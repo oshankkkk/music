@@ -15,6 +15,7 @@
           go
           gopls
 		  delve
+		  sqlite
         ];
 
         shellHook = ''
