@@ -26,15 +26,17 @@ func main() {
 
 		fmt.Println("Searching...")
 
-		url, err := ytdl.SearchYT(query)
+		song,audio, err := ytdl.SearchYT(query)
 		if err != nil {
 			fmt.Println("Search error:", err)
 			continue
 		}
 
-		fmt.Println("Playing:", url)
+		//fmt.Println("Playing:", audio)
+		fmt.Printf("Playing %s by %s \n", song.Title,song.Artist)
+		fmt.Printf(" Song duration %f  \n and view count is  %d \n and the upload data is %s \n", song.Duration,song.ViewCount,song.UploadDate)
 
-		err = player.Plaympv(url)
+		err = player.Plaympv(audio)
 		if err != nil {
 			fmt.Println("Playback error:", err)
 		}

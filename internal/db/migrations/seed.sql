@@ -12,7 +12,7 @@ INSERT INTO song (title, artist, duration, isliked, genere) VALUES
 
 
 INSERT INTO playlist (title, duration, songCount) VALUES
-('Favorites', 1066, 4),
+('Liked Songs', 1066, 4),
 ('Workout Mix', 730, 3),
 ('Chill Vibes', 639, 3);
 
