@@ -1,25 +1,26 @@
-CREATE TABLE song(
+CREATE TABLE song (
     id INTEGER PRIMARY KEY,
     title TEXT NOT NULL,
     artist TEXT NOT NULL,
     duration INTEGER,
-    isliked BOOLEAN NOT NULL
+    isLiked BOOLEAN NOT NULL
 );
 
 ALTER TABLE song
-ADD COLUMN genere TEXT;
+ADD COLUMN genre TEXT;
 
-CREATE TABLE playlist(
-	id INTEGER PRIMARY KEY,
-	title TEXT NOT NULL,
-	duration INTEGER,
-	songCount INTEGER,
-	createdAt TEXT DEFAULT CURRENT_TIMESTAMP
+CREATE TABLE playlist (
+    id INTEGER PRIMARY KEY,
+    title TEXT NOT NULL,
+    duration INTEGER,
+    songCount INTEGER,
+    createdAt TEXT DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE catelogue(
-
-	id INTEGER PRIMARY KEY,
-	songID INTEGER NOT NULL,
-	playlistID INTEGER NOT NULL
+CREATE TABLE catalogue (
+    id INTEGER PRIMARY KEY,
+    songID INTEGER NOT NULL,
+    playlistID INTEGER NOT NULL,
+    FOREIGN KEY (songID) REFERENCES song(id),
+    FOREIGN KEY (playlistID) REFERENCES playlist(id)
 );
