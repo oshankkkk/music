@@ -10,12 +10,13 @@ import (
 	"music/internal/ytdl"
 	"os"
 	"strings"
+	"sync"
 )
 
 func main() {
 	fmt.Println("music player")
 	fmt.Println("Type a song name:")
-
+	var wg sync.WaitGroup
 	reader := bufio.NewReader(os.Stdin)
 
 	database, err := db.InitDB("internal/db/migrations/music.db")
@@ -41,7 +42,7 @@ func main() {
 			fmt.Println("Search error:", err)
 			continue
 		}
-		
+			
 		library.AddSong(database, song)
 		library.Like(database, song.ID)
 
@@ -54,9 +55,20 @@ func main() {
 			catalogue[song.Title] = &song
 		}
 
-		if err := player.Plaympv(audio); err != nil {
+		wg.Add(1)
+		go func(){ if err := player.Plaympv(audio); err != nil {
 			fmt.Println("Playback error:", err)
+
 		}
+			wg.Done()
+	}()
+
+	filepath,err:=ytdl.DownloadAudio(song.URL,"../audios/")
+		fmt.Println(filepath)
+		if err!=nil{
+		fmt.Println(err)
+		}
+		wg.Wait()	
 	}
 }
 

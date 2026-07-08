@@ -7,7 +7,7 @@ type Song struct {
 	Thumbnail   string  `json:"thumbnail"`
 	ViewCount   int64   `json:"view_count"`
 	UploadDate  string  `json:"upload_date"`
-	URL         string  `json:"url"`
+	URL         string  `json:"webpage_url"`
 	IsLiked bool
 	PersonalPlayCount int
 	Genre string
