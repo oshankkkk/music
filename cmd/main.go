@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"music/internal/db"
 	"music/internal/library"
+	"music/internal/model"
 	"music/internal/player"
 	"music/internal/ytdl"
 	"os"
@@ -17,15 +18,14 @@ func main() {
 
 	reader := bufio.NewReader(os.Stdin)
 
-//	database, err := db.InitDB("internal/db/migrations/music.db")
-	database, err := db.InitDB("../internal/db/migrations/music.db")
+	database, err := db.InitDB("internal/db/migrations/music.db")
 	if err != nil {
 		fmt.Println("dataerr", err)
 		os.Exit(1)
 	}
 	defer database.Close()
 
-	catalogue := make(map[string]*library.Song)
+	catalogue := make(map[string]*model.Song)
 
 	for {
 		fmt.Print("> ")
@@ -41,12 +41,12 @@ func main() {
 			fmt.Println("Search error:", err)
 			continue
 		}
+		
+		library.AddSong(database, song)
+		library.Like(database, song.ID)
 
-		if err := db.InsertSong(database, song); err != nil {
-			fmt.Println("Insert error:", err)
-		}
-
-		fmt.Printf("Playing %s by %s \n", song.Title, song.Artist)
+			//fmt.Printf("Playing %s by %s \n", )
+			library.GetSong(database,song.ID)
 		fmt.Printf(" Song duration %f  \n and view count is  %d \n and the upload date is %s \n",
 			song.Duration, song.ViewCount, song.UploadDate)
 
@@ -59,3 +59,4 @@ func main() {
 		}
 	}
 }
+

@@ -1,83 +1,77 @@
 package library
 
 import (
-	"errors"
+	"database/sql"
+	"fmt"
+	"music/internal/db"
+	"music/internal/model"
 )
 
-type Song struct {
-	ID          string  `json:"id"`
-	Title       string  `json:"title"`
-	Artist      string  `json:"channel"`
-	Duration    float64 `json:"duration"`
-	Thumbnail   string  `json:"thumbnail"`
-	ViewCount   int64   `json:"view_count"`
-	UploadDate  string  `json:"upload_date"`
-	URL         string  `json:"url"`
-	IsLiked bool
-	PersonalPlayCount int
-	Genre string
+func CheckSong(id string, store *sql.DB) bool {
+	res, err := db.CheckSong(store, id)
+	if err != nil {
+		fmt.Println("CheckSong error:")
+		fmt.Println(err)
+	}
+	return res
 }
 
-
-func CheckSong(id string, catalogue map[string]*Song) bool {
-	_, ok := catalogue[id]
-	return ok
+func AddSong(store *sql.DB, song model.Song) {
+	err := db.AddSong(store, song)
+	if err != nil {
+		fmt.Println("AddSong error:")
+		fmt.Println(err)
+	}
 }
 
-func  AddSong(song Song, Catelogue map[string]*Song) Song {
+func RemoveSong(store *sql.DB, id string) {
+	err := db.RemoveSong(store, id)
+	if err != nil {
+		fmt.Println("RemoveSong error:")
+		fmt.Println(err)
+	}
+}
 
-	Catelogue[song.ID] = &song
+func GetSong(store *sql.DB, id string) model.Song {
+	song, err := db.GetSong(store, id)
+	if err != nil {
+		fmt.Println("GetSong error:")
+		fmt.Println(err)
+	}
+	fmt.Printf("menna song %s\n", song.Title)
 	return song
 }
 
-func RemoveSong(id string ,Catelogue map[string]*Song) error {
-	if !CheckSong(id,Catelogue) {
-		return errors.New("song not found")
+func Play(store *sql.DB, id string) {
+	err := db.Play(store, id)
+	if err != nil {
+		fmt.Println("Play error:")
+		fmt.Println(err)
 	}
-	delete(Catelogue, id)
-	return nil
 }
 
-func  GetSong(id string ,Catelogue map[string]*Song) (Song, error) {
-	s, ok := Catelogue[id]
-	if !ok {
-		return Song{}, errors.New("song not found")
+func Like(store *sql.DB, id string) {
+	fmt.Println("like like")
+	err := db.Like(store, id)
+	if err != nil {
+		fmt.Println("Like error:")
+		fmt.Println(err)
 	}
-	return *s, nil
 }
 
-func  Play(id string, Catelogue map[string]*Song) error {
-	s, ok := Catelogue[id]
-	if !ok {
-		return errors.New("song not found")
+func Unlike(store *sql.DB, id string) {
+	err := db.Unlike(store, id)
+	if err != nil {
+		fmt.Println("Unlike error:")
+		fmt.Println(err)
 	}
-	s.PersonalPlayCount++
-	return nil
 }
 
-func  Like(id string, Catelogue map[string]*Song) error {
-	s, ok := Catelogue[id]
-	if !ok {
-		return errors.New("song not found")
+func AllCatelogue(store *sql.DB) []model.Song {
+	songlist, err := db.AllSongs(store)
+	if err != nil {
+		fmt.Println("AllCatelogue error:")
+		fmt.Println(err)
 	}
-	s.IsLiked = true
-	return nil
+	return songlist
 }
-
-func  Unlike(id string, Catelogue map[string]*Song) error {
-	s, ok := Catelogue[id]
-	if !ok {
-		return errors.New("song not found")
-	}
-	s.IsLiked = false
-	return nil
-}
-
-func ACatelogue( Catelogue map[string]*Song) []Song {
-	songs := make([]Song, 0, len(Catelogue))
-	for _, s := range Catelogue {
-		songs = append(songs, *s)
-	}
-	return songs
-}
-

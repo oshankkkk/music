@@ -1,5 +1,5 @@
 CREATE TABLE song (
-    id INTEGER PRIMARY KEY,
+    id TEXT PRIMARY KEY,
     title TEXT NOT NULL,
     artist TEXT NOT NULL,
     duration INTEGER,

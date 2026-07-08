@@ -2,12 +2,13 @@ package ytdl
 
 import (
 	"encoding/json"
-	"music/internal/library"
+	"fmt"
+	"music/internal/model"
 	"os/exec"
 	"strings"
 )
 
-func SearchYT(query string) (library.Song,string, error) {
+func SearchYT(query string) (model.Song,string, error) {
 	metadata := exec.Command(
 		"yt-dlp",
 		"--dump-json",
@@ -24,29 +25,30 @@ func SearchYT(query string) (library.Song,string, error) {
 	metaout, err := metadata.Output()
 
 	if err != nil {
-		return library.Song{}, "",err
+		return model.Song{}, "",err
 	}
 
 	audioout, err := audio.Output()
 	audionew:=strings.TrimSpace(string(audioout))
 	if err != nil {
-		return library.Song{}, "",err
+		return model.Song{}, "",err
 	}
 
-	
-	var song library.Song
+	var song model.Song
 
 	err = json.Unmarshal(metaout, &song)
 
-
 	if err != nil {
-		return library.Song{},"",err
+		return model.Song{},"",err
 	}
+	song.ID=generateID(song)
 
 	return song,audionew, nil
 
 }
-
+func generateID(song model.Song) string{
+return fmt.Sprint(song.Title,song.Artist)
+}
 //yt-dlp --dump-json "ytsearch1:daft punk harder better faster stronger"
 
 
