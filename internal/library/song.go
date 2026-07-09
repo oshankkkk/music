@@ -7,7 +7,7 @@ import (
 	"music/internal/model"
 )
 
-func CheckSong(id string, store *sql.DB) bool {
+func CheckSong(store *sql.DB, id string) bool {
 	res, err := db.CheckSong(store, id)
 	if err != nil {
 		fmt.Println("CheckSong error:")

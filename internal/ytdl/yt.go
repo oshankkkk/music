@@ -18,7 +18,6 @@ func SearchYT(query string) (model.Song,string, error) {
 	if err != nil {
 		return model.Song{}, "",err
 	}
-
 	//parts := strings.SplitN(strings.TrimSpace(string(metaout)), "\x1f", 2)
 	var song model.Song
 
