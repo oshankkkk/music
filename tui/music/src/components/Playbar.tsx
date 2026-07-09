@@ -80,13 +80,6 @@ export function Playbar() {
   const progressStrFilled = "─".repeat(Math.max(0, progressFilled - 1)) + (progressFilled > 0 ? "●" : "");
   const progressStrEmpty = "─".repeat(progressEmpty);
 
-  const volWidth = 10;
-  const volRatio = volume / 100;
-  const volFilled = Math.max(0, Math.min(volWidth, Math.round(volRatio * volWidth)));
-  const volEmpty = Math.max(0, volWidth - volFilled);
-  const volStrFilled = "─".repeat(Math.max(0, volFilled - 1)) + (volFilled > 0 ? "●" : "");
-  const volStrEmpty = "─".repeat(volEmpty);
-
   return (
     <box flexDirection="row" width="100%" height={4} backgroundColor="#181818" alignItems="center" paddingX={2}>
       <box flexDirection="row" width={30} alignItems="center" gap={1}>
@@ -116,8 +109,7 @@ export function Playbar() {
         <text fg="#b3b3b3">🎤</text>
         <text fg="#b3b3b3">♫</text>
         <text fg="#b3b3b3">Vol</text>
-        <text fg={interpolateVol(volFlash)}>{volStrFilled}</text>
-        <text fg="#404040">{volStrEmpty}</text>
+        <text fg={interpolateVol(volFlash)}>{volume.toString().padStart(3, ' ')}%</text>
       </box>
     </box>
   );
