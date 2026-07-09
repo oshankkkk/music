@@ -27,7 +27,7 @@ function formatTime(seconds: number) {
   return `${m}:${s.toString().padStart(2, '0')}`;
 }
 
-export function Playbar({ isSidebarFocused }: { isSidebarFocused?: boolean }) {
+export function Playbar({ isFocused }: { isFocused?: boolean }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(97);
   const [duration, setDuration] = useState(212);
@@ -51,22 +51,19 @@ export function Playbar({ isSidebarFocused }: { isSidebarFocused?: boolean }) {
   };
 
   useKeyboard((key) => {
+    if (!isFocused) return;
     switch (key.name) {
       case "space":
         setIsPlaying((p) => !p);
         triggerFlash(tPlay, setPlayFlash);
         break;
       case "j":
-        if (!isSidebarFocused) {
-          setVolume((v) => Math.max(0, v - 5));
-          triggerFlash(tVol, setVolFlash);
-        }
+        setVolume((v) => Math.max(0, v - 5));
+        triggerFlash(tVol, setVolFlash);
         break;
       case "k":
-        if (!isSidebarFocused) {
-          setVolume((v) => Math.min(100, v + 5));
-          triggerFlash(tVol, setVolFlash);
-        }
+        setVolume((v) => Math.min(100, v + 5));
+        triggerFlash(tVol, setVolFlash);
         break;
       case "h":
         triggerFlash(tPrev, setPrevFlash);

@@ -8,7 +8,7 @@ import { Playbar } from "./components/Playbar";
 
 function App() {
   const renderer = useRenderer();
-  const [isSidebarFocused, setIsSidebarFocused] = useState(false);
+  const [focusArea, setFocusArea] = useState<"none" | "sidebar" | "quick-access" | "mixes">("none");
   const [lastSeq, setLastSeq] = useState("");
 
   useKeyboard((key) => {
@@ -20,7 +20,15 @@ function App() {
     setLastSeq(prev => {
       const seq = `${prev} ${key.name}`.trim();
       if (seq.endsWith("space p")) {
-        setIsSidebarFocused(true);
+        setFocusArea("sidebar");
+        return "";
+      }
+      if (seq.endsWith("space n")) {
+        setFocusArea("quick-access");
+        return "";
+      }
+      if (seq.endsWith("space m")) {
+        setFocusArea("mixes");
         return "";
       }
       const parts = seq.split(" ");
@@ -28,18 +36,18 @@ function App() {
     });
 
     if (key.name === "escape") {
-      setIsSidebarFocused(false);
+      setFocusArea("none");
     }
   });
 
   return (
     <box flexDirection="column" width="100%" height="100%" backgroundColor="#000000">
       <box flexDirection="row" width="100%" flexGrow={1}>
-        <Sidebar isFocused={isSidebarFocused} />
-        <MainContent />
+        <Sidebar isFocused={focusArea === "sidebar"} />
+        <MainContent focusArea={focusArea} />
         <ContextPanel />
       </box>
-      <Playbar isSidebarFocused={isSidebarFocused} />
+      <Playbar isFocused={focusArea === "none"} />
     </box>
   );
 }
