@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useKeyboard, useTimeline } from "@opentui/react";
 
 function interpolateGray(v: number) {
@@ -27,8 +27,7 @@ function formatTime(seconds: number) {
   return `${m}:${s.toString().padStart(2, '0')}`;
 }
 
-export function Playbar({ isFocused }: { isFocused?: boolean }) {
-  const [isPlaying, setIsPlaying] = useState(false);
+export function Playbar({ isFocused, isPlaying }: { isFocused?: boolean; isPlaying: boolean }) {
   const [currentTime, setCurrentTime] = useState(97);
   const [duration, setDuration] = useState(212);
   const [volume, setVolume] = useState(50);
@@ -50,13 +49,19 @@ export function Playbar({ isFocused }: { isFocused?: boolean }) {
     timeline.add({ v: 1 }, { v: 0, duration: 150, onUpdate: (a: any) => setter(a.targets[0].v) });
   };
 
+  // Flash the play icon whenever isPlaying changes (globally)
+  const isFirstRender = useRef(true);
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    triggerFlash(tPlay, setPlayFlash);
+  }, [isPlaying]);
+
   useKeyboard((key) => {
     if (!isFocused) return;
     switch (key.name) {
-      case "space":
-        setIsPlaying((p) => !p);
-        triggerFlash(tPlay, setPlayFlash);
-        break;
       case "j":
         setVolume((v) => Math.max(0, v - 5));
         triggerFlash(tVol, setVolFlash);

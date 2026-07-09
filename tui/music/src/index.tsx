@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import { createCliRenderer } from "@opentui/core";
 import { createRoot, useKeyboard, useRenderer } from "@opentui/react";
 import { Sidebar } from "./components/Sidebar";
@@ -9,34 +9,52 @@ import { Playbar } from "./components/Playbar";
 function App() {
   const renderer = useRenderer();
   const [focusArea, setFocusArea] = useState<"none" | "sidebar" | "quick-access" | "mixes">("none");
-  const [lastSeq, setLastSeq] = useState("");
+  const [isPlaying, setIsPlaying] = useState(false);
+  const pendingSpaceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const togglePlay = useCallback(() => {
+    setIsPlaying((p) => !p);
+  }, []);
 
   useKeyboard((key) => {
     if (key.name === "escape" || (key.ctrl && key.name === "c")) {
       renderer.destroy();
       process.exit(0);
     }
-    
-    setLastSeq(prev => {
-      const seq = `${prev} ${key.name}`.trim();
-      if (seq.endsWith("space p")) {
-        setFocusArea("sidebar");
-        return "";
-      }
-      if (seq.endsWith("space n")) {
-        setFocusArea("quick-access");
-        return "";
-      }
-      if (seq.endsWith("space m")) {
-        setFocusArea("mixes");
-        return "";
-      }
-      const parts = seq.split(" ");
-      return parts.slice(-2).join(" ");
-    });
 
     if (key.name === "escape") {
+      if (pendingSpaceRef.current) {
+        clearTimeout(pendingSpaceRef.current);
+        pendingSpaceRef.current = null;
+      }
       setFocusArea("none");
+      return;
+    }
+
+    // If there's a pending space, check for sequence completion
+    if (pendingSpaceRef.current !== null) {
+      clearTimeout(pendingSpaceRef.current);
+      pendingSpaceRef.current = null;
+
+      switch (key.name) {
+        case "p": setFocusArea("sidebar"); return;
+        case "n": setFocusArea("quick-access"); return;
+        case "m": setFocusArea("mixes"); return;
+        case "b": setFocusArea("none"); return;
+        default:
+          // Not a sequence key — fire the buffered space as play/pause
+          togglePlay();
+          break; // fall through to handle current key normally
+      }
+    }
+
+    // Buffer space for potential sequence
+    if (key.name === "space") {
+      pendingSpaceRef.current = setTimeout(() => {
+        pendingSpaceRef.current = null;
+        togglePlay();
+      }, 300);
+      return;
     }
   });
 
@@ -47,10 +65,11 @@ function App() {
         <MainContent focusArea={focusArea} />
         <ContextPanel />
       </box>
-      <Playbar isFocused={focusArea === "none"} />
+      <Playbar isFocused={focusArea === "none"} isPlaying={isPlaying} />
     </box>
   );
 }
 
 const renderer = await createCliRenderer();
 createRoot(renderer).render(<App />);
+
