@@ -27,7 +27,7 @@ function formatTime(seconds: number) {
   return `${m}:${s.toString().padStart(2, '0')}`;
 }
 
-export function Playbar() {
+export function Playbar({ isSidebarFocused }: { isSidebarFocused?: boolean }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(97);
   const [duration, setDuration] = useState(212);
@@ -57,12 +57,16 @@ export function Playbar() {
         triggerFlash(tPlay, setPlayFlash);
         break;
       case "j":
-        setVolume((v) => Math.max(0, v - 5));
-        triggerFlash(tVol, setVolFlash);
+        if (!isSidebarFocused) {
+          setVolume((v) => Math.max(0, v - 5));
+          triggerFlash(tVol, setVolFlash);
+        }
         break;
       case "k":
-        setVolume((v) => Math.min(100, v + 5));
-        triggerFlash(tVol, setVolFlash);
+        if (!isSidebarFocused) {
+          setVolume((v) => Math.min(100, v + 5));
+          triggerFlash(tVol, setVolFlash);
+        }
         break;
       case "h":
         triggerFlash(tPrev, setPrevFlash);
