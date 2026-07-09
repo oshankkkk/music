@@ -44,9 +44,15 @@ export function Playbar({ isFocused, isPlaying }: { isFocused?: boolean; isPlayi
   const tNext = useTimeline({ duration: 150, autoplay: false });
   const tVol = useTimeline({ duration: 150, autoplay: false });
 
-  const triggerFlash = (timeline: any, setter: (val: number) => void) => {
-    timeline.clear();
-    timeline.add({ v: 1 }, { v: 0, duration: 150, onUpdate: (a: any) => setter(a.targets[0].v) });
+  useEffect(() => {
+    tPlay.add({ v: 1 }, { v: 0, duration: 150, onUpdate: (a: any) => setPlayFlash(a.targets[0].v) });
+    tPrev.add({ v: 1 }, { v: 0, duration: 150, onUpdate: (a: any) => setPrevFlash(a.targets[0].v) });
+    tNext.add({ v: 1 }, { v: 0, duration: 150, onUpdate: (a: any) => setNextFlash(a.targets[0].v) });
+    tVol.add({ v: 1 }, { v: 0, duration: 150, onUpdate: (a: any) => setVolFlash(a.targets[0].v) });
+  }, [tPlay, tPrev, tNext, tVol]);
+
+  const triggerFlash = (timeline: any) => {
+    timeline.restart();
   };
 
   // Flash the play icon whenever isPlaying changes (globally)
@@ -56,7 +62,7 @@ export function Playbar({ isFocused, isPlaying }: { isFocused?: boolean; isPlayi
       isFirstRender.current = false;
       return;
     }
-    triggerFlash(tPlay, setPlayFlash);
+    triggerFlash(tPlay);
   }, [isPlaying]);
 
   useKeyboard((key) => {
@@ -64,17 +70,17 @@ export function Playbar({ isFocused, isPlaying }: { isFocused?: boolean; isPlayi
     switch (key.name) {
       case "j":
         setVolume((v) => Math.max(0, v - 5));
-        triggerFlash(tVol, setVolFlash);
+        triggerFlash(tVol);
         break;
       case "k":
         setVolume((v) => Math.min(100, v + 5));
-        triggerFlash(tVol, setVolFlash);
+        triggerFlash(tVol);
         break;
       case "h":
-        triggerFlash(tPrev, setPrevFlash);
+        triggerFlash(tPrev);
         break;
       case "l":
-        triggerFlash(tNext, setNextFlash);
+        triggerFlash(tNext);
         break;
     }
   });

@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { createCliRenderer } from "@opentui/core";
 import { createRoot, useKeyboard, useRenderer } from "@opentui/react";
 import { Sidebar } from "./components/Sidebar";
@@ -6,35 +6,72 @@ import { MainContent } from "./components/MainContent";
 import { ContextPanel } from "./components/ContextPanel";
 import { Playbar } from "./components/Playbar";
 
+const LEADER_TIMEOUT_MS = 300;
+
 function App() {
   const renderer = useRenderer();
   const [focusArea, setFocusArea] = useState<"none" | "sidebar" | "quick-access" | "mixes">("none");
   const [isPlaying, setIsPlaying] = useState(false);
-  const pendingSpaceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Track when space was pressed (timestamp), not a setTimeout handle
+  const spaceTimestampRef = useRef<number | null>(null);
+
+  // State-based trigger for deferred play toggles (safe for React/OpenTUI lifecycle)
+  const [playToggleTick, setPlayToggleTick] = useState(0);
+  const isFirstTickRef = useRef(true);
+
+  // When playToggleTick changes (and it's not the initial mount), toggle play
+  useEffect(() => {
+    if (isFirstTickRef.current) {
+      isFirstTickRef.current = false;
+      return;
+    }
+    setIsPlaying((p) => !p);
+  }, [playToggleTick]);
 
   const togglePlay = useCallback(() => {
     setIsPlaying((p) => !p);
   }, []);
 
+  // Safe deferred toggle: bumps a state counter so the actual toggle
+  // happens inside a React useEffect, not a raw setTimeout
+  const deferredTogglePlay = useCallback(() => {
+    setPlayToggleTick((t) => t + 1);
+  }, []);
+
+  // Poll for expired pending space presses.
+  // This replaces the setTimeout-based approach that crashed when
+  // togglePlay was called outside the renderer's event processing cycle.
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      if (
+        spaceTimestampRef.current !== null &&
+        Date.now() - spaceTimestampRef.current >= LEADER_TIMEOUT_MS
+      ) {
+        spaceTimestampRef.current = null;
+        deferredTogglePlay();
+      }
+    }, 50);
+    return () => clearInterval(intervalId);
+  }, [deferredTogglePlay]);
+
   useKeyboard((key) => {
-    if (key.name === "escape" || (key.ctrl && key.name === "c")) {
+    // Ctrl+C exits the app
+    if (key.ctrl && key.name === "c") {
       renderer.destroy();
       process.exit(0);
     }
 
+    // Escape unfocuses (resets to playbar) and clears pending leader
     if (key.name === "escape") {
-      if (pendingSpaceRef.current) {
-        clearTimeout(pendingSpaceRef.current);
-        pendingSpaceRef.current = null;
-      }
+      spaceTimestampRef.current = null;
       setFocusArea("none");
       return;
     }
 
     // If there's a pending space, check for sequence completion
-    if (pendingSpaceRef.current !== null) {
-      clearTimeout(pendingSpaceRef.current);
-      pendingSpaceRef.current = null;
+    if (spaceTimestampRef.current !== null) {
+      spaceTimestampRef.current = null;
 
       switch (key.name) {
         case "p": setFocusArea("sidebar"); return;
@@ -48,12 +85,9 @@ function App() {
       }
     }
 
-    // Buffer space for potential sequence
+    // Buffer space for potential leader sequence
     if (key.name === "space") {
-      pendingSpaceRef.current = setTimeout(() => {
-        pendingSpaceRef.current = null;
-        togglePlay();
-      }, 300);
+      spaceTimestampRef.current = Date.now();
       return;
     }
   });
