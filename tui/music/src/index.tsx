@@ -5,12 +5,14 @@ import { Sidebar } from "./components/Sidebar";
 import { MainContent } from "./components/MainContent";
 import { ContextPanel } from "./components/ContextPanel";
 import { Playbar } from "./components/Playbar";
+import { SearchPopup } from "./components/SearchPopup";
 
 const LEADER_TIMEOUT_MS = 300;
 
 function App() {
   const renderer = useRenderer();
   const [focusArea, setFocusArea] = useState<"none" | "sidebar" | "quick-access" | "mixes">("none");
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
 
   // Track when space was pressed (timestamp), not a setTimeout handle
@@ -65,7 +67,15 @@ function App() {
     // Escape unfocuses (resets to playbar) and clears pending leader
     if (key.name === "escape") {
       spaceTimestampRef.current = null;
-      setFocusArea("none");
+      if (isSearchOpen) {
+        setIsSearchOpen(false);
+      } else {
+        setFocusArea("none");
+      }
+      return;
+    }
+
+    if (isSearchOpen) {
       return;
     }
 
@@ -78,6 +88,7 @@ function App() {
         case "n": setFocusArea("quick-access"); return;
         case "m": setFocusArea("mixes"); return;
         case "b": setFocusArea("none"); return;
+        case "s": setIsSearchOpen(true); return;
         default:
           // Not a sequence key — fire the buffered space as play/pause
           togglePlay();
@@ -94,12 +105,16 @@ function App() {
 
   return (
     <box flexDirection="column" width="100%" height="100%" backgroundColor="#000000">
+      <box width="100%" height={1} justifyContent="center" alignItems="center" backgroundColor="#181818">
+        <text fg="#b3b3b3">Search press space+s</text>
+      </box>
       <box flexDirection="row" width="100%" flexGrow={1}>
-        <Sidebar isFocused={focusArea === "sidebar"} />
-        <MainContent focusArea={focusArea} />
+        <Sidebar isFocused={focusArea === "sidebar" && !isSearchOpen} />
+        <MainContent focusArea={isSearchOpen ? "none" : focusArea} />
         <ContextPanel />
       </box>
-      <Playbar isFocused={focusArea === "none"} isPlaying={isPlaying} />
+      <Playbar isFocused={focusArea === "none" && !isSearchOpen} isPlaying={isPlaying} />
+      <SearchPopup isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
     </box>
   );
 }
