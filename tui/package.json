@@ -1,5 +1,5 @@
 {
-  "name": "music",
+  "name": "tui",
   "module": "src/index.tsx",
   "type": "module",
   "private": true,
