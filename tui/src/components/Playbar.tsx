@@ -27,12 +27,21 @@ function formatTime(seconds: number) {
   return `${m}:${s.toString().padStart(2, '0')}`;
 }
 
-export function Playbar({ isFocused, isPlaying }: { isFocused?: boolean; isPlaying: boolean }) {
-  const [currentTime, setCurrentTime] = useState(97);
-  const [duration, setDuration] = useState(212);
+export function Playbar({ isFocused, isPlaying, onTogglePlay }: { isFocused?: boolean; isPlaying: boolean; onTogglePlay?: () => void }) {
+  const [song, setSong] = useState({
+    title: "Never Gonna Give You Up",
+    description: "Rick Astley's greatest hit",
+    artist: "Rick Astley",
+    timestamp: 97,
+    duration: 212,
+    albumArtUrl: "https://example.com/art.jpg",
+    isLiked: true,
+    playlists: [1, 2, 3],
+    isPlayed: isPlaying
+  });
+  
   const [volume, setVolume] = useState(50);
-  const [isLiked, setIsLiked] = useState(true);
-  const [currentTrack, setCurrentTrack] = useState({ title: "Never Gonna Give You Up", artist: "Rick Astley" });
+  const [lyrics, setLyrics] = useState(false);
 
   const [playFlash, setPlayFlash] = useState(0);
   const [prevFlash, setPrevFlash] = useState(0);
@@ -55,6 +64,22 @@ export function Playbar({ isFocused, isPlaying }: { isFocused?: boolean; isPlayi
     timeline.restart();
   };
 
+  const handlePlayToggle = () => {
+    triggerFlash(tPlay);
+    setSong(s => ({ ...s, isPlayed: !s.isPlayed }));
+    if (onTogglePlay) onTogglePlay();
+  };
+
+  const handleNext = () => {
+    triggerFlash(tNext);
+    setSong(s => ({ ...s, title: s.title === "Never Gonna Give You Up" ? "Together Forever" : "Never Gonna Give You Up", timestamp: 0 }));
+  };
+
+  const handlePrev = () => {
+    triggerFlash(tPrev);
+    setSong(s => ({ ...s, timestamp: 0 }));
+  };
+
   // Flash the play icon whenever isPlaying changes (globally)
   const isFirstRender = useRef(true);
   useEffect(() => {
@@ -63,6 +88,7 @@ export function Playbar({ isFocused, isPlaying }: { isFocused?: boolean; isPlayi
       return;
     }
     triggerFlash(tPlay);
+    setSong(s => ({ ...s, isPlayed: isPlaying }));
   }, [isPlaying]);
 
   useKeyboard((key) => {
@@ -77,16 +103,16 @@ export function Playbar({ isFocused, isPlaying }: { isFocused?: boolean; isPlayi
         triggerFlash(tVol);
         break;
       case "h":
-        triggerFlash(tPrev);
+        handlePrev();
         break;
       case "l":
-        triggerFlash(tNext);
+        handleNext();
         break;
     }
   });
 
   const progressWidth = 27;
-  const progressRatio = currentTime / duration;
+  const progressRatio = song.timestamp / song.duration;
   const progressFilled = Math.max(0, Math.min(progressWidth, Math.round(progressRatio * progressWidth)));
   const progressEmpty = Math.max(0, progressWidth - progressFilled);
   const progressStrFilled = "─".repeat(Math.max(0, progressFilled - 1)) + (progressFilled > 0 ? "●" : "");
@@ -97,30 +123,36 @@ export function Playbar({ isFocused, isPlaying }: { isFocused?: boolean; isPlayi
       <box flexDirection="row" width={30} alignItems="center" gap={1}>
         <text fg="#1DB954">██</text>
         <box flexDirection="column">
-          <text fg="#ffffff">{currentTrack.title}</text>
-          <text fg="#b3b3b3">{currentTrack.artist}</text>
+          <text fg="#ffffff">{song.title}</text>
+          <text fg="#b3b3b3">{song.artist}</text>
         </box>
-        <text fg="#1DB954" paddingLeft={1}>{isLiked ? '♥' : '♡'}</text>
+        <text 
+          fg="#1DB954" 
+          paddingLeft={1} 
+          onMouseDown={() => setSong(s => ({ ...s, isLiked: !s.isLiked }))}
+        >
+          {song.isLiked ? '♥' : '♡'}
+        </text>
       </box>
 
       <box flexDirection="column" flexGrow={1} alignItems="center" justifyContent="center">
         <box flexDirection="row" gap={2}>
-          <text fg={interpolateGray(prevFlash)}>{'|<'}</text>
-          <text fg={interpolatePlay(playFlash)}>{isPlaying ? '[ || ]' : '[ > ]'}</text>
-          <text fg={interpolateGray(nextFlash)}>{'>|'}</text>
+          <text fg={interpolateGray(prevFlash)} onMouseDown={handlePrev}>{'|<'}</text>
+          <text fg={interpolatePlay(playFlash)} onMouseDown={handlePlayToggle}>{song.isPlayed ? '[ || ]' : '[ > ]'}</text>
+          <text fg={interpolateGray(nextFlash)} onMouseDown={handleNext}>{'>|'}</text>
         </box>
         <box flexDirection="row" gap={1} alignItems="center">
-          <text fg="#b3b3b3">{formatTime(currentTime)}</text>
+          <text fg="#b3b3b3">{formatTime(song.timestamp)}</text>
           <text fg="#1DB954">{progressStrFilled}</text>
           <text fg="#404040">{progressStrEmpty}</text>
-          <text fg="#b3b3b3">{formatTime(duration)}</text>
+          <text fg="#b3b3b3">{formatTime(song.duration)}</text>
         </box>
       </box>
 
       <box flexDirection="row" width={30} justifyContent="flex-end" alignItems="center" gap={1}>
-        <text fg="#b3b3b3">🎤</text>
+        <text fg={setLyrics? "#1DB954" : "#b3b3b3"} onMouseDown={() => setLyrics(!lyrics)}>🎤</text>
         <text fg="#b3b3b3">♫</text>
-        <text fg="#b3b3b3">Vol</text>
+        <text fg="#b3b3b3" onMouseDown={() => { setVolume(v => (v === 0 ? 50 : 0)); triggerFlash(tVol); }}>Vol</text>
         <text fg={interpolateVol(volFlash)}>{volume.toString().padStart(3, ' ')}%</text>
       </box>
     </box>

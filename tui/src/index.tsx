@@ -113,7 +113,7 @@ function App() {
         <MainContent focusArea={isSearchOpen ? "none" : focusArea} />
         <ContextPanel />
       </box>
-      <Playbar isFocused={focusArea === "none" && !isSearchOpen} isPlaying={isPlaying} />
+      <Playbar isFocused={focusArea === "none" && !isSearchOpen} isPlaying={isPlaying} onTogglePlay={togglePlay} />
       <SearchPopup isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
     </box>
   );
