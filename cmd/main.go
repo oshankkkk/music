@@ -17,6 +17,7 @@ import (
 func main() {
 	fmt.Println("music player")
 	fmt.Println("Type a song name:")
+
 	var wg sync.WaitGroup
 	reader := bufio.NewReader(os.Stdin)
 
@@ -28,8 +29,6 @@ func main() {
 	}
 	defer database.Close()
 
-//	var yt ytdl.Yt
-	catalogue := make(map[string]*model.Song)
 	for {
 		fmt.Print("> ")
 		query, _ := reader.ReadString('\n')
@@ -37,7 +36,6 @@ func main() {
 		if query == "exit" {
 			break
 		}
-
 		fmt.Println("Searching...")
 		song, audio, err := ytdl.SearchYT(query)
 		if err != nil {
@@ -48,11 +46,7 @@ func main() {
 			library.AddSong(database, song)
 			library.Like(database, song.ID)
 		}
-
-		//fmt.Printf("Playing %s by %s \n", )
-		library.GetSong(database,song.ID)
-		fmt.Printf(" Song duration %f  \n and view count is  %d \n and the upload date is %s \n",
-		song.Duration, song.ViewCount, song.UploadDate)
+		fmt.Printf(" Song duration %f  \n and view count is  %d \n and the upload date is %s \n", song.Duration, song.ViewCount, song.UploadDate)
 
 		if _, exists := catalogue[song.Title]; !exists {
 			catalogue[song.Title] = &song
