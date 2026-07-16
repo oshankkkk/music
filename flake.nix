@@ -16,6 +16,7 @@
           gopls
 		  delve
 		  sqlite
+		  cjson
 		  bun
         ];
 
