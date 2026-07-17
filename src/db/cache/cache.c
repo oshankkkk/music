@@ -5,6 +5,7 @@
 #include <string.h>
 #include "../../models/song.h"
 #include "../../models/cache.h"
+#include "cache.h"
 
 static void check(int rc, sqlite3 *db) {
     if (rc != SQLITE_OK && rc != SQLITE_DONE && rc != SQLITE_ROW)

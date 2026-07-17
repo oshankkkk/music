@@ -1,6 +1,6 @@
 #include <cjson/cJSON.h>
 #include "../models/response.h"
-#include "../db/song.c"
+#include "yt.h"
 
 char * readAll(FILE *fp){
 	size_t cap = 65536, len = 0;
