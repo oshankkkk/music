@@ -137,9 +137,12 @@ Song song = {
 				  );
 
 			perror("execlp");
+			_exit(1);
 		}
 		else if (pid > 0) {
 			printf("mpv started with PID %d\n", pid);
+			int status;
+			waitpid(pid, &status, 0);
 		}
 		else {
 			perror("fork");
