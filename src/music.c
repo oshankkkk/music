@@ -14,6 +14,9 @@
 #include "./yt/yt.c"
 
 int backgroundCaching(sqlite3 *db, Song *song) {
+
+time_t expires = song->playedTime+ (7 * 24 * 60 * 60);
+
 	(void)db;
 	pid_t pid = fork();
 	if (pid == 0) {
@@ -24,7 +27,7 @@ int backgroundCaching(sqlite3 *db, Song *song) {
 			char filepath[512];
 			printf("caching");
 			snprintf(filepath, sizeof(filepath), "./cache/%s", song->id);
-			int rc = CacheSong(childDb, song, filepath);
+			int rc = CacheSong(childDb, song, filepath, expires);
 			sqlite3_close(childDb);
 			_exit(rc != 0);
 		}
@@ -83,14 +86,17 @@ int main(void) {
 			fprintf(stderr, "no url found for that result\n");
 			continue;
 		}
-		Song song = {
-			.id = response.id,
-			.title = response.title,
-			.artist = response.artist,
-			.duration = response.duration,
-			.url=response.url
-		};
+time_t updated = time(NULL);
+Song song = {
+    .id = response.id,
+    .title = response.title,
+    .artist = response.artist,
+    .duration = response.duration,
+    .url = response.url,
+    .playedTime= updated,
+};
 		int check=CheckSong(db, song.id);
+		printf("this happend");
 		Cache cachesong;
 		char *path;
 		if (check==-1){

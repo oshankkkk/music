@@ -19,6 +19,7 @@ typedef struct {
     bool isliked;
     int personalplaycount;
     char *genre;
+	time_t playedTime;
 } Song;
 
 #endif 

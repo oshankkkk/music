@@ -6,7 +6,6 @@
 #include "../models/song.h"
 #include "song.h"
 
-
 sqlite3 * InitDb(void){
 	sqlite3 *db;	
 	int rc=sqlite3_open("./db/migrations/music.db",&db);
@@ -14,13 +13,13 @@ sqlite3 * InitDb(void){
 		return NULL;
 	}
 	return db;
-
 }
 
 static void handleError(int rc, sqlite3 *db) {
     if (rc != SQLITE_OK && rc != SQLITE_DONE && rc != SQLITE_ROW)
-        fprintf(stderr, "sqlite error: %s\n", sqlite3_errmsg(db));
+        fprintf(stderr, "sqlite erroe33r: %s\n", sqlite3_errmsg(db));
 }
+
 int CheckSong(sqlite3 *db, const char *id) {
     sqlite3_stmt *stmt;
     const char *sql = "SELECT EXISTS(SELECT 1 FROM song WHERE id=?)";
