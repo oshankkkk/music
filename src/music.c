@@ -1,93 +1,47 @@
 #include <stdio.h>
+#include <sys/wait.h>
 #include <strings.h>
 #include <string.h>
 #include <unistd.h>
 #include <stdbool.h>
-#include <stdlib.h>
 #include <cjson/cJSON.h>
 #include <sqlite3.h>
-#include "./models/song.c"
-#include "./models/cache.c"
-#include "./models/response.c"
-#include "./db/cache/cache.c"
+#include "./models/song.h"
+#include "./models/cache.h"
+#include "./models/response.h"
 #include "./db/song.c"
+#include "./db/cache/cache.c"
+#include "./yt/yt.c"
 
-
-char * readAll(FILE *fp){
-	size_t cap = 65536, len = 0;
-	char *buf = malloc(cap);
-	if (!buf) return NULL;
-
-	size_t n;
-	while ((n = fread(buf + len, 1, cap - len, fp)) > 0) {
-		len += n;
-		if (len == cap) {
-			cap *= 2;
-			char *tmp = realloc(buf, cap);
-			if (!tmp) { free(buf); return NULL; }
-			buf = tmp;
+int backgroundCaching(sqlite3 *db, Song *song) {
+	(void)db;
+	pid_t pid = fork();
+	if (pid == 0) {
+		if (fork() == 0) {
+			// grandchild does the real work, gets reparented, no zombie risk
+			sqlite3 *childDb = InitDb();
+			if (!childDb) { perror("child db init"); _exit(1); }
+			char filepath[512];
+			printf("caching");
+			snprintf(filepath, sizeof(filepath), "./cache/%s", song->id);
+			int rc = CacheSong(childDb, song, filepath);
+			sqlite3_close(childDb);
+			_exit(rc != 0);
 		}
+		_exit(0); // first child exits immediately, parent reaps it fast
+	} else if (pid > 0) {
+		int status;
+		waitpid(pid, &status, 0); // quick reap of the short-lived first child
+		printf("cache started\n");
+		return 0;
+	} else {
+		perror("fork");
+		return -1;
 	}
-	buf[len] = '\0';
-	return buf;
 }
-
-
-int ytSearch(char  songName[2048], Respones *response){
-	char cmd [1024];
-	snprintf(cmd,sizeof(cmd),"yt-dlp --dump-json ytsearch1:%s",songName);
-	FILE *ptr=popen(cmd,"r");
-	if (!ptr){
-		perror("search ytdlp error");
-	}
-	char *data=readAll(ptr);
-
-	int close_status = pclose(ptr);
-
-	if (!data) {
-		fprintf(stderr, "failed to read yt-dlp output\n");
-		return 1;
-	}
-	if (close_status != 0 ||data[0] == '\0') {
-		fprintf(stderr, "yt-dlp returned no results\n");
-		free(data);
-		return 1;
-	}
-
-	cJSON *root = cJSON_Parse(data);
-	free(data);
-	if (!root) {
-		fprintf(stderr, "JSON parse error near: %s\n", cJSON_GetErrorPtr());
-		return 1;
-	}
-
-	cJSON *id       = cJSON_GetObjectItemCaseSensitive(root, "id");
-	cJSON *title    = cJSON_GetObjectItemCaseSensitive(root, "title");
-
-	cJSON *artist   = cJSON_GetObjectItemCaseSensitive(root, "uploader");
-	cJSON *duration = cJSON_GetObjectItemCaseSensitive(root, "duration");
-	cJSON *thumb    = cJSON_GetObjectItemCaseSensitive(root, "thumbnail");
-	cJSON *views    = cJSON_GetObjectItemCaseSensitive(root, "view_count");
-	cJSON *upload   = cJSON_GetObjectItemCaseSensitive(root, "upload_date");
-	cJSON *url      = cJSON_GetObjectItemCaseSensitive(root, "webpage_url");
-
-	memset(response, 0, sizeof(*response));
-
-	if (cJSON_IsString(id))       snprintf(response->id, sizeof(response->id), "%s", id->valuestring);
-	if (cJSON_IsString(title))    snprintf(response->title, sizeof(response->title), "%s", title->valuestring);
-	if (cJSON_IsString(artist))   snprintf(response->artist, sizeof(response->artist), "%s", artist->valuestring);
-	if (cJSON_IsNumber(duration)) response->duration = duration->valuedouble;
-	if (cJSON_IsString(thumb))    snprintf(response->thumbnail, sizeof(response->thumbnail), "%s", thumb->valuestring);
-	if (cJSON_IsNumber(views))    response->view_count = (long)views->valuedouble;
-	if (cJSON_IsString(upload))   snprintf(response->upload_date, sizeof(response->upload_date), "%s", upload->valuestring);
-	if (cJSON_IsString(url))      snprintf(response->url, sizeof(response->url), "%s", url->valuestring);
-
-	cJSON_Delete(root);
-	return 0;
-}
-
 
 int main(void) {
+	bool isCached = false;
 	sqlite3 *db =InitDb();
 	if (!db){
 		perror("db init");
@@ -95,7 +49,6 @@ int main(void) {
 	}else{
 		printf("db works\n");
 	}
-	
 	sqlite3 *cache = InitCache();
 	if (!cache){
 		perror("cache db init");
@@ -103,9 +56,6 @@ int main(void) {
 	}else{
 		printf("cache db works\n");
 	}
-	
-	sqlite3_close(db);
-	sqlite3_close(cache);
 	char songName [2048];
 	printf("Music player\n");
 	while(true){
@@ -124,25 +74,59 @@ int main(void) {
 			return 1;
 		}		
 
-		Respones song;
-		if (ytSearch(songName, &song) != 0) {
+		Respones response;
+		if (ytSearch(songName, &response) != 0) {
 			fprintf(stderr, "search failed, try again\n");
 			continue;
 		}
-		if (song.url[0] == '\0') {
+		if (response.url[0] == '\0') {
 			fprintf(stderr, "no url found for that result\n");
 			continue;
 		}
+		Song song = {
+			.id = response.id,
+			.title = response.title,
+			.artist = response.artist,
+			.duration = response.duration,
+			.url=response.url
+		};
+		int check=CheckSong(db, song.id);
+		Cache cachesong;
+		char *path;
+		if (check==-1){
+			AddSong(db, &song);
+			path=song.url;
+			backgroundCaching(db,&song);
+			// start background caching
+		}else{
+			int cacheCheck=CheckCache(db,song.id);
+			if (cacheCheck!=-1){
+				isCached=true;
+				GetCacheSong(db,song.id,&cachesong);	
+				path=cachesong.filepath;	
+			}else{
+				printf("this is the problem");
+				path=song.url;
+				// start background caching
+				backgroundCaching(db,&song);
+			}
+		}
+		printf("Playing: %s - %s and here is the path=> %s \n", song.title, song.artist,path);
 
-		printf("Playing: %s - %s\n", song.title, song.artist);
-
+		char *songpath;
+		if( isCached){
+			songpath=path;
+		}else{
+			songpath=song.url;	
+		}
+		printf("path  %s",path);
 		pid_t pid = fork();
 		if (pid == 0) {
 			execlp(
 					"mpv",
 					"mpv",
 					"--no-video",
-					song.url,
+					songpath,
 					NULL
 				  );
 
@@ -156,8 +140,44 @@ int main(void) {
 		}
 
 	}
+	sqlite3_close(db);
+	sqlite3_close(cache);
 
 	return 0;
 }
+
+
+//int backgroundCaching(sqlite3 *db, Song *song) {
+//    (void)db;
+//
+//    pid_t pid = fork();
+//    if (pid == 0) {
+//        // child process
+//        sqlite3 *childDb = InitDb();
+//        if (!childDb) {
+//            perror("child db init");
+//            _exit(1);
+//        }
+//
+//        char filepath[512];
+//        snprintf(filepath, sizeof(filepath), "./cache/%s", song->id);
+//
+//        int rc = CacheSong(childDb, song, filepath);
+//        sqlite3_close(childDb);
+//
+//        if (rc != 0) {
+//            fprintf(stderr, "caching failed for %s\n", song->id);
+//            _exit(1);
+//        }
+//        _exit(0);
+//    } else if (pid > 0) {
+//        printf("cache started %d\n", pid);
+//        return 0;
+//    } else {
+//        perror("fork");
+//        return -1;
+//    }
+//}
+//
 
 

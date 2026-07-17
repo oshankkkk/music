@@ -2,6 +2,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
+#include "../../models/song.h"
+#include "../../models/cache.h"
+
+static void check(int rc, sqlite3 *db) {
+    if (rc != SQLITE_OK && rc != SQLITE_DONE && rc != SQLITE_ROW)
+        fprintf(stderr, "sqlite error: %s\n", sqlite3_errmsg(db));
+}
 
 sqlite3 * InitCache(void){
 	sqlite3 *cache;	
@@ -12,11 +20,11 @@ sqlite3 * InitCache(void){
 	return cache;
 }
 
-int CacheSong(sqlite3 *db,Song *song, char *filepath,char *expiresAt,char *createdAt){
+int CacheSong(sqlite3 *db,Song *song,char *filepath){
 	sqlite3_stmt *stmt;
 	const char *sql=
 		"INSERT INTO audioCache (id, filepath, created_at, expires_at)"
-		"VALUES (?, ?, ?, ?)"
+		"VALUES (?, ? )"
 		"ON CONFLICT(id) DO UPDATE SET"
 		"filepath = excluded.filepath"
 		"created_at = excluded.created_at"
@@ -24,17 +32,17 @@ int CacheSong(sqlite3 *db,Song *song, char *filepath,char *expiresAt,char *creat
 	int rc= sqlite3_prepare_v2(db,sql,1,&stmt,NULL);
 	if (rc!=SQLITE_OK){
     printf("sql error code: %d\n", sqlite3_errcode(db));
-	return 1;
+	return -1;
 	}
 
 sqlite3_bind_text(stmt, 1, song->id, -1, SQLITE_STATIC);
 sqlite3_bind_text(stmt, 2, filepath, -1, SQLITE_STATIC);
-sqlite3_bind_text(stmt, 3, createdAt, -1,SQLITE_STATIC);
-sqlite3_bind_text(stmt, 4, expiresAt,-1, SQLITE_STATIC);
+//sqlite3_bind_text(stmt, 3, createdAt, -1,SQLITE_STATIC);
+//sqlite3_bind_text(stmt, 4, expiresAt,-1, SQLITE_STATIC);
 
     int nrc = sqlite3_step(stmt);
     sqlite3_finalize(stmt);
-	if (rc != SQLITE_DONE) {
+	if (nrc != SQLITE_DONE) {
     fprintf(stderr, "SQLite Error: %s\n", sqlite3_errmsg(db));
     return -1;
 }
@@ -52,9 +60,17 @@ sqlite3_bind_text(stmt,1,id,-1, SQLITE_STATIC);
 
     int nrc = sqlite3_step(stmt);
 	if (nrc==SQLITE_ROW){
-    snprintf(out->filepath, sizeof(out->filepath), "%s", sqlite3_column_text(stmt, 0));
-    snprintf(out->expDate, sizeof(out->expDate), "%s", sqlite3_column_text(stmt, 1));
-	sqlite3_finalize(stmt);
+
+		memset(out, 0, sizeof(Song)); // zero all pointers so a failed strdup leaves NULL, not garbage
+		out->filepath = strdup((const char *)sqlite3_column_text(stmt, 0));
+		out->expDate= strdup((const char *)sqlite3_column_text(stmt, 1));
+		out->creatDate= strdup((const char *)sqlite3_column_text(stmt, 2));
+
+//		snprintf(out->filepath, sizeof(out->filepath), "%s", sqlite3_column_text(stmt, 0));
+//		snprintf(out->expDate, sizeof(out->expDate), "%s", sqlite3_column_text(stmt, 1));
+//		sqlite3_finalize(stmt);
+//
+
 	return 0;
 	}
 	sqlite3_finalize(stmt);
@@ -65,3 +81,37 @@ sqlite3_bind_text(stmt,1,id,-1, SQLITE_STATIC);
 
 return 0;
 }
+int CheckCache(sqlite3 *db, char *id){
+    sqlite3_stmt *stmt;
+    const char *sql = "SELECT EXISTS(SELECT 1 FROM song WHERE id=?)";
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK) {
+        check(sqlite3_errcode(db), db);
+        return -1;
+    }
+    sqlite3_bind_text(stmt, 1, id, -1, SQLITE_STATIC);
+
+    int rc = sqlite3_step(stmt);
+    if (rc == SQLITE_ROW) {
+        return sqlite3_column_int(stmt, 0) != 0;
+    } else {
+        check(rc, db);
+        rc = -1;
+    }
+    sqlite3_finalize(stmt);
+    return rc;
+
+}
+
+void FreeSongList(Song *arr, int count) {
+    for (int i = 0; i < count; i++) {
+        free(arr[i].id);
+        free(arr[i].title);
+        free(arr[i].artist);
+        free(arr[i].thumbnail);
+        free(arr[i].uploaddate);
+        free(arr[i].url);
+        free(arr[i].genre);
+    }
+    free(arr);
+}
+

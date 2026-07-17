@@ -1,7 +1,11 @@
+#ifndef SONG_H
+#define SONG_H
+
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdlib.h>
 
-typedef int64_t i64 ;
+typedef int64_t i64;
 
 typedef struct {
     char *id;
@@ -17,4 +21,4 @@ typedef struct {
     char *genre;
 } Song;
 
-
+#endif 

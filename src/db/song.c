@@ -2,6 +2,9 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <sqlite3.h>
+#include <string.h>
+#include "../models/song.h"
+
 sqlite3 * InitDb(void){
 	sqlite3 *db;	
 	int rc=sqlite3_open("./db/migrations/music.db",&db);
@@ -12,25 +15,24 @@ sqlite3 * InitDb(void){
 
 }
 
-static void check(int rc, sqlite3 *db) {
+static void handleError(int rc, sqlite3 *db) {
     if (rc != SQLITE_OK && rc != SQLITE_DONE && rc != SQLITE_ROW)
         fprintf(stderr, "sqlite error: %s\n", sqlite3_errmsg(db));
 }
-int CheckSong(sqlite3 *db, const char *id, bool *exists) {
+int CheckSong(sqlite3 *db, const char *id) {
     sqlite3_stmt *stmt;
     const char *sql = "SELECT EXISTS(SELECT 1 FROM song WHERE id=?)";
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK) {
-        check(sqlite3_errcode(db), db);
+        handleError(sqlite3_errcode(db), db);
         return -1;
     }
     sqlite3_bind_text(stmt, 1, id, -1, SQLITE_STATIC);
 
     int rc = sqlite3_step(stmt);
     if (rc == SQLITE_ROW) {
-        *exists = sqlite3_column_int(stmt, 0) != 0;
-        rc = 0;
+        return sqlite3_column_int(stmt, 0) != 0;
     } else {
-        check(rc, db);
+		handleError(rc, db);
         rc = -1;
     }
     sqlite3_finalize(stmt);
@@ -43,7 +45,7 @@ int AddSong(sqlite3 *db, const Song *s) {
         "VALUES (?, ?, ?, ?, ?, ?)";
     sqlite3_stmt *stmt;
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK) {
-        check(sqlite3_errcode(db), db);
+        handleError(sqlite3_errcode(db), db);
         return -1;
     }
     sqlite3_bind_text(stmt, 1, s->id, -1, SQLITE_STATIC);
@@ -56,31 +58,40 @@ int AddSong(sqlite3 *db, const Song *s) {
     int rc = sqlite3_step(stmt);
     sqlite3_finalize(stmt);
     if (rc != SQLITE_DONE) {
-        check(rc, db);
+        handleError(rc, db);
         return -1;
     }
     return 0;
 }
 
-int GetSong(sqlite3 *db, const char *id, Song *out) {
+int GetSong(sqlite3 *db, const char *id, Song *s) {
     const char *sql =
         "SELECT id, title, artist, duration, isliked, genre FROM song WHERE id=?";
     sqlite3_stmt *stmt;
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK) {
-        check(sqlite3_errcode(db), db);
+        handleError(sqlite3_errcode(db), db);
         return -1;
     }
     sqlite3_bind_text(stmt, 1, id, -1, SQLITE_STATIC);
 
     int rc = sqlite3_step(stmt);
     if (rc == SQLITE_ROW) {
-        snprintf(out->id, sizeof(out->id), "%s", sqlite3_column_text(stmt, 0));
-        snprintf(out->title, sizeof(out->title), "%s", sqlite3_column_text(stmt, 1));
-        snprintf(out->artist, sizeof(out->artist), "%s", sqlite3_column_text(stmt, 2));
-        out->duration = sqlite3_column_int(stmt, 3);
-        out->isliked  = sqlite3_column_int(stmt, 4) != 0;
-        snprintf(out->genre, sizeof(out->genre), "%s", sqlite3_column_text(stmt, 5));
-        sqlite3_finalize(stmt);
+
+      memset(s, 0, sizeof(Song)); // zero all pointers so a failed strdup leaves NULL, not garbage
+		s->id     = strdup((const char *)sqlite3_column_text(stmt, 0));
+        s->title  = strdup((const char *)sqlite3_column_text(stmt, 1));
+        s->artist = strdup((const char *)sqlite3_column_text(stmt, 2));
+        s->duration = sqlite3_column_int(stmt, 3);
+        s->isliked  = sqlite3_column_int(stmt, 4) != 0;
+        s->genre  = strdup((const char *)sqlite3_column_text(stmt, 5));
+
+ //       snprintf(out->id, sizeof(out->id), "%s", sqlite3_column_text(stmt, 0));
+ //       snprintf(out->title, sizeof(out->title), "%s", sqlite3_column_text(stmt, 1));
+ //       snprintf(out->artist, sizeof(out->artist), "%s", sqlite3_column_text(stmt, 2));
+ //       out->duration = sqlite3_column_int(stmt, 3);
+ //       out->isliked  = sqlite3_column_int(stmt, 4) != 0;
+ //       snprintf(out->genre, sizeof(out->genre), "%s", sqlite3_column_text(stmt, 5));
+ //       sqlite3_finalize(stmt);
         return 0;
     }
     sqlite3_finalize(stmt);
@@ -89,33 +100,32 @@ int GetSong(sqlite3 *db, const char *id, Song *out) {
         return 1;
 
     }
-    check(rc, db);
+    handleError(rc, db);
     return -1;
 }
 
 int remove_song(sqlite3 *db, const char *id) {
-    bool exists;
-    int rc = CheckSong(db, id, &exists);
-    if (rc != 0) return rc;
-    if (!exists) {
+    int rc = CheckSong(db, id);
+    if (rc != -1){
+	return rc;
+	}else{
         fprintf(stderr, "song not found\n");
         return 1;
-    }
-
+	}
     sqlite3_stmt *stmt;
     const char *sql = "DELETE FROM song WHERE id=?";
     sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
     sqlite3_bind_text(stmt, 1, id, -1, SQLITE_STATIC);
     rc = sqlite3_step(stmt);
     sqlite3_finalize(stmt);
-    if (rc != SQLITE_DONE) { check(rc, db); return -1; }
+    if (rc != SQLITE_DONE) { handleError(rc, db); return -1; }
     return 0;
 }
 
 static int updateSong(sqlite3 *db, const char *sql, bool has_bool, bool val, const char *id) {
     sqlite3_stmt *stmt;
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK) {
-        check(sqlite3_errcode(db), db);
+        handleError(sqlite3_errcode(db), db);
         return -1;
     }
     if (has_bool) {
@@ -126,7 +136,7 @@ static int updateSong(sqlite3 *db, const char *sql, bool has_bool, bool val, con
     }
     int rc = sqlite3_step(stmt);
     sqlite3_finalize(stmt);
-    if (rc != SQLITE_DONE) { check(rc, db); return -1; }
+    if (rc != SQLITE_DONE) { handleError(rc, db); return -1; }
 
     if (sqlite3_changes(db) == 0) { // equivalent of RowsAffected() == 0
         fprintf(stderr, "song not found\n");
@@ -149,7 +159,7 @@ int GetSongList(sqlite3 *db, Song **out, int *count) {
     const char *sql = "SELECT id, title, artist, duration, isliked, genre FROM song";
     sqlite3_stmt *stmt;
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK) {
-        check(sqlite3_errcode(db), db);
+        handleError(sqlite3_errcode(db), db);
         return -1;
     }
 
@@ -160,16 +170,26 @@ int GetSongList(sqlite3 *db, Song **out, int *count) {
     while ((rc = sqlite3_step(stmt)) == SQLITE_ROW) {
         if (n == cap) { cap *= 2; arr = realloc(arr, cap * sizeof(Song)); }
         Song *s = &arr[n++];
-        snprintf(s->id, sizeof(s->id), "%s", sqlite3_column_text(stmt, 0));
-        snprintf(s->title, sizeof(s->title), "%s", sqlite3_column_text(stmt, 1));
-        snprintf(s->artist, sizeof(s->artist), "%s", sqlite3_column_text(stmt, 2));
+
+//        snprintf(s->id, sizeof(s->id), "%s", sqlite3_column_text(stmt, 0));
+//        snprintf(s->title, sizeof(s->title), "%s", sqlite3_column_text(stmt, 1));
+//        snprintf(s->artist, sizeof(s->artist), "%s", sqlite3_column_text(stmt, 2));
+//        s->duration = sqlite3_column_int(stmt, 3);
+//        s->isliked  = sqlite3_column_int(stmt, 4) != 0;
+//        snprintf(s->genre, sizeof(s->genre), "%s", sqlite3_column_text(stmt, 5));
+//
+       memset(s, 0, sizeof(Song)); // zero all pointers so a failed strdup leaves NULL, not garbage
+		s->id     = strdup((const char *)sqlite3_column_text(stmt, 0));
+        s->title  = strdup((const char *)sqlite3_column_text(stmt, 1));
+        s->artist = strdup((const char *)sqlite3_column_text(stmt, 2));
         s->duration = sqlite3_column_int(stmt, 3);
         s->isliked  = sqlite3_column_int(stmt, 4) != 0;
-        snprintf(s->genre, sizeof(s->genre), "%s", sqlite3_column_text(stmt, 5));
+        s->genre  = strdup((const char *)sqlite3_column_text(stmt, 5));
+
     }
     sqlite3_finalize(stmt);
 
-    if (rc != SQLITE_DONE) { check(rc, db); free(arr); return -1; }
+    if (rc != SQLITE_DONE) { handleError(rc, db); free(arr); return -1; }
     *out = arr;
     *count = n;
     return 0;

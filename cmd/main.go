@@ -47,7 +47,7 @@ func main() {
 			library.Like(database, song.ID)
 		}
 		fmt.Printf(" Song duration %f  \n and view count is  %d \n and the upload date is %s \n", song.Duration, song.ViewCount, song.UploadDate)
-
+		catalogue := make(map[string]*model.Song)
 		if _, exists := catalogue[song.Title]; !exists {
 			catalogue[song.Title] = &song
 		}
