@@ -8,7 +8,7 @@
 
 sqlite3 * InitDb(void){
 	sqlite3 *db;	
-	int rc=sqlite3_open("./db/migrations/music.db",&db);
+	int rc=sqlite3_open("./db/db/music.db",&db);
 	if( rc!=SQLITE_OK){
 		return NULL;
 	}

@@ -18,6 +18,14 @@ int backgroundCaching(Song *song) {
 	pid_t pid = fork();
 	if (pid == 0) {
 		if (fork() == 0) {
+			char filepath[512];
+			printf("caching");
+			snprintf(filepath, sizeof(filepath), "../cache/%s", song->id);
+			char *path = ytDownload(filepath, song->url);
+			if (path) {
+				printf("Saved: %s\n", path);
+				free(path);
+			}
 			// grandchild does the real work, gets reparented, no zombie risk
 			sqlite3 *cache = InitCache();
 			if (!cache){
@@ -26,16 +34,9 @@ int backgroundCaching(Song *song) {
 			}else{
 				printf("cache db works\n");
 			}
-			char filepath[512];
-			printf("caching");
-			snprintf(filepath, sizeof(filepath), "./cache/%s", song->id);
-			int rc = CacheSong(cache, song, filepath, expires);
+			int rc = CacheSong(cache, song,path, expires);
 			sqlite3_close(cache);
-			char *path = ytDownload(filepath, song->url);
-			if (path) {
-				printf("Saved: %s\n", path);
-				free(path);
-			}
+		
 			_exit(rc != 0);
 		}
 		_exit(0); // first child exits immediately, parent reaps it fast
