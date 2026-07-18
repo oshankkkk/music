@@ -1,6 +1,12 @@
 #include <cjson/cJSON.h>
 #include "../models/response.h"
 #include "yt.h"
+//#include <cstddef>
+//#include <cstring>
+#include <stdio.h>
+#include <string.h>
+#include <strings.h>
+#include <stdlib.h>
 
 char * readAll(FILE *fp){
 	size_t cap = 65536, len = 0;
@@ -19,6 +25,33 @@ char * readAll(FILE *fp){
 	}
 	buf[len] = '\0';
 	return buf;
+}
+
+char *ytDownload(char *filepath, char *url)
+{
+    char cmd[2024];
+
+    snprintf(cmd, sizeof(cmd),
+        "yt-dlp -f bestaudio -x --audio-format mp3 -o \"%s.%%(ext)s\" \"%s\"",
+        filepath, url);
+
+    printf("Downloading...\n");
+
+    int result = system(cmd);
+
+    if (result != 0) {
+        fprintf(stderr, "yt-dlp failed\n");
+        return NULL;
+    }
+
+    char *output = malloc(strlen(filepath) + 5);
+
+    if (!output)
+        return NULL;
+
+    sprintf(output, "%s.mp3", filepath);
+
+    return output;
 }
 
 int ytSearch(char  songName[2048], Respones *response){

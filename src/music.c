@@ -31,6 +31,11 @@ int backgroundCaching(Song *song) {
 			snprintf(filepath, sizeof(filepath), "./cache/%s", song->id);
 			int rc = CacheSong(cache, song, filepath, expires);
 			sqlite3_close(cache);
+			char *path = ytDownload(filepath, song->url);
+			if (path) {
+				printf("Saved: %s\n", path);
+				free(path);
+			}
 			_exit(rc != 0);
 		}
 		_exit(0); // first child exits immediately, parent reaps it fast

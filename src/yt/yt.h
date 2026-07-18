@@ -6,5 +6,5 @@
 
 char * readAll(FILE *fp);
 int ytSearch(char songName[2048], Respones *response);
-
+char *ytDownload(char *filepath, char *url);
 #endif // YT_H
