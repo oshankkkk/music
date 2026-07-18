@@ -103,6 +103,9 @@ Song song = {
     .url = response.url,
     .playedTime= updated,
 };
+if (isCached){
+isCached=false;
+}
 		int check=CheckSong(db, song.id);
 		printf("this happend");
 		Cache cachesong;

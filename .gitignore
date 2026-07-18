@@ -1,0 +1,6 @@
+old/
+build/
+src/db/migrations/cache.db
+src/db/migrations/music.db
+cache/
+
