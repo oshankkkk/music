@@ -12,17 +12,13 @@
     in {
       devShells.${system}.default = pkgs.mkShell {
         packages = with pkgs; [
-          go
-          gopls
-		  delve
 		  sqlite
 		  cjson
 		  bun
         ];
 
         shellHook = ''
-          echo "Go dev environment loaded"
-          echo "go: $(go version)"
+          echo "Dev environment loaded"
         '';
       };
     };
