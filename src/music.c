@@ -13,22 +13,24 @@
 #include "./db/cache/cache.c"
 #include "./yt/yt.c"
 
-int backgroundCaching(sqlite3 *db, Song *song) {
-
-time_t expires = song->playedTime+ (7 * 24 * 60 * 60);
-
-	(void)db;
+int backgroundCaching(Song *song) {
+	time_t expires = song->playedTime+ (7 * 24 * 60 * 60);
 	pid_t pid = fork();
 	if (pid == 0) {
 		if (fork() == 0) {
 			// grandchild does the real work, gets reparented, no zombie risk
-			sqlite3 *childDb = InitDb();
-			if (!childDb) { perror("child db init"); _exit(1); }
+			sqlite3 *cache = InitCache();
+			if (!cache){
+				perror("cache db init");
+				return 1;
+			}else{
+				printf("cache db works\n");
+			}
 			char filepath[512];
 			printf("caching");
 			snprintf(filepath, sizeof(filepath), "./cache/%s", song->id);
-			int rc = CacheSong(childDb, song, filepath, expires);
-			sqlite3_close(childDb);
+			int rc = CacheSong(cache, song, filepath, expires);
+			sqlite3_close(cache);
 			_exit(rc != 0);
 		}
 		_exit(0); // first child exits immediately, parent reaps it fast
@@ -53,12 +55,12 @@ int main(void) {
 		printf("db works\n");
 	}
 	sqlite3 *cache = InitCache();
-	if (!cache){
-		perror("cache db init");
-		return 1;
-	}else{
-		printf("cache db works\n");
-	}
+			if (!cache){
+				perror("cache db init");
+				return 1;
+			}else{
+				printf("cache db works\n");
+			}
 	char songName [2048];
 	printf("Music player\n");
 	while(true){
@@ -102,22 +104,25 @@ Song song = {
 		if (check==-1){
 			AddSong(db, &song);
 			path=song.url;
-			backgroundCaching(db,&song);
+			backgroundCaching(&song);
 			// start background caching
 		}else{
-			int cacheCheck=CheckCache(db,song.id);
-			if (cacheCheck!=-1){
+			int cacheCheck=CheckCache(cache,song.id);
+				printf("meka thama cache line eke %d \n",cacheCheck);
+			if (cacheCheck==1){
 				isCached=true;
-				GetCacheSong(db,song.id,&cachesong);	
+				GetCacheSong(cache,song.id,&cachesong);	
 				path=cachesong.filepath;	
+			}else if (cacheCheck==-1){
+				printf("sql error");
+				break;
 			}else{
-				printf("this is the problem");
 				path=song.url;
 				// start background caching
-				backgroundCaching(db,&song);
+				backgroundCaching(&song);
 			}
 		}
-		printf("Playing: %s - %s and here is the path=> %s \n", song.title, song.artist,path);
+		//printf("Playing: %s - %s and here is the path=> %s \n", song.title, song.artist,path);
 
 		char *songpath;
 		if( isCached){
@@ -151,7 +156,6 @@ Song song = {
 	}
 	sqlite3_close(db);
 	sqlite3_close(cache);
-
 	return 0;
 }
 
