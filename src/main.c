@@ -12,6 +12,7 @@
 #include "./db/song.c"
 #include "./db/cache/cache.c"
 #include "./yt/yt.c"
+#include "./server/server.c"
 
 int backgroundCaching(Song *song) {
 	time_t expires = song->playedTime+ (7 * 24 * 60 * 60);
@@ -50,8 +51,11 @@ int backgroundCaching(Song *song) {
 		return -1;
 	}
 }
-
-int main(void) {
+int main(void){
+serverInit();
+return 0;
+}
+int main33(void) {
 	bool isCached = false;
 	sqlite3 *db =InitDb();
 	if (!db){
@@ -132,7 +136,6 @@ isCached=false;
 			}
 		}
 		//printf("Playing: %s - %s and here is the path=> %s \n", song.title, song.artist,path);
-
 		char *songpath;
 		if( isCached){
 			songpath=path;
@@ -166,40 +169,7 @@ isCached=false;
 	sqlite3_close(db);
 	sqlite3_close(cache);
 	return 0;
+
 }
-
-
-//int backgroundCaching(sqlite3 *db, Song *song) {
-//    (void)db;
-//
-//    pid_t pid = fork();
-//    if (pid == 0) {
-//        // child process
-//        sqlite3 *childDb = InitDb();
-//        if (!childDb) {
-//            perror("child db init");
-//            _exit(1);
-//        }
-//
-//        char filepath[512];
-//        snprintf(filepath, sizeof(filepath), "./cache/%s", song->id);
-//
-//        int rc = CacheSong(childDb, song, filepath);
-//        sqlite3_close(childDb);
-//
-//        if (rc != 0) {
-//            fprintf(stderr, "caching failed for %s\n", song->id);
-//            _exit(1);
-//        }
-//        _exit(0);
-//    } else if (pid > 0) {
-//        printf("cache started %d\n", pid);
-//        return 0;
-//    } else {
-//        perror("fork");
-//        return -1;
-//    }
-//}
-//
 
 

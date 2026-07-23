@@ -1,4 +1,10 @@
 ### my spotify replacement
+
+```
+gcc music.c -o musix -Wall -Werror -lsqlite3 -lcjson
+```
+
+#### Figure out the RPC connection
 #### Library
 - Search YouTube (via yt-dlp)
 - Stream music
@@ -21,6 +27,7 @@
 - Remove songs from playlist
 - Reorder songs
 - Duplicate playlist
+
 #### User Interface
 - Keyboard-driven TUI
 - View now playing
