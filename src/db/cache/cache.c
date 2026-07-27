@@ -116,7 +116,7 @@ void FreeSongList(Song *arr, int count) {
         free(arr[i].title);
         free(arr[i].artist);
         free(arr[i].thumbnail);
-        free(arr[i].uploaddate);
+        free(arr[i].uploadDate);
         free(arr[i].url);
         free(arr[i].genre);
     }

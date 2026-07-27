@@ -98,16 +98,41 @@ int ytSearch(char  songName[2048], Song *song){
 
 	memset(song, 0, sizeof(*song));
 
-	if (cJSON_IsString(id))       snprintf(song->id, sizeof(song->id), "%s", id->valuestring);
-	if (cJSON_IsString(title))    snprintf(song->title, sizeof(song->title), "%s", title->valuestring);
-	if (cJSON_IsString(artist))   snprintf(song->artist, sizeof(song->artist), "%s", artist->valuestring);
-	if (cJSON_IsNumber(duration))song->duration = duration->valuedouble;
-	if (cJSON_IsString(thumb))    snprintf(song->thumbnail, sizeof(song->thumbnail), "%s", thumb->valuestring);
-	if (cJSON_IsNumber(views))song->viewCount = (long)views->valuedouble;
-	if (cJSON_IsString(upload))   snprintf(song->uploadDate, sizeof(song->uploadDate), "%s", upload->valuestring);
-	if (cJSON_IsString(url))      snprintf(song->url, sizeof(song->url), "%s", url->valuestring);
+if (cJSON_IsString(id))
+    song->id = strdup(id->valuestring);
 
+if (cJSON_IsString(title))
+    song->title = strdup(title->valuestring);
+
+if (cJSON_IsString(artist))
+    song->artist = strdup(artist->valuestring);
+
+if (cJSON_IsNumber(duration))
+    song->duration = duration->valuedouble;
+
+if (cJSON_IsString(thumb))
+    song->thumbnail = strdup(thumb->valuestring);
+
+if (cJSON_IsNumber(views))
+    song->viewCount = (i64)views->valuedouble;
+
+if (cJSON_IsString(upload))
+    song->uploadDate = strdup(upload->valuestring);
+
+if (cJSON_IsString(url))
+    song->url = strdup(url->valuestring);
 	cJSON_Delete(root);
 	return 0;
+
 }
 
+void freeSong(Song *song)
+{
+    free(song->id);
+    free(song->title);
+    free(song->artist);
+    free(song->thumbnail);
+    free(song->uploadDate);
+    free(song->url);
+    free(song->genre);
+}
