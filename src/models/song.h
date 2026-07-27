@@ -13,8 +13,8 @@ typedef struct {
     char *artist;
     double duration;
     char *thumbnail;
-    i64 view_count;
-    char *uploaddate;
+    i64 viewCount;
+    char *uploadDate;
     char *url;
     bool isliked;
     int personalplaycount;

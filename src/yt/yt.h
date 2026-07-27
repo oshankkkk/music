@@ -2,9 +2,9 @@
 #define YT_H
 
 #include <stdio.h>
-#include "../models/response.h"
+#include "../models/song.h"
 
 char * readAll(FILE *fp);
-int ytSearch(char songName[2048], Respones *response);
+int ytSearch(char songName[2048], Song *song);
 char *ytDownload(char *filepath, char *url);
 #endif // YT_H

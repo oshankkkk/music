@@ -1,7 +1,6 @@
 #ifndef RESPONSE_H
 #define RESPONSE_H
 
-
 typedef struct {
 	char id[64];
 	char title[256];

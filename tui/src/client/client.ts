@@ -1,5 +1,5 @@
 const socket = await Bun.connect({
-  unix: "../../../build/us.socket",
+  unix: "../../../src/server/us.socket",
 
   socket: {
     data(socket, data) {

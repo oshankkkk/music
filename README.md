@@ -4,6 +4,13 @@
 gcc music.c -o musix -Wall -Werror -lsqlite3 -lcjson
 ```
 
+```
+
+// Protocol: each request/response is a single JSON object, newline-terminated.
+// Request:  {"jsonrpc":"2.0","method":"add","params":{"a":2,"b":3},"id":1}
+// Response: {"jsonrpc":"2.0","result":5,"id":1}
+
+```
 #### Figure out the RPC connection
 #### Library
 - Search YouTube (via yt-dlp)
