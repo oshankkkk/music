@@ -1,5 +1,6 @@
 #include <cjson/cJSON.h>
 #include <stddef.h>
+#include <stdio.h>
 #include <unistd.h>
 #include <unistd.h>
 #include <string.h>
@@ -17,10 +18,12 @@ static char *handler(App *app,const char *raw) {
         cJSON *method = cJSON_GetObjectItemCaseSensitive(req, "method");
         cJSON *params = cJSON_GetObjectItemCaseSensitive(req, "params");
         cJSON *id = cJSON_GetObjectItemCaseSensitive(req, "id");
-
+		printf("handler");
         if (!cJSON_IsString(method)) {
             response =errorResponse(-32600, "Invalid Request: missing 'method'", id);
         } else {
+
+		printf("dispatch");
             response = dispatch(app,method->valuestring, params, id);
         }
         cJSON_Delete(req);

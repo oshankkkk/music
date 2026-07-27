@@ -5,6 +5,8 @@
 
 int mpvRun(char *path,bool *isCached){
 //printf("path  %s",path);
+//
+	printf("playing song");
 		pid_t pid = fork();
 		if (pid == 0) {
 			execlp(

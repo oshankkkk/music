@@ -39,7 +39,7 @@ int main(void) {
 	App app;
 	//char *path;
 	int err=0;
-	char *socketpath = "../build/us.socket";
+	char *socketpath = "./build/us.socket";
 
 	err = startup(&app);
     if (err != 0) {
@@ -66,40 +66,37 @@ int main(void) {
 	if (listen(serverFd, 8) < 0) {
 		perror("listen");
 		return 1;
+	}
+	printf("RPC server listening on %s\n",socketpath);
 
-		printf("RPC server listening on %s\n",socketpath);
+	while (1) {
+		int clientFd=accept(serverFd,NULL,NULL);	
+		if (clientFd< 0) {
+			perror("accept");
+			continue;
+		}	
+		char *buf=malloc(5053);	
+		read(clientFd,buf,5051);
 
-		while (1) {
-			int clientFd=accept(serverFd,NULL,NULL);	
-			if (clientFd< 0) {
-				perror("accept");
-				continue;
-			}	
-			char *buf=malloc(5053);	
-			read(clientFd,buf,5052);
+		buf[5052]='\0';
 
-			buf[5053]='\0';
+		char *response = handler(&app,buf);
+		size_t len = strlen(response);
 
-			char *response = handler(&app,buf);
-			size_t len = strlen(response);
+		write(clientFd, response, len);
+		write(clientFd, "\n", 1);
 
-			write(clientFd, response, len);
-			write(clientFd, "\n", 1);
+		free(response);
 
-			free(response);
+		close(clientFd);
+	}
 
-			close(clientFd);
-		}
-
-    }
-		return 0;
 
 cleanup:
     if (app.db)    sqlite3_close(app.db);
     if (app.cache) sqlite3_close(app.cache);
 	unlink(socketpath);
     return err;
-
 }
 
 

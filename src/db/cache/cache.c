@@ -15,7 +15,7 @@
 
 sqlite3 * InitCache(void){
 	sqlite3 *cache;	
-	int rc=sqlite3_open("./db/db/cache.db",&cache);
+	int rc=sqlite3_open("./src/db/db/cache.db",&cache);
 	if( rc!=SQLITE_OK){
 		return NULL;
 	}

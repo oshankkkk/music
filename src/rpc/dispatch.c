@@ -11,6 +11,7 @@ static cJSON *dispatch(App *app,const char *method, cJSON *params, cJSON *id) {
         if (cJSON_IsNumber(songName)) {
             return errorResponse(-32602, "Invalid params: no numbers only song names ", id);
         }
+		printf("playsong");
 		err=playSong(app,songName->valuestring);
 		if (err!=0){
 			perror("rpc start song");

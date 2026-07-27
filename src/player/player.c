@@ -21,6 +21,8 @@ int getSong(App *app,char *songName){
 		return 1;
 		//RPCerror
 	}
+
+	printf("getting song");
 	if (app->currentsong->url[0] == '\0') {
 		fprintf(stderr, "no url found for that result\n");
 		return 1;
@@ -71,6 +73,7 @@ int playSong(App *app,char *songName) {
 	char path[256];
 
 	err = getSong(app, songName);
+
     if (err != 0) {
         perror("initPlay");
 			return err;

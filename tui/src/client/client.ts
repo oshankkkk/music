@@ -1,23 +1,4 @@
-const socket = await Bun.connect({
-  unix: "../../../src/server/us.socket",
+// Request:  {"jsonrpc":"2.0","method":"add","params":{"a":2,"b":3},"id":1}
+// Response: {"jsonrpc":"2.0","result":5,"id":1}
 
-  socket: {
-    data(socket, data) {
-      console.log("Server:", data.toString());
-    },
 
-    open(socket) {
-      console.log("Connected!");
-
-      socket.write("Hello from Bun client");
-    },
-
-    close(socket) {
-      console.log("Disconnected");
-    },
-
-    error(socket, error) {
-      console.error("Socket error:", error);
-    },
-  },
-});

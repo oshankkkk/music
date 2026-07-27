@@ -1,9 +1,41 @@
 import { useState } from "react";
 
 export function SearchPopup({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
-  const [query, setQuery] = useState("");
+	const [query, setQuery] = useState("");
 
-  if (!isOpen) return null;
+	if (!isOpen) return null;
+
+	async function handleSubmit(){
+		let message={
+			jsonrpc:"2.0",
+			method:"playSong",		
+			params:{
+				songName:query
+			},
+			id:1
+		}	
+		let request=JSON.stringify(message)		
+		const socket=await Bun.connect({
+			unix:"../build/us.socket",
+			socket:{
+				open(socket){
+					console.log("msg send");
+					socket.write(request)
+				},
+				data(socket,data){
+					console.log(data.toString);
+				},
+
+				close(socket) {
+					console.log("Disconnected");
+				},
+
+				error(socket, error) {
+					console.error(error);
+				}
+			}
+		})
+	} 
 
   return (
     <box
@@ -25,10 +57,12 @@ export function SearchPopup({ isOpen, onClose }: { isOpen: boolean; onClose: () 
         <input
           placeholder="Type here..."
           onInput={setQuery}
-          onSubmit={onClose}
+          onSubmit={handleSubmit}
           focused={true}
         />
       </box>
     </box>
   );
 }
+
+
