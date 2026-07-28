@@ -2,6 +2,7 @@
 //#include "../models/ytresponse.h"
 #include "yt.h"
 #include "../models/song.h"
+#include "../models/app.h"
 //#include <cstddef>
 //#include <cstring>
 #include <stdio.h>
@@ -55,7 +56,11 @@ char *ytDownload(char *filepath, char *url){
     return output;
 }
 
-int ytSearch(char  songName[2048], Song *song){
+int ytSearch(char *songName, App *app){
+	//Song *song;
+	Song *song = malloc(sizeof(Song));
+	song->isCached=false;	
+
 	char cmd [1024];
 	snprintf(cmd, sizeof(cmd),
     "yt-dlp --dump-json --no-playlist --no-warnings ytsearch1:%s 2>/dev/null",
@@ -97,7 +102,6 @@ int ytSearch(char  songName[2048], Song *song){
 	cJSON *url      = cJSON_GetObjectItemCaseSensitive(root, "webpage_url");
 
 	memset(song, 0, sizeof(*song));
-
 if (cJSON_IsString(id))
     song->id = strdup(id->valuestring);
 
@@ -122,6 +126,7 @@ if (cJSON_IsString(upload))
 if (cJSON_IsString(url))
     song->url = strdup(url->valuestring);
 	cJSON_Delete(root);
+	app->currentsong=song;
 	return 0;
 
 }

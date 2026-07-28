@@ -3,7 +3,7 @@
 #include <sys/wait.h>
 #include <stdbool.h>
 
-int mpvRun(char *path,bool *isCached){
+int mpvRun(char *path){
 //printf("path  %s",path);
 //
 	printf("playing song");
@@ -29,10 +29,7 @@ int mpvRun(char *path,bool *isCached){
 			perror("fork");
 			return 1;		
 		}
-	if (*isCached){
-			*isCached=false;
-		}
-
+	
 	return 0;
 }
 

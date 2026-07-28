@@ -6,7 +6,7 @@
 #include "../player/player.c"
 static cJSON *dispatch(App *app,const char *method, cJSON *params, cJSON *id) {
 	int err;
-    if (strcmp(method, "initPlay") == 0) {
+    if (strcmp(method, "playSong") == 0) {
         cJSON *songName = cJSON_GetObjectItemCaseSensitive(params, "songName");
         if (cJSON_IsNumber(songName)) {
             return errorResponse(-32602, "Invalid params: no numbers only song names ", id);

@@ -3,8 +3,9 @@
 
 #include <stdio.h>
 #include "../models/song.h"
+#include "../models/app.h"
 
 char * readAll(FILE *fp);
-int ytSearch(char songName[2048], Song *song);
+int ytSearch(char *songName, App *app);
 char *ytDownload(char *filepath, char *url);
 #endif // YT_H

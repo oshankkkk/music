@@ -12,11 +12,10 @@
 #include "./cache.c"
 #include "../models/app.h"
 
-bool *isCached = false;
 
 int getSong(App *app,char *songName){
 	//take rpc connection with songname from dispacher
-	if (ytSearch(songName, app->currentsong) != 0) {
+	if (ytSearch(songName,app) != 0) {
 		fprintf(stderr, "search failed, try again\n");
 		return 1;
 		//RPCerror
@@ -48,7 +47,7 @@ int getAudioPath(char *path,App *app){
 		int cacheCheck=CheckCache(app->cache,app->currentsong->id);
 		printf("meka thama cache line eke %d \n",cacheCheck);
 		if (cacheCheck==1){
-			*isCached=true;
+			app->currentsong->isCached=true;
 			GetCacheSong(app->cache,app->currentsong->id,&cachesong);	
 			path=cachesong.filepath;	
 			//songpath=cachesong.filepath;	
@@ -70,7 +69,7 @@ int playSong(App *app,char *songName) {
 	// when user press play it calls the init play and then gets the audiopath and runsmpv
 
 	int err=0;	
-	char path[256];
+	char *path=NULL;
 
 	err = getSong(app, songName);
 
@@ -86,7 +85,7 @@ int playSong(App *app,char *songName) {
 			return err;
     }
 
-    mpvRun(path, isCached);
+    mpvRun(path);
 	return 0;
 }
 

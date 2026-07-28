@@ -31,6 +31,9 @@ int startup(App *app){
 		printf("cache db works\n");
 		app->cache=cache;
 	}
+	Song *song=NULL;
+	app->currentsong=song;
+
 	return 0;
 }
 

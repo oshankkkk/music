@@ -20,6 +20,7 @@ typedef struct {
     int personalplaycount;
     char *genre;
 	time_t playedTime;
+	bool isCached;
 } Song;
 
 #endif 
