@@ -10,4 +10,4 @@ gcc -g src/main.c \
     -lcjson
 
 #gdb ./build/music
-gdb ./build/music
+./build/music

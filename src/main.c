@@ -79,9 +79,12 @@ int main(void) {
 			continue;
 		}	
 		char *buf=malloc(5053);	
-		read(clientFd,buf,5051);
-
-		buf[5052]='\0';
+		size_t n=read(clientFd,buf,5051);
+		if (n>0){
+			buf[n]='\0';
+		}else{
+		buf[0]='\0';
+		}
 
 		char *response = handler(&app,buf);
 		size_t len = strlen(response);

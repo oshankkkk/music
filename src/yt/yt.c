@@ -37,6 +37,7 @@ char *ytDownload(char *filepath, char *url){
         "yt-dlp -f bestaudio -x --audio-format mp3 -o \"%s.%%(ext)s\" \"%s\"",
         filepath, url);
 
+
     printf("Downloading...\n");
 
     int result = system(cmd);
@@ -60,10 +61,10 @@ int ytSearch(char *songName, App *app){
 	//Song *song;
 	Song *song = malloc(sizeof(Song));
 	song->isCached=false;	
-
+	printf("this is the song name tui gives: %s",songName);
 	char cmd [1024];
 	snprintf(cmd, sizeof(cmd),
-    "yt-dlp --dump-json --no-playlist --no-warnings ytsearch1:%s 2>/dev/null",
+    "yt-dlp --dump-json --no-playlist --no-warnings \"ytsearch1:%s\" 2>/dev/null",
     songName);
 	FILE *ptr=popen(cmd,"r");
 	if (!ptr){
@@ -127,6 +128,9 @@ if (cJSON_IsString(url))
     song->url = strdup(url->valuestring);
 	cJSON_Delete(root);
 	app->currentsong=song;
+
+	printf("this is the song name: %s\n",app->currentsong->title);
+	printf("this is the song url: %s\n",app->currentsong->url);
 	return 0;
 
 }

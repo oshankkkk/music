@@ -34,13 +34,13 @@ int getSong(App *app,char *songName){
 	//connect ipc with rpc
 }
 
-int getAudioPath(char *path,App *app){
+int getAudioPath(char **path,App *app){
 	int check=CheckSong(app->db, app->currentsong->id);
 	printf("this happend");
 	Cache cachesong;
 	if (check==-1){
 		AddSong(app->db, app->currentsong);
-		path=app->currentsong->url;
+		*path=app->currentsong->url;
 		backgroundCaching(app->currentsong);
 		// start background caching
 	}else{
@@ -49,13 +49,13 @@ int getAudioPath(char *path,App *app){
 		if (cacheCheck==1){
 			app->currentsong->isCached=true;
 			GetCacheSong(app->cache,app->currentsong->id,&cachesong);	
-			path=cachesong.filepath;	
+			*path=cachesong.filepath;	
 			//songpath=cachesong.filepath;	
 		}else if (cacheCheck==-1){
 			perror("getaudio");
 			return 1;
 		}else{
-			path=app->currentsong->url;
+			*path=app->currentsong->url;
 			// start background caching
 			backgroundCaching(app->currentsong);
 		}
@@ -79,7 +79,7 @@ int playSong(App *app,char *songName) {
     }
 
 
-	err = getAudioPath(path, app);
+	err = getAudioPath(&path, app);
     if (err != 0) {
         perror("audio");
 			return err;
