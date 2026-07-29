@@ -12,7 +12,6 @@
 #include "./cache.c"
 #include "../models/app.h"
 
-
 int getSong(App *app,char *songName){
 	//take rpc connection with songname from dispacher
 	if (ytSearch(songName,app) != 0) {
@@ -34,34 +33,71 @@ int getSong(App *app,char *songName){
 	//connect ipc with rpc
 }
 
-int getAudioPath(char **path,App *app){
-	int check=CheckSong(app->db, app->currentsong->id);
-	printf("this happend");
-	Cache cachesong;
-	if (check==-1){
-		AddSong(app->db, app->currentsong);
-		*path=app->currentsong->url;
-		backgroundCaching(app->currentsong);
-		// start background caching
-	}else{
-		int cacheCheck=CheckCache(app->cache,app->currentsong->id);
-		printf("meka thama cache line eke %d \n",cacheCheck);
-		if (cacheCheck==1){
-			app->currentsong->isCached=true;
-			GetCacheSong(app->cache,app->currentsong->id,&cachesong);	
-			*path=cachesong.filepath;	
-			//songpath=cachesong.filepath;	
-		}else if (cacheCheck==-1){
-			perror("getaudio");
-			return 1;
-		}else{
-			*path=app->currentsong->url;
-			// start background caching
-			backgroundCaching(app->currentsong);
-		}
-	}
-	return 0;
-} 
+//int getAudioPath(char **path,App *app){
+//	int check=CheckSong(app->db, app->currentsong->id);
+//
+//	Cache cachesong;
+//	if (check==-1){
+//		AddSong(app->db, app->currentsong);
+//		*path=app->currentsong->url;
+//		backgroundCaching(app->currentsong,app->cache);
+//		// start background caching
+//	}else{
+//		int cacheCheck=CheckCache(app->cache,app->currentsong->id);
+//		printf("\nmeka thama cache line eke %d \n",cacheCheck);
+//		if (cacheCheck==1){
+//			app->currentsong->isCached=true;
+//			GetCacheSong(app->cache,app->currentsong->id,&cachesong);	
+//			*path=cachesong.filepath;	
+//			printf("\npath===>%s\n",cachesong.filepath);
+//			printf("\npath===>%s\n",*path);
+//			//songpath=cachesong.filepath;	
+//		}else if (cacheCheck==-1){
+//			perror("getaudio");
+//			return 1;
+//		}else{
+//			*path=app->currentsong->url;
+//			// start background caching
+//			backgroundCaching(app->currentsong,app->cache);
+//		}
+//	}
+//	return 0;
+//} 
+//
+
+
+char *getAudioPath(App *app){
+    int check = CheckSong(app->db, app->currentsong->id);
+    char *path = NULL;
+
+    if (check == -1){
+        AddSong(app->db, app->currentsong);
+        path = strdup(app->currentsong->url);
+        backgroundCaching(app->currentsong, app->cache);
+    } else {
+        Cache cachesong;
+        int cacheCheck = CheckCache(app->cache, app->currentsong->id);
+        printf("\nmeka thama cache line eke %d \n", cacheCheck);
+
+        if (cacheCheck == 1){
+            app->currentsong->isCached = true;
+            GetCacheSong(app->cache, app->currentsong->id, &cachesong);
+            path = strdup(cachesong.filepath);
+            printf("\npath===>%s\n", path);
+        } else if (cacheCheck == -1){
+            perror("getaudio");
+            return NULL;
+        } else {
+            path = strdup(app->currentsong->url);
+            backgroundCaching(app->currentsong, app->cache);
+        }
+    }
+
+    if (!path) {
+        perror("strdup");
+    }
+    return path;
+}
 
 int playSong(App *app,char *songName) {
 
@@ -69,7 +105,6 @@ int playSong(App *app,char *songName) {
 	// when user press play it calls the init play and then gets the audiopath and runsmpv
 
 	int err=0;	
-	char *path=NULL;
 
 	err = getSong(app, songName);
 
@@ -79,13 +114,16 @@ int playSong(App *app,char *songName) {
     }
 
 
-	err = getAudioPath(&path, app);
-    if (err != 0) {
-        perror("audio");
-			return err;
+	char *path = getAudioPath(app);
+    if (path == NULL) {
+        fprintf(stderr, "audio: failed to get audio path\n");
+        return 1;
     }
 
+
+	printf("pathbeforempv====>  %s",path);
     mpvRun(path);
+	free(path);
 	return 0;
 }
 

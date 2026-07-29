@@ -9,5 +9,5 @@ gcc -g src/main.c \
     -lsqlite3 \
     -lcjson
 
-#gdb ./build/music
-./build/music
+gdb ./build/music
+# ./build/music

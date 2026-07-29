@@ -15,6 +15,8 @@
 		  sqlite
 		  cjson
 		  bun
+		  typescript
+
         ];
 
         shellHook = ''

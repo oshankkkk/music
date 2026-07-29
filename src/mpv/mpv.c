@@ -4,8 +4,7 @@
 #include <stdbool.h>
 
 int mpvRun(char *path){
-//printf("path  %s",path);
-//
+printf("pathmpv====>  %s",path);
 	printf("playing song");
 		pid_t pid = fork();
 		if (pid == 0) {

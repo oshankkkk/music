@@ -30,6 +30,7 @@ char * readAll(FILE *fp){
 	return buf;
 }
 
+
 char *ytDownload(char *filepath, char *url){
     char cmd[2024];
 
@@ -46,14 +47,15 @@ char *ytDownload(char *filepath, char *url){
         fprintf(stderr, "yt-dlp failed\n");
         return NULL;
     }
-
-    char *output = malloc(strlen(filepath) + 5);
+    char *output = malloc(strlen(filepath) + 30);
 
     if (!output)
         return NULL;
 
     sprintf(output, "%s.mp3", filepath);
 
+	printf("\nfilenameinyt====>%s\n",filepath);
+	printf("\nfilenameoutyt====>%s\n",output);
     return output;
 }
 

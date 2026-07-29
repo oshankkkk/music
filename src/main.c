@@ -89,20 +89,24 @@ int main(void) {
 		char *response = handler(&app,buf);
 		size_t len = strlen(response);
 
-		write(clientFd, response, len);
-		write(clientFd, "\n", 1);
+		ssize_t written = write(clientFd, response, len);
+		if (written == -1) {
+			perror("write");
+		}
 
-		free(response);
+		written = write(clientFd, "\n", 1);
+		if (written == -1) {
+			perror("write");
+		}		free(response);
 
 		close(clientFd);
 	}
 
-
 cleanup:
-    if (app.db)    sqlite3_close(app.db);
-    if (app.cache) sqlite3_close(app.cache);
+	if (app.db)    sqlite3_close(app.db);
+	if (app.cache) sqlite3_close(app.cache);
 	unlink(socketpath);
-    return err;
+	return err;
 }
 
 

@@ -25,11 +25,20 @@ static char *handler(App *app,const char *raw) {
 
 		printf("dispatch");
             response = dispatch(app,method->valuestring, params, id);
+
         }
         cJSON_Delete(req);
     }
 
     char *out = cJSON_PrintUnformatted(response);
+
+		// printf("==================================");
+		// printf("==================================");
+		// printf("==================================");
+		// printf("here is the response %s",out);
+		//
+		printf("here is the response %s\n", out);
+fflush(stdout);
     cJSON_Delete(response);
     return out;
 }
