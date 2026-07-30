@@ -78,7 +78,7 @@ int main(void) {
 			perror("accept");
 			continue;
 		}	
-		char *buf=malloc(5053);	
+		char *buf=malloc(6063);	
 		size_t n=read(clientFd,buf,5051);
 		if (n>0){
 			buf[n]='\0';
@@ -87,14 +87,18 @@ int main(void) {
 		}
 
 		char *response = handler(&app,buf);
-		size_t len = strlen(response);
-
+		printf("socketin====>%s\n",response);
+		uint32_t len = strlen(response);
+		printf("socketinlen====>%d\n",len);
+		fflush(stdout);
+		write(clientFd,&len,sizeof(len));
 		ssize_t written = write(clientFd, response, len);
 		if (written == -1) {
 			perror("write");
 		}
 
 		written = write(clientFd, "\n", 1);
+
 		if (written == -1) {
 			perror("write");
 		}		free(response);

@@ -14,6 +14,17 @@ function App() {
   const [focusArea, setFocusArea] = useState<"none" | "sidebar" | "quick-access" | "mixes">("none");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [song, setSong] = useState({
+    title: "Never Gonna Give You Up",
+    description: "Rick Astley's greatest hit",
+    artist: "Rick Astley",
+    timestamp: 97,
+    duration: 212,
+    albumArtUrl: "https://example.com/art.jpg",
+    isLiked: true,
+    playlists: [1, 2, 3],
+    isPlayed: false
+  });
 
   // Track when space was pressed (timestamp), not a setTimeout handle
   const spaceTimestampRef = useRef<number | null>(null);
@@ -113,8 +124,18 @@ function App() {
         <MainContent focusArea={isSearchOpen ? "none" : focusArea} />
         <ContextPanel />
       </box>
-      <Playbar isFocused={focusArea === "none" && !isSearchOpen} isPlaying={isPlaying} onTogglePlay={togglePlay} />
-      <SearchPopup isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
+      <Playbar isFocused={focusArea === "none" && !isSearchOpen} isPlaying={isPlaying} onTogglePlay={togglePlay} song={song} setSong={setSong} />
+      <SearchPopup isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} onSongSelect={(newSong) => {
+        setSong(s => ({
+          ...s, 
+          title: newSong.title || s.title,
+          artist: newSong.artist || s.artist,
+          duration: Number(newSong.duration) || s.duration,
+          timestamp: 0,
+          isPlayed: true
+        }));
+        if (!isPlaying) setIsPlaying(true);
+      }} />
     </box>
   );
 }

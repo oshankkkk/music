@@ -3,7 +3,6 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <unistd.h>
-#include <string.h>
 #include <sys/socket.h>
 #include <sys/un.h>
 #include "./dispatch.c"
@@ -32,13 +31,7 @@ static char *handler(App *app,const char *raw) {
 
     char *out = cJSON_PrintUnformatted(response);
 
-		// printf("==================================");
-		// printf("==================================");
-		// printf("==================================");
-		// printf("here is the response %s",out);
-		//
 		printf("here is the response %s\n", out);
-fflush(stdout);
     cJSON_Delete(response);
     return out;
 }

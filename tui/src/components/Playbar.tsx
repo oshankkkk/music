@@ -27,18 +27,7 @@ function formatTime(seconds: number) {
   return `${m}:${s.toString().padStart(2, '0')}`;
 }
 
-export function Playbar({ isFocused, isPlaying, onTogglePlay }: { isFocused?: boolean; isPlaying: boolean; onTogglePlay?: () => void }) {
-  const [song, setSong] = useState({
-    title: "Never Gonna Give You Up",
-    description: "Rick Astley's greatest hit",
-    artist: "Rick Astley",
-    timestamp: 97,
-    duration: 212,
-    albumArtUrl: "https://example.com/art.jpg",
-    isLiked: true,
-    playlists: [1, 2, 3],
-    isPlayed: isPlaying
-  });
+export function Playbar({ isFocused, isPlaying, onTogglePlay, song, setSong }: { isFocused?: boolean; isPlaying: boolean; onTogglePlay?: () => void; song: any; setSong: any }) {
   
   const [volume, setVolume] = useState(50);
   const [lyrics, setLyrics] = useState(false);

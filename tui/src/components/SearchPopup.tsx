@@ -1,53 +1,67 @@
 import { useState } from "react";
 
-async function handleSubmit(query:string){
-		console.log("hu");
-	let message={
-		jsonrpc:"2.0",
-		method:"playSong",		
-		params:{
-			songName:query
-		},
-		id:1
-	}	
-	let request=JSON.stringify(message)		
-	const socket=await Bun.connect({
-		unix:"../build/us.socket",
-		socket:{
-			open(socket){
-				console.log("msg send");
-				socket.write(request)
-			},
-			data(socket,data){
-				readResponse(data)	
-			},
-
-			close(socket) {
-				console.log("Disconnected");
-			},
-
-			error(socket, error) {
-				console.error(error);
-			}
-		}
-	})
-} 
-
-function readResponse(data:Buffer){
-	let buff=Buffer.alloc(0);
-	buff= Buffer.concat([buff, data]);
-	while (true){
-   		let msgLen = buff.readInt32BE(0);
-		if (buff.length < 4 + msgLen)
-        break;
-		let rpcmsg=buff.subarray(4,4+msgLen)
-		console.log(rpcmsg.toString)
-		buff=buff.subarray(4+msgLen)
-	}
-}
-
-export function SearchPopup({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+export function SearchPopup({ isOpen, onClose, onSongSelect }: { isOpen: boolean; onClose: () => void; onSongSelect?: (song: any) => void }) {
 	const [query, setQuery] = useState("");
+
+	const handleSubmit = async (query: string) => {
+		console.log("hu");
+		let message = {
+			jsonrpc: "2.0",
+			method: "playSong",		
+			params: {
+				songName: query
+			},
+			id: 1
+		};
+		let request = JSON.stringify(message);		
+		let buff = Buffer.alloc(0);
+
+		const socket = await Bun.connect({
+			unix: "../build/us.socket",
+			socket: {
+				open(socket) {
+					console.log("msg send");
+					socket.write(request);
+				},
+				data(socket, data) {
+					buff = Buffer.concat([buff, data]);
+					while (true) {
+						if (buff.length < 4) break;
+						console.log("buff legnth",buff.length);
+						let msgLen = buff.readUInt32LE(0);
+						if (buff.length < 4 + msgLen){
+							console.log("awul");
+							break;
+						} 
+						let rpcmsg = buff.subarray(4, 4 + msgLen);
+							console.log("rpclist",rpcmsg.toString());
+						try {
+							const response = JSON.parse(rpcmsg.toString());
+							console.log("res",response)
+							if (response.result && onSongSelect) {
+
+							console.log("resresult",response.result)
+								onSongSelect(response.result);
+								onClose();
+							}
+						} catch (e) {
+							console.error(e);
+						}
+						
+						buff = buff.subarray(4 + msgLen);
+					}
+				},
+				close(socket) {
+					console.log("Disconnected");
+				},
+				error(socket, error) {
+					console.error(error);
+				}
+			}
+		});
+	};
+
+
 
 	if (!isOpen) return null;
 
