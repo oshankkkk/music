@@ -21,9 +21,7 @@ static char *handler(App *app,const char *raw) {
 		if (!cJSON_IsString(method)) {
 			response =errorResponse(-32600, "Invalid Request: missing 'method'", id);
 		} else {
-
 			response = dispatch(app,method->valuestring, params, id);
-
 		}
 		cJSON_Delete(req);
 	}

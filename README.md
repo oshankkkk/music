@@ -44,6 +44,7 @@ gcc music.c -o musix -Wall -Werror -lsqlite3 -lcjson
 - Configuration files
 - Theme support
 - Lua plugin system
+
 ### mpv Features 
 uses mpv IPC
 

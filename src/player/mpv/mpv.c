@@ -15,6 +15,7 @@ int mpvstart(){
 					"mpv",
 					"mpv",
 					"--idle=yes",
+					"--no-video",
 					"--input-ipc-server=./build/mpv.socket",
 					NULL
 				  );

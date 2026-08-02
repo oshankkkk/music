@@ -9,6 +9,7 @@ static cJSON *dispatch(App *app,const char *method, cJSON *params, cJSON *id) {
 	int err=0;
 
 	if (strcmp(method, "playSong") == 0){
+
 		cJSON *songName = cJSON_GetObjectItemCaseSensitive(params, "songName");
 		if (cJSON_IsNumber(songName)) {
 			return errorResponse(-32602, "Invalid params: no numbers only song names ", id);
@@ -18,7 +19,10 @@ static cJSON *dispatch(App *app,const char *method, cJSON *params, cJSON *id) {
 		if (err!=0){
 			perror("rpc start song");
 		}
+
 		cJSON* response=mpvread(app->mpvfd);
+		if (response!=NULL){
+
 		cJSON *error = cJSON_GetObjectItemCaseSensitive(response, "error");
 		if (strcmp(error->valuestring, "success") == 0) {
 
@@ -38,12 +42,15 @@ static cJSON *dispatch(App *app,const char *method, cJSON *params, cJSON *id) {
 		}else{
 			return resultResponse(response,id);
 		}
+}else{
+printf("mu null bn");
+}
 
 	}
 
 	else if (strcmp(method, "player-pause") == 0) {
 
-		if (mpvwrite(app->mpvfd, "pause") != 0) {
+		if (mpvwrite(app->mpvfd, "pause") < 0) {
 			return errorResponse(-32602, "socket write went wrong", id);
 		}
 
@@ -51,7 +58,7 @@ static cJSON *dispatch(App *app,const char *method, cJSON *params, cJSON *id) {
 	}
 	else if (strcmp(method, "player-resume") == 0) {
 
-		if (mpvwrite(app->mpvfd, "resume") != 0) {
+		if (mpvwrite(app->mpvfd, "resume") < 0) {
 			return errorResponse(-32602, "socket write went wrong", id);
 		}
 
@@ -59,7 +66,7 @@ static cJSON *dispatch(App *app,const char *method, cJSON *params, cJSON *id) {
 	}
 	else if (strcmp(method, "player-toggle-pause") == 0) {
 
-		if (mpvwrite(app->mpvfd, "toggle_pause") != 0) {
+		if (mpvwrite(app->mpvfd, "toggle_pause") < 0) {
 			return errorResponse(-32602, "socket write went wrong", id);
 		}
 
@@ -67,7 +74,7 @@ static cJSON *dispatch(App *app,const char *method, cJSON *params, cJSON *id) {
 	}
 	else if (strcmp(method, "player-stop") == 0) {
 
-		if (mpvwrite(app->mpvfd, "stop") != 0) {
+		if (mpvwrite(app->mpvfd, "stop") < 0) {
 			return errorResponse(-32602, "socket write went wrong", id);
 		}
 
@@ -75,7 +82,7 @@ static cJSON *dispatch(App *app,const char *method, cJSON *params, cJSON *id) {
 	}
 	else if (strcmp(method, "player-seek-forward") == 0) {
 
-		if (mpvwrite(app->mpvfd, "seek_forward") != 0) {
+		if (mpvwrite(app->mpvfd, "seek_forward") < 0) {
 			return errorResponse(-32602, "socket write went wrong", id);
 		}
 
@@ -83,7 +90,7 @@ static cJSON *dispatch(App *app,const char *method, cJSON *params, cJSON *id) {
 	}
 	else if (strcmp(method, "player-seek-backward") == 0) {
 
-		if (mpvwrite(app->mpvfd, "seek_backward") != 0) {
+		if (mpvwrite(app->mpvfd, "seek_backward") < 0) {
 			return errorResponse(-32602, "socket write went wrong", id);
 		}
 
@@ -91,7 +98,7 @@ static cJSON *dispatch(App *app,const char *method, cJSON *params, cJSON *id) {
 	}
 	else if (strcmp(method, "player-next") == 0) {
 
-		if (mpvwrite(app->mpvfd, "next") != 0) {
+		if (mpvwrite(app->mpvfd, "next") < 0) {
 			return errorResponse(-32602, "socket write went wrong", id);
 		}
 
@@ -99,7 +106,7 @@ static cJSON *dispatch(App *app,const char *method, cJSON *params, cJSON *id) {
 	}
 	else if (strcmp(method, "player-previous") == 0) {
 
-		if (mpvwrite(app->mpvfd, "previous") != 0) {
+		if (mpvwrite(app->mpvfd, "previous") < 0) {
 			return errorResponse(-32602, "socket write went wrong", id);
 		}
 
@@ -107,7 +114,7 @@ static cJSON *dispatch(App *app,const char *method, cJSON *params, cJSON *id) {
 	}
 	else if (strcmp(method, "player-fast-forward") == 0) {
 
-		if (mpvwrite(app->mpvfd, "fast_forward") != 0) {
+		if (mpvwrite(app->mpvfd, "fast_forward") < 0) {
 			return errorResponse(-32602, "socket write went wrong", id);
 		}
 
@@ -115,7 +122,7 @@ static cJSON *dispatch(App *app,const char *method, cJSON *params, cJSON *id) {
 	}
 	else if (strcmp(method, "player-rewind") == 0) {
 
-		if (mpvwrite(app->mpvfd, "rewind") != 0) {
+		if (mpvwrite(app->mpvfd, "rewind") < 0) {
 			return errorResponse(-32602, "socket write went wrong", id);
 		}
 
@@ -123,7 +130,7 @@ static cJSON *dispatch(App *app,const char *method, cJSON *params, cJSON *id) {
 	}
 	else if (strcmp(method, "player-volume-up") == 0) {
 
-		if (mpvwrite(app->mpvfd, "volume_up") != 0) {
+		if (mpvwrite(app->mpvfd, "volume_up") < 0) {
 			return errorResponse(-32602, "socket write went wrong", id);
 		}
 
@@ -131,7 +138,7 @@ static cJSON *dispatch(App *app,const char *method, cJSON *params, cJSON *id) {
 	}
 	else if (strcmp(method, "player-volume-down") == 0) {
 
-		if (mpvwrite(app->mpvfd, "volume_down") != 0) {
+		if (mpvwrite(app->mpvfd, "volume_down") < 0) {
 			return errorResponse(-32602, "socket write went wrong", id);
 		}
 
@@ -139,7 +146,7 @@ static cJSON *dispatch(App *app,const char *method, cJSON *params, cJSON *id) {
 	}
 	else if (strcmp(method, "player-mute") == 0) {
 
-		if (mpvwrite(app->mpvfd, "mute") != 0) {
+		if (mpvwrite(app->mpvfd, "mute") < 0) {
 			return errorResponse(-32602, "socket write went wrong", id);
 		}
 
@@ -147,7 +154,7 @@ static cJSON *dispatch(App *app,const char *method, cJSON *params, cJSON *id) {
 	}
 	else if (strcmp(method, "player-unmute") == 0) {
 
-		if (mpvwrite(app->mpvfd, "unmute") != 0) {
+		if (mpvwrite(app->mpvfd, "unmute") < 0) {
 			return errorResponse(-32602, "socket write went wrong", id);
 		}
 
@@ -155,7 +162,7 @@ static cJSON *dispatch(App *app,const char *method, cJSON *params, cJSON *id) {
 	}
 	else if (strcmp(method, "player-toggle-mute") == 0) {
 
-		if (mpvwrite(app->mpvfd, "toggle_mute") != 0) {
+		if (mpvwrite(app->mpvfd, "toggle_mute") < 0) {
 			return errorResponse(-32602, "socket write went wrong", id);
 		}
 
