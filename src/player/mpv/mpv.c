@@ -55,11 +55,12 @@ int mpvinit(char *socketpath){
 }
 int mpvplay(int ipcfd,char *path){
 
-	char cmd[1024] = {0};
+	char cmd[5050] = {0};
 	snprintf(cmd, sizeof(cmd),"{\"command\":[\"loadfile\",\"%s\"]}\n",path);		
-	
-	return write(ipcfd, cmd, strlen(cmd));
+	snprintf(cmd+strlen(cmd),sizeof(cmd)-strlen(cmd),
+	"{\"command\":[\"set_property\",\"pause\",false]}\n");
 
+	return write(ipcfd, cmd, strlen(cmd));
 }
 
 int mpvwrite(int ipcfd, char *action)

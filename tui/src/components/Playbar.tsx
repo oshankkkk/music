@@ -75,54 +75,54 @@ export function Playbar({ isFocused, isPlaying, onTogglePlay, song, setSong }: {
       await rpcCall("player-previous");
     } catch (e) {
       console.error(e);
-    }
-    triggerFlash(tPrev);
-    setSong(s => ({ ...s, timestamp: 0 }));
+	}
+	triggerFlash(tPrev);
+	setSong(s => ({ ...s, timestamp: 0 }));
   };
 
   // Flash the play icon whenever isPlaying changes (globally)
   const isFirstRender = useRef(true);
   useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
-    }
-    triggerFlash(tPlay);
-    setSong(s => ({ ...s, isPlayed: isPlaying }));
+	  if (isFirstRender.current) {
+		  isFirstRender.current = false;
+		  return;
+	  }
+	  triggerFlash(tPlay);
+	  setSong(s => ({ ...s, isPlayed: isPlaying }));
   }, [isPlaying]);
 
   useKeyboard((key) => {
-    if (!isFocused) return;
-    switch (key.name) {
-      case "j":
-        rpcCall("player-volume-down").catch(console.error);
-        setVolume((v) => Math.max(0, v - 5));
-        triggerFlash(tVol);
-        break;
-      case "k":
-        rpcCall("player-volume-up").catch(console.error);
-        setVolume((v) => Math.min(100, v + 5));
-        triggerFlash(tVol);
-        break;
-      case "h":
-        handlePrev();
-        break;
-      case "l":
-        handleNext();
-        break;
-      case "f":
-        rpcCall("player-fast-forward").catch(console.error);
-        break;
-      case "b":
-        rpcCall("player-rewind").catch(console.error);
-        break;
-      case "right":
-        rpcCall("player-seek-forward").catch(console.error);
-        break;
-      case "left":
-        rpcCall("player-seek-backward").catch(console.error);
-        break;
-    }
+	  if (!isFocused) return;
+	  switch (key.name) {
+		  case "j":
+			  rpcCall("player-volume-down").catch(console.error);
+		  setVolume((v) => Math.max(0, v - 5));
+		  triggerFlash(tVol);
+		  break;
+		  case "k":
+			  rpcCall("player-volume-up").catch(console.error);
+		  setVolume((v) => Math.min(100, v + 5));
+		  triggerFlash(tVol);
+		  break;
+		  case "h":
+			  rpcCall("player-seek-backward").catch(console.error);
+		  break;
+		  case "l":
+			  rpcCall("player-seek-forward").catch(console.error);
+		  break;
+		  case "H":
+			  handlePrev();
+		  break;
+		  case "L":
+			  handleNext();
+		  break;
+		  case "f":
+			  rpcCall("player-fast-forward").catch(console.error);
+		  break;
+		  case "b":
+			  rpcCall("player-rewind").catch(console.error);
+		  break;
+	  }
   });
 
   const progressWidth = 27;
