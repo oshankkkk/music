@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useKeyboard, useTimeline } from "@opentui/react";
+import { rpcCall } from "../client/client";
 
 function interpolateGray(v: number) {
   const val = Math.round(179 + (255 - 179) * v);
@@ -59,12 +60,22 @@ export function Playbar({ isFocused, isPlaying, onTogglePlay, song, setSong }: {
     if (onTogglePlay) onTogglePlay();
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
+    try {
+      await rpcCall("player-next");
+    } catch (e) {
+      console.error(e);
+    }
     triggerFlash(tNext);
     setSong(s => ({ ...s, title: s.title === "Never Gonna Give You Up" ? "Together Forever" : "Never Gonna Give You Up", timestamp: 0 }));
   };
 
-  const handlePrev = () => {
+  const handlePrev = async () => {
+    try {
+      await rpcCall("player-previous");
+    } catch (e) {
+      console.error(e);
+    }
     triggerFlash(tPrev);
     setSong(s => ({ ...s, timestamp: 0 }));
   };
@@ -84,10 +95,12 @@ export function Playbar({ isFocused, isPlaying, onTogglePlay, song, setSong }: {
     if (!isFocused) return;
     switch (key.name) {
       case "j":
+        rpcCall("player-volume-down").catch(console.error);
         setVolume((v) => Math.max(0, v - 5));
         triggerFlash(tVol);
         break;
       case "k":
+        rpcCall("player-volume-up").catch(console.error);
         setVolume((v) => Math.min(100, v + 5));
         triggerFlash(tVol);
         break;
@@ -96,6 +109,18 @@ export function Playbar({ isFocused, isPlaying, onTogglePlay, song, setSong }: {
         break;
       case "l":
         handleNext();
+        break;
+      case "f":
+        rpcCall("player-fast-forward").catch(console.error);
+        break;
+      case "b":
+        rpcCall("player-rewind").catch(console.error);
+        break;
+      case "right":
+        rpcCall("player-seek-forward").catch(console.error);
+        break;
+      case "left":
+        rpcCall("player-seek-backward").catch(console.error);
         break;
     }
   });

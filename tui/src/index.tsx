@@ -39,18 +39,21 @@ function App() {
       isFirstTickRef.current = false;
       return;
     }
+    import("./client/client").then(({ rpcCall }) => {
+      rpcCall("player-toggle-pause").catch(console.error);
+    });
     setIsPlaying((p) => !p);
   }, [playToggleTick]);
-
-  const togglePlay = useCallback(() => {
-    setIsPlaying((p) => !p);
-  }, []);
 
   // Safe deferred toggle: bumps a state counter so the actual toggle
   // happens inside a React useEffect, not a raw setTimeout
   const deferredTogglePlay = useCallback(() => {
     setPlayToggleTick((t) => t + 1);
   }, []);
+
+  const togglePlay = useCallback(() => {
+    deferredTogglePlay();
+  }, [deferredTogglePlay]);
 
   // Poll for expired pending space presses.
   // This replaces the setTimeout-based approach that crashed when
