@@ -168,6 +168,14 @@ printf("mu null bn");
 
 		return resultResponse(mpvread(app->mpvfd),id);
 	}
+	else if (strcmp(method, "player-toggle-repeat") == 0) {
+
+		if (mpvwrite(app->mpvfd, "toggle_repeat") < 0) {
+			return errorResponse(-32602, "socket write went wrong", id);
+		}
+
+		return resultResponse(mpvread(app->mpvfd),id);
+	}
 	// if sending failed:
 	return errorResponse(-32601, "Method not found", id);
 

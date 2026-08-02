@@ -111,7 +111,9 @@ int mpvwrite(int ipcfd, char *action)
 	else if (strcmp(action, "toggle_mute") == 0) {
 		strcpy(cmd, "{\"command\":[\"cycle\",\"mute\"]}\n");
 	}
-
+	else if (strcmp(action, "toggle_repeat") == 0) {
+    strcpy(cmd, "{\"command\":[\"cycle\",\"loop-file\"]}\n");
+	}
 
 	return	write(ipcfd, cmd, strlen(cmd));
 	//mpvread(ipcfd);

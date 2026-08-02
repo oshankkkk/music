@@ -32,6 +32,7 @@ export function Playbar({ isFocused, isPlaying, onTogglePlay, song, setSong }: {
   
   const [volume, setVolume] = useState(50);
   const [lyrics, setLyrics] = useState(false);
+  const [isRepeat, setIsRepeat] = useState(false);
 
   const [playFlash, setPlayFlash] = useState(0);
   const [prevFlash, setPrevFlash] = useState(0);
@@ -58,6 +59,15 @@ export function Playbar({ isFocused, isPlaying, onTogglePlay, song, setSong }: {
     triggerFlash(tPlay);
     setSong(s => ({ ...s, isPlayed: !s.isPlayed }));
     if (onTogglePlay) onTogglePlay();
+  };
+
+  const handleRepeat = async () => {
+    try {
+      await rpcCall("player-toggle-repeat");
+      setIsRepeat(r => !r);
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   const handleNext = async () => {
@@ -150,10 +160,11 @@ export function Playbar({ isFocused, isPlaying, onTogglePlay, song, setSong }: {
       </box>
 
       <box flexDirection="column" flexGrow={1} alignItems="center" justifyContent="center">
-        <box flexDirection="row" gap={2}>
+        <box flexDirection="row" gap={2} alignItems="center">
           <text fg={interpolateGray(prevFlash)} onMouseDown={handlePrev}>{'|<'}</text>
           <text fg={interpolatePlay(playFlash)} onMouseDown={handlePlayToggle}>{song.isPlayed ? '[ || ]' : '[ > ]'}</text>
           <text fg={interpolateGray(nextFlash)} onMouseDown={handleNext}>{'>|'}</text>
+          <text fg={isRepeat ? "#1DB954" : "#b3b3b3"} onMouseDown={handleRepeat}>{'∞'}</text>
         </box>
         <box flexDirection="row" gap={1} alignItems="center">
           <text fg="#b3b3b3">{formatTime(song.timestamp)}</text>
