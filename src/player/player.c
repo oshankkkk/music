@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <sys/wait.h>
 #include <strings.h>
-#include "../mpv/mpv.c"
+#include "./mpv/mpv.c"
 #include <unistd.h>
 #include <stdbool.h>
 #include <cjson/cJSON.h>
@@ -19,7 +19,6 @@ int getSong(App *app,char *songName){
 		return 1;
 		//RPCerror
 	}
-
 	printf("getting song");
 	if (app->currentsong->url[0] == '\0') {
 		fprintf(stderr, "no url found for that result\n");
@@ -113,18 +112,23 @@ int playSong(App *app,char *songName) {
 			return err;
     }
 
-
 	char *path = getAudioPath(app);
     if (path == NULL) {
         fprintf(stderr, "audio: failed to get audio path\n");
         return 1;
     }
 
-
-	printf("pathbeforempv====>  %s",path);
-    mpvRun(path);
+//    mpvstart();
+	err=mpvplay(app->mpvfd,path);
+	if (err < 0) {
+        perror("playcmdwrite");
+			return err;
+    }
+		
 	free(path);
 	return 0;
 }
+
+
 
 

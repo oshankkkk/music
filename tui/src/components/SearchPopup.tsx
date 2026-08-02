@@ -13,9 +13,9 @@ export function SearchPopup({ isOpen, onClose, onSongSelect }: { isOpen: boolean
 			},
 			id: 1
 		};
+
 		let request = JSON.stringify(message);		
 		let buff = Buffer.alloc(0);
-
 		const socket = await Bun.connect({
 			unix: "../build/us.socket",
 			socket: {
@@ -61,10 +61,7 @@ export function SearchPopup({ isOpen, onClose, onSongSelect }: { isOpen: boolean
 		});
 	};
 
-
-
 	if (!isOpen) return null;
-
 
 	return (
 		<box

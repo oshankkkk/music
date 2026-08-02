@@ -9,7 +9,8 @@
 #include <sys/un.h>
 #include "./rpc/handler.c"
 #include "./models/app.h"
-//#include "./player/player.c"
+//#include "./player/mpv/.c"
+//#includhttps://github.com/oshankkkk/musice "./player/player.c"
 
 #include <stddef.h>
 
@@ -43,12 +44,22 @@ int main(void) {
 	//char *path;
 	int err=0;
 	char *socketpath = "./build/us.socket";
-
+	//char *mpvipcpath="../../../build/mpv.socket";
+	char *mpvipcpath="./build/mpv.socket";
+	err=mpvstart();
+	sleep(1);
+	if (err != 0) {
+		perror("startup");
+		goto cleanup;
+	}
+	int mpvfd=mpvinit(mpvipcpath);
+	app.mpvfd=mpvfd;
+	printf("mpvfd %d",app.mpvfd);
 	err = startup(&app);
-    if (err != 0) {
-        perror("startup");
-        goto cleanup;
-    }
+	if (err != 0) {
+		perror("startup");
+		goto cleanup;
+	}
 
 	int serverFd=socket(AF_UNIX,SOCK_STREAM,0);
 	if (serverFd<0){
@@ -58,12 +69,13 @@ int main(void) {
 
 	struct sockaddr_un addr;
 	addr.sun_family=AF_UNIX;
+
 	strncpy(addr.sun_path, socketpath, sizeof(addr.sun_path) - 1);
 	unlink(socketpath);
 	err=bind(serverFd,(struct sockaddr *)&addr,sizeof(addr));
 	if (err < 0) {
 		perror("bind");
-		return 1;
+		goto cleanup;
 	}
 
 	if (listen(serverFd, 8) < 0) {
@@ -83,14 +95,11 @@ int main(void) {
 		if (n>0){
 			buf[n]='\0';
 		}else{
-		buf[0]='\0';
+			buf[0]='\0';
 		}
 
 		char *response = handler(&app,buf);
-		printf("socketin====>%s\n",response);
 		uint32_t len = strlen(response);
-		printf("socketinlen====>%d\n",len);
-		fflush(stdout);
 		write(clientFd,&len,sizeof(len));
 		ssize_t written = write(clientFd, response, len);
 		if (written == -1) {

@@ -8,6 +8,7 @@ typedef struct{
 	sqlite3 *db;
 	sqlite3 *cache;
 	Song *currentsong;
+	int mpvfd;
 }App;
 
 #endif
