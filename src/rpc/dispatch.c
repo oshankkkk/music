@@ -16,7 +16,7 @@ void dispatch(App *app,const char *method, cJSON *params, char *id) {
 	if (strcmp(method, "playSong") == 0){
 		cJSON *songName = cJSON_GetObjectItemCaseSensitive(params, "songName");
 		if (cJSON_IsNumber(songName)) {
- 			rpcerror(-32602, "Invalid params: no numbers only song names ", id);
+ 			rpcerror(-32602, "Invalid params: no numbers only song names ", id,mq);
 		}
 
 		err=playSong(app,songName->valuestring);
@@ -157,13 +157,14 @@ void handler(App *app,const char *raw) {
 
 	cJSON *req = cJSON_Parse(raw);
 	if (!req) {
-		rpcerror(-32700, "Parse error", NULL);
+		rpcerror(-32700, "Parse error", NULL,app->msgqueue);
 	} else {
 		cJSON *method = cJSON_GetObjectItemCaseSensitive(req, "method");
 		cJSON *params = cJSON_GetObjectItemCaseSensitive(req, "params");
 		cJSON *id = cJSON_GetObjectItemCaseSensitive(req, "id");
 		if (!cJSON_IsString(method)) {
-			 rpcerror(-32600, "Invalid Request: missing 'method'", id->valuestring);
+			 rpcerror(-32600, "Invalid Request: missing 'method'", id->valuestring,app->msgqueue);
+	;
 		} else {
 			dispatch(app,method->valuestring, params, id->valuestring);
 		}

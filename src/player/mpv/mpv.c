@@ -8,6 +8,8 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include "../../models/app.h"
+#include "../../models/msg.h"
+#include "../../rpc/msg.h"
 #include <cjson/cJSON.h>
 
 int mpvstart(){
@@ -27,8 +29,6 @@ int mpvstart(){
 	}
 	else if (pid > 0) {
 		printf("mpv started with PID %d\n", pid);
-		//			int status;
-		//waitpid(pid, &status, 0);
 	}
 	else {
 		perror("fork");
@@ -41,6 +41,7 @@ int mpvinit(char *socketpath){
 	int sockfd=socket(AF_UNIX,SOCK_STREAM,0);
 	if (sockfd==-1){
 		perror("error");
+		return -1;
 	}
 	struct sockaddr_un addr;
 	memset(&addr, 0, sizeof(addr));
@@ -48,7 +49,7 @@ int mpvinit(char *socketpath){
 	strncpy(addr.sun_path,  socketpath, sizeof(addr.sun_path)-1);
 
 	if (connect(sockfd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
-		perror("connect");
+		perror("connect error");
 		//	close(sockfd);
 		return -1;
 	}
@@ -144,6 +145,7 @@ void eventresponse(cJSON *response,queue *msgqueue){
 
 	char *item=malloc(3000);
 	item=cJSON_PrintUnformatted(resp);
+
 
 	push(msgqueue,sizeof(item),item);
 

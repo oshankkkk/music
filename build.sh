@@ -9,5 +9,5 @@ gcc -g $(find src -name "*.c") \
     -lsqlite3 \
     -lcjson
 
-# gdb ./build/music
+gdb ./build/music
 # ./build/music

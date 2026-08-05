@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <sys/wait.h>
 #include <strings.h>
+#include <string.h>
 #include "./mpv/mpv.h"
 #include <unistd.h>
 #include <stdbool.h>
@@ -9,6 +10,7 @@
 #include "../models/song.h"
 #include "../models/cache.h"
 #include "../db/song.h"
+#include "../db/cache/cache.h"
 #include "./cache.h"
 #include "../models/app.h"
 #include "../yt/yt.h"

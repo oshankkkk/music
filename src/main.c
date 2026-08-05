@@ -8,12 +8,6 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <stddef.h>
-
-//#include "./db/cache/cache.c"
-//#include "./db/song.c"
-//#include "./player/mpv/mpv.c"
-//#include "./models/msg.h"
-
 #include "./models/app.h"
 #include "./rpc/dispatch.h"
 #include "./rpc/msg.h"
@@ -32,8 +26,14 @@ int startup(App *app){
 	return -1;
 	}
 	int mpvfd=mpvinit(MPVSOCK_PATH);
-	app->mpvfd=mpvfd;
+	if (mpvfd<0){
+		printf("mpv not set");
+		return -1;
+	}else{
 
+	printf("mpv socket works\n");
+	app->mpvfd=mpvfd;
+	}
 	sqlite3 *db =InitDb();
 	if (!db){
 		perror("db init");
@@ -61,9 +61,11 @@ void *tuireader(void *arg){
 	App *app=(App *)arg;
 	while (1) {
 		//reads from tui
+//		printf("this is the fd %d",app->serverfd);
 		int clientFd=accept(app->serverfd,NULL,NULL);	
 		app->clientfd=clientFd;
 		if (clientFd< 0) {
+			printf("prob here\n");
 			perror("accept");
 			continue;
 		}	
@@ -99,6 +101,8 @@ int main(void) {
 	}
 	int serverFd=socket(AF_UNIX,SOCK_STREAM,0);
 	app.serverfd=serverFd;
+
+		printf("this is the fd in main %d",app.serverfd);
 	if (serverFd<0){
 		perror("unix socket");		
 		goto cleanup;
@@ -115,14 +119,14 @@ int main(void) {
 		perror("bind");
 		goto cleanup;
 	}
-	if (listen(serverFd, 3) < 0) {
+	if (listen(serverFd, 8) < 0) {
 		perror("listen");
 		goto cleanup;
 	}
 
 	printf("RPC server listening on %s\n",TUISOCK_PATH);
 
-	if (pthread_create(&tui, NULL,tuireader, &serverFd) != 0) {
+	if (pthread_create(&tui, NULL,tuireader, &app) != 0) {
 		perror("pthread_create funcA");
 		goto cleanup;
 	}
