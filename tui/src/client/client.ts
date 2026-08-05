@@ -1,3 +1,6 @@
+import { createRequest } from "./request";
+import { parseResponse } from "./response";
+
 export function startReader() {
 	let buff = Buffer.alloc(0);
 
@@ -14,7 +17,7 @@ export function startReader() {
 					
 					let rpcmsg = buff.subarray(4, 4 + msgLen);
 					try {
-						const response = JSON.parse(rpcmsg.toString());
+						const response = parseResponse(rpcmsg);
 						console.log(response);
 					} catch (e) {
 						console.error("Failed to parse message", e);
@@ -32,14 +35,7 @@ export function startReader() {
 
 export async function rpcCall(method: string, params: any = {}): Promise<void> {
 	return new Promise((resolve, reject) => {
-		let message = {
-			jsonrpc: "2.0",
-			method,
-			params,
-			id: 1
-		};
-
-		let request = JSON.stringify(message);
+		let request = createRequest(method, params);
 
 		Bun.connect({
 			unix: "../build/us.socket",

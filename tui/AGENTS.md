@@ -155,4 +155,6 @@ The application completely mimics the ~90% visual static layout of the Spotify d
 
 ## Frontend RPC implementation
 
- 
+- **Separation of Concerns:** Separated the Unix socket logic into a dedicated continuous reader (`startReader()`) and a one-off writer (`rpcCall()`) to decouple reading and writing. The reader continuously parses incoming length-prefixed messages and prints them.
+- **Request & Response Helpers:** Refactored JSON-RPC request creation and response parsing into modular files (`request.ts` and `response.ts`). `request.ts` now auto-increments a unique request ID for each call.
+- **Initialization:** Hooked `startReader()` into `index.tsx` so the continuous socket reader starts automatically on app launch.
