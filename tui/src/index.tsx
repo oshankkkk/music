@@ -143,6 +143,8 @@ function App() {
   );
 }
 
-const renderer = await createCliRenderer();
-createRoot(renderer).render(<App />);
+import { startReader } from "./client/client";
 
+const renderer = await createCliRenderer();
+startReader();
+createRoot(renderer).render(<App />);
