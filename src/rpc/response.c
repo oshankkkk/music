@@ -1,18 +1,9 @@
 #include <cjson/cJSON.h>
+#include <unistd.h>
+#include "./msg.h"
 
 
-static cJSON *resultResponse(cJSON *result, cJSON *id) {
-    cJSON *resp = cJSON_CreateObject();
-    cJSON_AddStringToObject(resp, "jsonrpc", "2.0");
-    cJSON_AddItemToObject(resp, "result", result);
-
-    // id must be echoed back exactly as received; duplicate cause the
-    // request object still owns the original.
-    cJSON_AddItemToObject(resp, "id", cJSON_Duplicate(id, 1));
-    return resp;
-}
-
-static cJSON *errorResponse(int code, const char *message, cJSON *id) {
+void *rpcerror(int code, const char *message, char* id,queue *msgqueue) {
     cJSON *resp = cJSON_CreateObject();
     cJSON_AddStringToObject(resp, "jsonrpc", "2.0");
 
@@ -21,6 +12,11 @@ static cJSON *errorResponse(int code, const char *message, cJSON *id) {
     cJSON_AddStringToObject(error, "message", message);
     cJSON_AddItemToObject(resp, "error", error);
 
-    cJSON_AddItemToObject(resp, "id", id ? cJSON_Duplicate(id, 1) : cJSON_CreateNull());
-    return resp;
+    cJSON_AddStringToObject(resp, "id",id);
+
+	char *item=malloc(3000);
+	item=cJSON_PrintUnformatted(resp);
+	push(msgqueue,sizeof(item),item);
+
+	return NULL;
 }

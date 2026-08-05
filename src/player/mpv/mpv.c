@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <sys/wait.h>
@@ -6,33 +7,33 @@
 #include <stdio.h>
 #include <sys/socket.h>
 #include <sys/un.h>
+#include "../../models/app.h"
 #include <cjson/cJSON.h>
 
 int mpvstart(){
-		pid_t pid = fork();
-		if (pid == 0) {
-			execlp(
-					"mpv",
-					"mpv",
-					"--idle=yes",
-					"--no-video",
-					"--input-ipc-server=./build/mpv.socket",
-					NULL
-				  );
+	pid_t pid = fork();
+	if (pid == 0) {
+		execlp(
+				"mpv",
+				"mpv",
+				"--idle=yes",
+				"--no-video",
+				"--input-ipc-server=./build/mpv.socket",
+				NULL
+			  );
 
-			perror("execlp");
-			_exit(1);
-		}
-		else if (pid > 0) {
-			printf("mpv started with PID %d\n", pid);
-//			int status;
-			//waitpid(pid, &status, 0);
-		}
-		else {
-			perror("fork");
-			return 1;		
-		}
-	
+		perror("execlp");
+		_exit(1);
+	}
+	else if (pid > 0) {
+		printf("mpv started with PID %d\n", pid);
+		//			int status;
+		//waitpid(pid, &status, 0);
+	}
+	else {
+		perror("fork");
+		return 1;		
+	}
 	return 0;
 }
 
@@ -53,107 +54,145 @@ int mpvinit(char *socketpath){
 	}
 	return sockfd;
 }
+
 int mpvplay(int ipcfd,char *path){
 
 	char cmd[5050] = {0};
 	snprintf(cmd, sizeof(cmd),"{\"command\":[\"loadfile\",\"%s\"]}\n",path);		
 	snprintf(cmd+strlen(cmd),sizeof(cmd)-strlen(cmd),
-	"{\"command\":[\"set_property\",\"pause\",false]}\n");
+			"{\"command\":[\"set_property\",\"pause\",false]}\n");
 
 	return write(ipcfd, cmd, strlen(cmd));
 }
 
-int mpvwrite(int ipcfd, char *action)
-{
+int mpvwrite(int ipcfd, char *action, char *id){
 	char cmd[1024] = {0};
+
 	if (strcmp(action, "pause") == 0) {
-		strcpy(cmd, "{\"command\":[\"set_property\",\"pause\",true]}\n");
+		snprintf(cmd, sizeof(cmd),
+				"{\"command\":[\"set_property\",\"pause\",true],\"request_id\":\"%s\"}\n", id);
 	}
 	else if (strcmp(action, "resume") == 0) {
-		strcpy(cmd, "{\"command\":[\"set_property\",\"pause\",false]}\n");
+		snprintf(cmd, sizeof(cmd),
+				"{\"command\":[\"set_property\",\"pause\",false],\"request_id\":\"%s\"}\n", id);
 	}
 	else if (strcmp(action, "toggle_pause") == 0) {
-		strcpy(cmd, "{\"command\":[\"cycle\",\"pause\"]}\n");
+		snprintf(cmd, sizeof(cmd),
+				"{\"command\":[\"cycle\",\"pause\"],\"request_id\":\"%s\"}\n", id);
 	}
 	else if (strcmp(action, "stop") == 0) {
-		strcpy(cmd, "{\"command\":[\"quit\"]}\n");
+		snprintf(cmd, sizeof(cmd),
+				"{\"command\":[\"quit\"],\"request_id\":\"%s\"}\n", id);
 	}
 	else if (strcmp(action, "seek_forward") == 0) {
-		strcpy(cmd, "{\"command\":[\"seek\",10,\"relative\"]}\n");
+		snprintf(cmd, sizeof(cmd),
+				"{\"command\":[\"seek\",10,\"relative\"],\"request_id\":\"%s\"}\n", id);
 	}
 	else if (strcmp(action, "seek_backward") == 0) {
-		strcpy(cmd, "{\"command\":[\"seek\",-10,\"relative\"]}\n");
+		snprintf(cmd, sizeof(cmd),
+				"{\"command\":[\"seek\",-10,\"relative\"],\"request_id\":\"%s\"}\n", id);
 	}
 	else if (strcmp(action, "next") == 0) {
-		strcpy(cmd, "{\"command\":[\"playlist-next\",\"force\"]}\n");
+		snprintf(cmd, sizeof(cmd),
+				"{\"command\":[\"playlist-next\",\"force\"],\"request_id\":\"%s\"}\n", id);
 	}
 	else if (strcmp(action, "previous") == 0) {
-		strcpy(cmd, "{\"command\":[\"playlist-prev\",\"force\"]}\n");
+		snprintf(cmd, sizeof(cmd),
+				"{\"command\":[\"playlist-prev\",\"force\"],\"request_id\":\"%s\"}\n", id);
 	}
 	else if (strcmp(action, "fast_forward") == 0) {
-		strcpy(cmd, "{\"command\":[\"seek\",60,\"relative\"]}\n");
+		snprintf(cmd, sizeof(cmd),
+				"{\"command\":[\"seek\",60,\"relative\"],\"request_id\":\"%s\"}\n", id);
 	}
 	else if (strcmp(action, "rewind") == 0) {
-		strcpy(cmd, "{\"command\":[\"seek\",-60,\"relative\"]}\n");
+		snprintf(cmd, sizeof(cmd),
+				"{\"command\":[\"seek\",-60,\"relative\"],\"request_id\":\"%s\"}\n", id);
 	}
 	else if (strcmp(action, "volume_up") == 0) {
-		strcpy(cmd, "{\"command\":[\"add\",\"volume\",5]}\n");
+		snprintf(cmd, sizeof(cmd),
+				"{\"command\":[\"add\",\"volume\",5],\"request_id\":\"%s\"}\n", id);
 	}
 	else if (strcmp(action, "volume_down") == 0) {
-		strcpy(cmd, "{\"command\":[\"add\",\"volume\",-5]}\n");
+		snprintf(cmd, sizeof(cmd),
+				"{\"command\":[\"add\",\"volume\",-5],\"request_id\":\"%s\"}\n", id);
 	}
 	else if (strcmp(action, "mute") == 0) {
-		strcpy(cmd, "{\"command\":[\"set_property\",\"mute\",true]}\n");
+		snprintf(cmd, sizeof(cmd),
+				"{\"command\":[\"set_property\",\"mute\",true],\"request_id\":\"%s\"}\n", id);
 	}
 	else if (strcmp(action, "unmute") == 0) {
-		strcpy(cmd, "{\"command\":[\"set_property\",\"mute\",false]}\n");
+		snprintf(cmd, sizeof(cmd),
+				"{\"command\":[\"set_property\",\"mute\",false],\"request_id\":\"%s\"}\n", id);
 	}
 	else if (strcmp(action, "toggle_mute") == 0) {
-		strcpy(cmd, "{\"command\":[\"cycle\",\"mute\"]}\n");
+		snprintf(cmd, sizeof(cmd),
+				"{\"command\":[\"cycle\",\"mute\"],\"request_id\":\"%s\"}\n", id);
 	}
 	else if (strcmp(action, "toggle_repeat") == 0) {
-    strcpy(cmd, "{\"command\":[\"cycle\",\"loop-file\"]}\n");
+		snprintf(cmd, sizeof(cmd),
+				"{\"command\":[\"cycle\",\"loop-file\"],\"request_id\":\"%s\"}\n", id);
 	}
 
-	return	write(ipcfd, cmd, strlen(cmd));
-	//mpvread(ipcfd);
+	return write(ipcfd, cmd, strlen(cmd));
 }
 
-cJSON *mpvread(int fd){
-    char buff[2048];
+void eventresponse(cJSON *response,queue *msgqueue){
 
-    int n = read(fd, buff, sizeof(buff) - 1);
-    if (n < 0) {
-        return NULL;
-    }
+	cJSON *resp = cJSON_CreateObject();
+	cJSON_AddStringToObject(resp, "jsonrpc", "2.0");
+	cJSON_AddItemToObject(resp, "result", response);
 
-    buff[n] = '\0';
+	char *item=malloc(3000);
+	item=cJSON_PrintUnformatted(resp);
 
-    cJSON *response = cJSON_Parse(buff);
-    if (!response) {
-        return NULL;
-    }
+	push(msgqueue,sizeof(item),item);
 
-    cJSON *error = cJSON_GetObjectItemCaseSensitive(response, "error");
-    if (error == NULL || !cJSON_IsString(error)) {
-        cJSON_Delete(response);
-        return NULL;
-    }
+	// parse and send 
 
-    // mpv command succeeded
-   // if (strcmp(error->valuestring, "success") == 0) {
-   //     cJSON_Delete(response);
-   //     return NULL;
-   // }
-   //
-    // mpv returned an error
-    return response;
 }
 
-//cJSON *event = cJSON_GetObjectItemCaseSensitive(response, "event");
-		//if (event==NULL){
-		//	return 1;
-		//}
-		// what ever that the event response has to parse
-		// The event repsonse has different values in different types ryt, how do we handle that
-		//
+void cmdresponse(cJSON *response,queue *msgqueue){
+
+	cJSON *resp = cJSON_CreateObject();
+	cJSON_AddStringToObject(resp, "jsonrpc", "2.0");
+	cJSON_AddItemToObject(resp, "result", response);
+
+	char *item=malloc(3000);
+	item=cJSON_PrintUnformatted(resp);
+
+	push(msgqueue,sizeof(item),item);
+
+}
+
+void *mpvread(void *arg){
+	App *app=(App *)arg;
+	char buff[2048];
+
+	int n = read(app->mpvfd, buff, sizeof(buff) - 1);
+	if (n < 0) {
+		return NULL;
+	}
+
+	buff[n] = '\0';
+
+	cJSON *response = cJSON_Parse(buff);
+	if (!response) {
+		return NULL;
+	}
+
+	cJSON *error = cJSON_GetObjectItemCaseSensitive(response, "error");
+
+	if (error==NULL){
+
+		cJSON *event = cJSON_GetObjectItemCaseSensitive(response, "event");
+
+		if (event==NULL){
+			return NULL;
+		}
+		eventresponse(response,app->msgqueue);
+
+	}
+	cmdresponse(response,app->msgqueue);
+	return NULL;
+}
+

@@ -1,16 +1,17 @@
 #include <stdio.h>
 #include <sys/wait.h>
 #include <strings.h>
-#include "./mpv/mpv.c"
+#include "./mpv/mpv.h"
 #include <unistd.h>
 #include <stdbool.h>
 #include <cjson/cJSON.h>
 #include <sqlite3.h>
 #include "../models/song.h"
 #include "../models/cache.h"
-#include "../db/song.c"
-#include "./cache.c"
+#include "../db/song.h"
+#include "./cache.h"
 #include "../models/app.h"
+#include "../yt/yt.h"
 
 int getSong(App *app,char *songName){
 	//take rpc connection with songname from dispacher

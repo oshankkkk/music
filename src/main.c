@@ -1,24 +1,43 @@
 #include <cjson/cJSON.h>
-#include <stddef.h>
+#include <pthread.h>
+#include <time.h>
 #include <stdio.h>
-#include <unistd.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
 #include <sys/socket.h>
 #include <sys/un.h>
-#include "./rpc/handler.c"
-#include "./models/app.h"
-//#include "./player/mpv/.c"
-//#includhttps://github.com/oshankkkk/musice "./player/player.c"
-
 #include <stddef.h>
 
+//#include "./db/cache/cache.c"
+//#include "./db/song.c"
+//#include "./player/mpv/mpv.c"
+//#include "./models/msg.h"
+
+#include "./models/app.h"
+#include "./rpc/dispatch.h"
+#include "./rpc/msg.h"
+#include "./player/mpv/mpv.h"
+#include "./db/song.h"
+#include "./db/cache/cache.h"
+
+#define TUISOCK_PATH "./build/us.socket"
+#define MPVSOCK_PATH "./build/mpv.socket"
+#define MSG_MAX      4096
+#define QUEUE_CAP    64
+
 int startup(App *app){
+	if(mpvstart()){
+	sleep(1);
+	return -1;
+	}
+	int mpvfd=mpvinit(MPVSOCK_PATH);
+	app->mpvfd=mpvfd;
+
 	sqlite3 *db =InitDb();
 	if (!db){
 		perror("db init");
-		return 1; 
+		return -1; 
 	}else{
 		printf("db works\n");
 		app->db=db;
@@ -27,7 +46,7 @@ int startup(App *app){
 	sqlite3 *cache = InitCache();
 	if (!cache){
 		perror("cache db init");
-		return 1;
+		return -1;
 	}else{
 		printf("cache db works\n");
 		app->cache=cache;
@@ -38,54 +57,12 @@ int startup(App *app){
 	return 0;
 }
 
-int main(void) {
-	//char *songName;
-	App app;
-	//char *path;
-	int err=0;
-	char *socketpath = "./build/us.socket";
-	//char *mpvipcpath="../../../build/mpv.socket";
-	char *mpvipcpath="./build/mpv.socket";
-	err=mpvstart();
-	sleep(1);
-	if (err != 0) {
-		perror("startup");
-		goto cleanup;
-	}
-	int mpvfd=mpvinit(mpvipcpath);
-	app.mpvfd=mpvfd;
-	printf("mpvfd %d",app.mpvfd);
-	err = startup(&app);
-	if (err != 0) {
-		perror("startup");
-		goto cleanup;
-	}
-
-	int serverFd=socket(AF_UNIX,SOCK_STREAM,0);
-	if (serverFd<0){
-		perror("unix socket");		
-		return 1;
-	}	
-
-	struct sockaddr_un addr;
-	addr.sun_family=AF_UNIX;
-
-	strncpy(addr.sun_path, socketpath, sizeof(addr.sun_path) - 1);
-	unlink(socketpath);
-	err=bind(serverFd,(struct sockaddr *)&addr,sizeof(addr));
-	if (err < 0) {
-		perror("bind");
-		goto cleanup;
-	}
-
-	if (listen(serverFd, 8) < 0) {
-		perror("listen");
-		return 1;
-	}
-	printf("RPC server listening on %s\n",socketpath);
-
+void *tuireader(void *arg){
+	App *app=(App *)arg;
 	while (1) {
-		int clientFd=accept(serverFd,NULL,NULL);	
+		//reads from tui
+		int clientFd=accept(app->serverfd,NULL,NULL);	
+		app->clientfd=clientFd;
 		if (clientFd< 0) {
 			perror("accept");
 			continue;
@@ -97,29 +74,82 @@ int main(void) {
 		}else{
 			buf[0]='\0';
 		}
+		handler(app,buf);
+	}
+}
 
-		char *response = handler(&app,buf);
-		uint32_t len = strlen(response);
-		write(clientFd,&len,sizeof(len));
-		ssize_t written = write(clientFd, response, len);
-		if (written == -1) {
-			perror("write");
+queue msgqueue={
+	.head=0,
+	.tail=0,
+	.count=0,
+	.lock=PTHREAD_MUTEX_INITIALIZER,
+	.hybernate=PTHREAD_COND_INITIALIZER,
+};
+
+int main(void) {
+
+	pthread_t tui,mpvreader;
+	App app;
+	int err=0;
+
+	err = startup(&app);
+	if (err < 0) {
+		perror("startup");
+		goto cleanup;
+	}
+	int serverFd=socket(AF_UNIX,SOCK_STREAM,0);
+	app.serverfd=serverFd;
+	if (serverFd<0){
+		perror("unix socket");		
+		goto cleanup;
+	}	
+
+	app.msgqueue=&msgqueue;
+
+	struct sockaddr_un addr;
+	addr.sun_family=AF_UNIX;
+	strncpy(addr.sun_path, TUISOCK_PATH, sizeof(addr.sun_path) - 1);
+	unlink(TUISOCK_PATH);
+	err=bind(serverFd,(struct sockaddr *)&addr,sizeof(addr));
+	if (err < 0) {
+		perror("bind");
+		goto cleanup;
+	}
+	if (listen(serverFd, 3) < 0) {
+		perror("listen");
+		goto cleanup;
+	}
+
+	printf("RPC server listening on %s\n",TUISOCK_PATH);
+
+	if (pthread_create(&tui, NULL,tuireader, &serverFd) != 0) {
+		perror("pthread_create funcA");
+		goto cleanup;
+	}
+	if (pthread_create(&mpvreader, NULL, mpvread, &app) != 0) {
+		perror("pthread_create funcB");
+		goto cleanup;
+	}
+
+//tui writer
+	msg msg;
+	while (1){
+		if(pop(&msgqueue,&msg, 200)){
+			write(app.clientfd,msg.msg,sizeof(msg.msg));
 		}
 
-		written = write(clientFd, "\n", 1);
-
-		if (written == -1) {
-			perror("write");
-		}		free(response);
-
-		close(clientFd);
 	}
+
+	pthread_join(tui, NULL);
+	pthread_join(mpvreader, NULL);
+	return 0;
 
 cleanup:
 	if (app.db)    sqlite3_close(app.db);
 	if (app.cache) sqlite3_close(app.cache);
-	unlink(socketpath);
+	unlink(TUISOCK_PATH);
+	unlink(MPVSOCK_PATH);
+
 	return err;
 }
-
 

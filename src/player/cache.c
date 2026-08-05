@@ -5,8 +5,8 @@
 #include <stdbool.h>
 #include <cjson/cJSON.h>
 #include <sqlite3.h>
-#include "../db/cache/cache.c"
-#include "../yt/yt.c"
+#include "../db/cache/cache.h"
+#include "../yt/yt.h"
 //#include "../models/app.h"
 //#include "./server/server.c"
 

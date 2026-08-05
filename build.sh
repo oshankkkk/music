@@ -2,12 +2,12 @@
 
 mkdir -p build
 
-gcc -g src/main.c \
+gcc -g $(find src -name "*.c") \
     -o build/music \
     -Wall \
     -Werror \
     -lsqlite3 \
     -lcjson
 
-gdb ./build/music
+# gdb ./build/music
 # ./build/music
