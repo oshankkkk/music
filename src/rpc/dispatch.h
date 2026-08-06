@@ -4,7 +4,7 @@
 #include <cjson/cJSON.h>
 #include "../models/app.h"
 
-void dispatch(App *app,const char *method, cJSON *params, char *id);
+void dispatch(App *app,const char *method, cJSON *params, int id);
 void handler(App *app,const char *raw);
 
 #endif

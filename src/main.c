@@ -21,19 +21,21 @@
 #define QUEUE_CAP    64
 
 int startup(App *app){
+
 	if(mpvstart()){
-	sleep(1);
-	return -1;
+		sleep(1);
+		return -1;
 	}
+
 	int mpvfd=mpvinit(MPVSOCK_PATH);
 	if (mpvfd<0){
 		printf("mpv not set");
 		return -1;
 	}else{
-
-	printf("mpv socket works\n");
-	app->mpvfd=mpvfd;
+		printf("mpv socket works\n");
+		app->mpvfd=mpvfd;
 	}
+
 	sqlite3 *db =InitDb();
 	if (!db){
 		perror("db init");
@@ -44,6 +46,7 @@ int startup(App *app){
 	}
 
 	sqlite3 *cache = InitCache();
+
 	if (!cache){
 		perror("cache db init");
 		return -1;
@@ -51,33 +54,41 @@ int startup(App *app){
 		printf("cache db works\n");
 		app->cache=cache;
 	}
+
 	Song *song=NULL;
 	app->currentsong=song;
-
+	mpvsongtimer(app->mpvfd,0,0);
 	return 0;
 }
 
-void *tuireader(void *arg){
+void *tuiwriter(void *arg){
+
 	App *app=(App *)arg;
-	while (1) {
-		//reads from tui
-//		printf("this is the fd %d",app->serverfd);
-		int clientFd=accept(app->serverfd,NULL,NULL);	
-		app->clientfd=clientFd;
-		if (clientFd< 0) {
-			printf("prob here\n");
-			perror("accept");
-			continue;
-		}	
-		char *buf=malloc(6063);	
-		size_t n=read(clientFd,buf,5051);
-		if (n>0){
-			buf[n]='\0';
-		}else{
-			buf[0]='\0';
+	msg msg;
+
+	while(1){
+		if(pop(app->msgqueue,&msg, 200)){
+			write(app->clientfd,msg.msg,sizeof(msg.msg));
 		}
-		handler(app,buf);
 	}
+	//while (1) {
+	//	int clientFd=accept(app->serverfd,NULL,NULL);	
+	//	app->clientfd=clientFd;
+	//	if (clientFd< 0) {
+	//		printf("prob here\n");
+	//		perror("accept");
+	//		continue;
+	//	}	
+	//	char *buf=malloc(6063);	
+	//	size_t n=read(clientFd,buf,5051);
+	//	if (n>0){
+	//		buf[n]='\0';
+	//	}else{
+	//		buf[0]='\0';
+	//	}
+	//	handler(app,buf);
+	//}
+	
 }
 
 queue msgqueue={
@@ -93,7 +104,7 @@ int main(void) {
 	pthread_t tui,mpvreader;
 	App app;
 	int err=0;
-
+	
 	err = startup(&app);
 	if (err < 0) {
 		perror("startup");
@@ -102,7 +113,7 @@ int main(void) {
 	int serverFd=socket(AF_UNIX,SOCK_STREAM,0);
 	app.serverfd=serverFd;
 
-		printf("this is the fd in main %d",app.serverfd);
+	printf("this is the fd in main %d",app.serverfd);
 	if (serverFd<0){
 		perror("unix socket");		
 		goto cleanup;
@@ -126,7 +137,7 @@ int main(void) {
 
 	printf("RPC server listening on %s\n",TUISOCK_PATH);
 
-	if (pthread_create(&tui, NULL,tuireader, &app) != 0) {
+	if (pthread_create(&tui, NULL,tuiwriter, &app) != 0) {
 		perror("pthread_create funcA");
 		goto cleanup;
 	}
@@ -135,13 +146,22 @@ int main(void) {
 		goto cleanup;
 	}
 
-//tui writer
-	msg msg;
-	while (1){
-		if(pop(&msgqueue,&msg, 200)){
-			write(app.clientfd,msg.msg,sizeof(msg.msg));
+	while (1) {
+		int clientFd=accept(app.serverfd,NULL,NULL);	
+		app.clientfd=clientFd;
+		if (clientFd< 0) {
+			printf("prob here\n");
+			perror("accept");
+			continue;
+		}	
+		char *buf=malloc(6063);	
+		size_t n=read(clientFd,buf,5051);
+		if (n>0){
+			buf[n]='\0';
+		}else{
+			buf[0]='\0';
 		}
-
+		handler(&app,buf);
 	}
 
 	pthread_join(tui, NULL);

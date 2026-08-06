@@ -4,6 +4,6 @@
 #include <cjson/cJSON.h>
 #include "../models/msg.h"
 
-void *rpcerror(int code, const char *message, char* id,queue *msgqueue);
+void *rpcerror(int code, const char *message, int id,queue *msgqueue);
 
 #endif

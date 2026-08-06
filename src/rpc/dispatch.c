@@ -10,7 +10,7 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 
-void dispatch(App *app,const char *method, cJSON *params, char *id) {
+void dispatch(App *app,const char *method, cJSON *params, int id) {
 	queue *mq=app->msgqueue;
 	int err=0;
 	if (strcmp(method, "playSong") == 0){
@@ -157,19 +157,18 @@ void handler(App *app,const char *raw) {
 
 	cJSON *req = cJSON_Parse(raw);
 	if (!req) {
-		rpcerror(-32700, "Parse error", NULL,app->msgqueue);
+		rpcerror(-32700, "Parse error", -1,app->msgqueue);
 	} else {
 		cJSON *method = cJSON_GetObjectItemCaseSensitive(req, "method");
 		cJSON *params = cJSON_GetObjectItemCaseSensitive(req, "params");
 		cJSON *id = cJSON_GetObjectItemCaseSensitive(req, "id");
 		if (!cJSON_IsString(method)) {
-			 rpcerror(-32600, "Invalid Request: missing 'method'", id->valuestring,app->msgqueue);
+			 rpcerror(-32600, "Invalid Request: missing 'method'", id->valueint,app->msgqueue);
 	;
 		} else {
-			dispatch(app,method->valuestring, params, id->valuestring);
+			dispatch(app,method->valuestring, params, id->valueint);
 		}
 		cJSON_Delete(req);
 	}
-
 }
 

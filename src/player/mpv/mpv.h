@@ -7,7 +7,8 @@
 int mpvstart(void);
 int mpvinit(char *socketpath);
 int mpvplay(int ipcfd,char *path);
-int mpvwrite(int ipcfd, char *action, char *id);
+int mpvsongtimer(int ipcfd,int observer_id, int id);
+int mpvwrite(int ipcfd, char *action, int id);
 void eventresponse(cJSON *response,queue *msgqueue);
 void cmdresponse(cJSON *response,queue *msgqueue);
 void *mpvread(void *arg);

@@ -2,7 +2,7 @@
 #include <unistd.h>
 #include "./msg.h"
 
-void *rpcerror(int code, const char *message, char* id,queue *msgqueue) {
+void *rpcerror(int code, const char *message, int  id,queue *msgqueue) {
     cJSON *resp = cJSON_CreateObject();
     cJSON_AddStringToObject(resp, "jsonrpc", "2.0");
 
@@ -11,7 +11,7 @@ void *rpcerror(int code, const char *message, char* id,queue *msgqueue) {
     cJSON_AddStringToObject(error, "message", message);
     cJSON_AddItemToObject(resp, "error", error);
 
-    cJSON_AddStringToObject(resp, "id",id);
+    cJSON_AddNumberToObject(resp, "id",id);
 
 	char *item=cJSON_PrintUnformatted(resp);
 	push(msgqueue,sizeof(item),item);

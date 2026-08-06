@@ -36,7 +36,6 @@ int mpvstart(){
 	}
 	return 0;
 }
-
 int mpvinit(char *socketpath){
 	int sockfd=socket(AF_UNIX,SOCK_STREAM,0);
 	if (sockfd==-1){
@@ -49,6 +48,8 @@ int mpvinit(char *socketpath){
 	strncpy(addr.sun_path,  socketpath, sizeof(addr.sun_path)-1);
 
 	if (connect(sockfd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
+
+		printf("this is the error in mpv init");
 		perror("connect error");
 		//	close(sockfd);
 		return -1;
@@ -66,72 +67,86 @@ int mpvplay(int ipcfd,char *path){
 	return write(ipcfd, cmd, strlen(cmd));
 }
 
-int mpvwrite(int ipcfd, char *action, char *id){
+int mpvsongtimer(int ipcfd,int observer_id,int id){
+
+char cmd[1024] = {0};
+snprintf(
+    cmd,
+    sizeof(cmd),
+    "{\"command\":[\"observe_property\",%d,\"time-pos\"],\"request_id\":\"%d\"}\n",
+    observer_id,
+    id
+);
+
+return write(ipcfd, cmd, strlen(cmd));
+}
+int mpvwrite(int ipcfd, char *action, int id){
 	char cmd[1024] = {0};
 
 	if (strcmp(action, "pause") == 0) {
 		snprintf(cmd, sizeof(cmd),
-				"{\"command\":[\"set_property\",\"pause\",true],\"request_id\":\"%s\"}\n", id);
+				"{\"command\":[\"set_property\",\"pause\",true],\"request_id\":\"%d\"}\n", id);
 	}
 	else if (strcmp(action, "resume") == 0) {
 		snprintf(cmd, sizeof(cmd),
-				"{\"command\":[\"set_property\",\"pause\",false],\"request_id\":\"%s\"}\n", id);
+				"{\"command\":[\"set_property\",\"pause\",false],\"request_id\":\"%d\"}\n", id);
+
 	}
 	else if (strcmp(action, "toggle_pause") == 0) {
 		snprintf(cmd, sizeof(cmd),
-				"{\"command\":[\"cycle\",\"pause\"],\"request_id\":\"%s\"}\n", id);
+				"{\"command\":[\"cycle\",\"pause\"],\"request_id\":\"%d\"}\n", id);
 	}
 	else if (strcmp(action, "stop") == 0) {
 		snprintf(cmd, sizeof(cmd),
-				"{\"command\":[\"quit\"],\"request_id\":\"%s\"}\n", id);
+				"{\"command\":[\"quit\"],\"request_id\":\"%d\"}\n", id);
 	}
 	else if (strcmp(action, "seek_forward") == 0) {
 		snprintf(cmd, sizeof(cmd),
-				"{\"command\":[\"seek\",10,\"relative\"],\"request_id\":\"%s\"}\n", id);
+				"{\"command\":[\"seek\",10,\"relative\"],\"request_id\":\"%d\"}\n", id);
 	}
 	else if (strcmp(action, "seek_backward") == 0) {
 		snprintf(cmd, sizeof(cmd),
-				"{\"command\":[\"seek\",-10,\"relative\"],\"request_id\":\"%s\"}\n", id);
+				"{\"command\":[\"seek\",-10,\"relative\"],\"request_id\":\"%d\"}\n", id);
 	}
 	else if (strcmp(action, "next") == 0) {
 		snprintf(cmd, sizeof(cmd),
-				"{\"command\":[\"playlist-next\",\"force\"],\"request_id\":\"%s\"}\n", id);
+				"{\"command\":[\"playlist-next\",\"force\"],\"request_id\":\"%d\"}\n", id);
 	}
 	else if (strcmp(action, "previous") == 0) {
 		snprintf(cmd, sizeof(cmd),
-				"{\"command\":[\"playlist-prev\",\"force\"],\"request_id\":\"%s\"}\n", id);
+				"{\"command\":[\"playlist-prev\",\"force\"],\"request_id\":\"%d\"}\n", id);
 	}
 	else if (strcmp(action, "fast_forward") == 0) {
 		snprintf(cmd, sizeof(cmd),
-				"{\"command\":[\"seek\",60,\"relative\"],\"request_id\":\"%s\"}\n", id);
+				"{\"command\":[\"seek\",60,\"relative\"],\"request_id\":\"%d\"}\n", id);
 	}
 	else if (strcmp(action, "rewind") == 0) {
 		snprintf(cmd, sizeof(cmd),
-				"{\"command\":[\"seek\",-60,\"relative\"],\"request_id\":\"%s\"}\n", id);
+				"{\"command\":[\"seek\",-60,\"relative\"],\"request_id\":\"%d\"}\n", id);
 	}
 	else if (strcmp(action, "volume_up") == 0) {
 		snprintf(cmd, sizeof(cmd),
-				"{\"command\":[\"add\",\"volume\",5],\"request_id\":\"%s\"}\n", id);
+				"{\"command\":[\"add\",\"volume\",5],\"request_id\":\"%d\"}\n", id);
 	}
 	else if (strcmp(action, "volume_down") == 0) {
 		snprintf(cmd, sizeof(cmd),
-				"{\"command\":[\"add\",\"volume\",-5],\"request_id\":\"%s\"}\n", id);
+				"{\"command\":[\"add\",\"volume\",-5],\"request_id\":\"%d\"}\n", id);
 	}
 	else if (strcmp(action, "mute") == 0) {
 		snprintf(cmd, sizeof(cmd),
-				"{\"command\":[\"set_property\",\"mute\",true],\"request_id\":\"%s\"}\n", id);
+				"{\"command\":[\"set_property\",\"mute\",true],\"request_id\":\"%d\"}\n", id);
 	}
 	else if (strcmp(action, "unmute") == 0) {
 		snprintf(cmd, sizeof(cmd),
-				"{\"command\":[\"set_property\",\"mute\",false],\"request_id\":\"%s\"}\n", id);
+				"{\"command\":[\"set_property\",\"mute\",false],\"request_id\":\"%d\"}\n", id);
 	}
 	else if (strcmp(action, "toggle_mute") == 0) {
 		snprintf(cmd, sizeof(cmd),
-				"{\"command\":[\"cycle\",\"mute\"],\"request_id\":\"%s\"}\n", id);
+				"{\"command\":[\"cycle\",\"mute\"],\"request_id\":\"%d\"}\n", id);
 	}
 	else if (strcmp(action, "toggle_repeat") == 0) {
 		snprintf(cmd, sizeof(cmd),
-				"{\"command\":[\"cycle\",\"loop-file\"],\"request_id\":\"%s\"}\n", id);
+				"{\"command\":[\"cycle\",\"loop-file\"],\"request_id\":\"%d\"}\n", id);
 	}
 
 	return write(ipcfd, cmd, strlen(cmd));
@@ -145,7 +160,6 @@ void eventresponse(cJSON *response,queue *msgqueue){
 
 	char *item=malloc(3000);
 	item=cJSON_PrintUnformatted(resp);
-
 
 	push(msgqueue,sizeof(item),item);
 
@@ -191,6 +205,7 @@ void *mpvread(void *arg){
 		if (event==NULL){
 			return NULL;
 		}
+
 		eventresponse(response,app->msgqueue);
 
 	}
