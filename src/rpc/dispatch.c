@@ -23,16 +23,28 @@ void dispatch(App *app,const char *method, cJSON *params, int id) {
 		if (err!=0){
 			perror("rpc start song");
 		}
-		cJSON *song=cJSON_CreateObject();	
-		cJSON_AddStringToObject(song, "id", app->currentsong->id);
-		cJSON_AddStringToObject(song, "title", app->currentsong->title);
-		cJSON_AddStringToObject(song, "artist", app->currentsong->title);
-		cJSON_AddStringToObject(song, "duration", app->currentsong->title);
-		//i dont know how to represent uploadDate and viewcount(youtube stats are not the song stats)
-		cJSON_AddStringToObject(song, "artist", app->currentsong->title);
-		cJSON_AddBoolToObject(song, "artist", app->currentsong->isliked);
-		cJSON_AddNumberToObject(song, "artist", app->currentsong->personalplaycount);
+		
+		if (app->currentsong != NULL) {
+			cJSON *song=cJSON_CreateObject();	
+			cJSON_AddStringToObject(song, "id", app->currentsong->id);
+			cJSON_AddStringToObject(song, "title", app->currentsong->title);
+			cJSON_AddStringToObject(song, "artist", app->currentsong->artist);
+			cJSON_AddNumberToObject(song, "duration", app->currentsong->duration);
+			cJSON_AddBoolToObject(song, "isliked", app->currentsong->isliked);
+			cJSON_AddNumberToObject(song, "personalplaycount", app->currentsong->personalplaycount);
 
+			cJSON *resp = cJSON_CreateObject();
+			cJSON_AddStringToObject(resp, "jsonrpc", "2.0");
+			cJSON_AddNumberToObject(resp, "id", id);
+			cJSON_AddItemToObject(resp, "result", song);
+			
+			char *item = cJSON_PrintUnformatted(resp);
+			push(mq, strlen(item), item);
+			free(item);
+			cJSON_Delete(resp);
+		} else {
+			rpcerror(-32603, "Internal error: currentsong is NULL", id, mq);
+		}
 	}
 	else if (strcmp(method, "player-pause") == 0) {
 

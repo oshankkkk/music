@@ -1,5 +1,8 @@
 import { createRequest } from "./request";
 import { parseResponse } from "./response";
+import type { Socket } from "bun";
+
+let tuiSocket: Socket | null = null;
 
 export function startReader() {
 	let buff = Buffer.alloc(0);
@@ -7,7 +10,9 @@ export function startReader() {
 	Bun.connect({
 		unix: "../build/us.socket",
 		socket: {
-			open(socket) {},
+			open(socket) {
+				tuiSocket = socket;
+			},
 			data(socket, data) {
 				buff = Buffer.concat([buff, data]);
 				while (true) {
@@ -25,9 +30,12 @@ export function startReader() {
 					buff = buff.subarray(4 + msgLen);
 				}
 			},
-			close(socket) {},
+			close(socket) {
+				tuiSocket = null;
+			},
 			error(socket, error) {
 				console.error("Socket error in reader:", error);
+				tuiSocket = null;
 			}
 		}
 	}).catch(console.error);
@@ -36,19 +44,11 @@ export function startReader() {
 export async function rpcCall(method: string, params: any = {}): Promise<void> {
 	return new Promise((resolve, reject) => {
 		let request = createRequest(method, params);
-
-		Bun.connect({
-			unix: "../build/us.socket",
-			socket: {
-				open(socket) {
-					socket.write(request);
-				},
-				data(socket, data) {},
-				close(socket) {},
-				error(socket, error) {
-					reject(error);
-				}
-			}
-		}).catch(reject);
+		if (tuiSocket) {
+			tuiSocket.write(request);
+			resolve();
+		} else {
+			reject(new Error("Socket not connected"));
+		}
 	});
 }

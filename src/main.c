@@ -65,10 +65,15 @@ void *tuiwriter(void *arg){
 
 	App *app=(App *)arg;
 	msg msg;
+	uint32_t len;
 
 	while(1){
 		if(pop(app->msgqueue,&msg, 200)){
-			write(app->clientfd,msg.msg,sizeof(msg.msg));
+			if (app->clientfd > 0) {
+				len = (uint32_t)msg.len;
+				write(app->clientfd, &len, sizeof(len));
+				write(app->clientfd, msg.msg, msg.len);
+			}
 		}
 	}
 	//while (1) {
@@ -103,6 +108,7 @@ int main(void) {
 
 	pthread_t tui,mpvreader;
 	App app;
+	memset(&app, 0, sizeof(app));
 	int err=0;
 	
 	err = startup(&app);
@@ -154,14 +160,20 @@ int main(void) {
 			perror("accept");
 			continue;
 		}	
-		char *buf=malloc(6063);	
-		size_t n=read(clientFd,buf,5051);
-		if (n>0){
-			buf[n]='\0';
-		}else{
-			buf[0]='\0';
+		while (1) {
+			char *buf=malloc(6063);	
+			if (!buf) break;
+			ssize_t n=read(clientFd,buf,5051);
+			if (n>0){
+				buf[n]='\0';
+				handler(&app,buf);
+				free(buf);
+			}else{
+				free(buf);
+				break;
+			}
 		}
-		handler(&app,buf);
+		close(clientFd);
 	}
 
 	pthread_join(tui, NULL);

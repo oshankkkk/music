@@ -14,7 +14,9 @@ void *rpcerror(int code, const char *message, int  id,queue *msgqueue) {
     cJSON_AddNumberToObject(resp, "id",id);
 
 	char *item=cJSON_PrintUnformatted(resp);
-	push(msgqueue,sizeof(item),item);
+	push(msgqueue,strlen(item),item);
+    free(item);
+    cJSON_Delete(resp);
 
 	return NULL;
 }

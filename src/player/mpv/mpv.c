@@ -158,13 +158,11 @@ void eventresponse(cJSON *response,queue *msgqueue){
 	cJSON_AddStringToObject(resp, "jsonrpc", "2.0");
 	cJSON_AddItemToObject(resp, "result", response);
 
-	char *item=malloc(3000);
-	item=cJSON_PrintUnformatted(resp);
+	char *item=cJSON_PrintUnformatted(resp);
 
-	push(msgqueue,sizeof(item),item);
-
-	// parse and send 
-
+	push(msgqueue,strlen(item),item);
+	free(item);
+	cJSON_Delete(resp);
 }
 
 void cmdresponse(cJSON *response,queue *msgqueue){
@@ -173,43 +171,47 @@ void cmdresponse(cJSON *response,queue *msgqueue){
 	cJSON_AddStringToObject(resp, "jsonrpc", "2.0");
 	cJSON_AddItemToObject(resp, "result", response);
 
-	char *item=malloc(3000);
-	item=cJSON_PrintUnformatted(resp);
+	char *item=cJSON_PrintUnformatted(resp);
 
-	push(msgqueue,sizeof(item),item);
-
+	push(msgqueue,strlen(item),item);
+	free(item);
+	cJSON_Delete(resp);
 }
 
 void *mpvread(void *arg){
 	App *app=(App *)arg;
 	char buff[2048];
 
-	int n = read(app->mpvfd, buff, sizeof(buff) - 1);
-	if (n < 0) {
-		return NULL;
-	}
-
-	buff[n] = '\0';
-
-	cJSON *response = cJSON_Parse(buff);
-	if (!response) {
-		return NULL;
-	}
-
-	cJSON *error = cJSON_GetObjectItemCaseSensitive(response, "error");
-
-	if (error==NULL){
-
-		cJSON *event = cJSON_GetObjectItemCaseSensitive(response, "event");
-
-		if (event==NULL){
-			return NULL;
+	while (1) {
+		int n = read(app->mpvfd, buff, sizeof(buff) - 1);
+		if (n <= 0) {
+			break;
 		}
 
-		eventresponse(response,app->msgqueue);
+		buff[n] = '\0';
 
+		cJSON *response = cJSON_Parse(buff);
+		if (!response) {
+			continue;
+		}
+
+		cJSON *error = cJSON_GetObjectItemCaseSensitive(response, "error");
+
+		if (error==NULL){
+
+			cJSON *event = cJSON_GetObjectItemCaseSensitive(response, "event");
+
+			if (event==NULL){
+				cJSON_Delete(response);
+				continue;
+			}
+
+			eventresponse(response,app->msgqueue);
+
+		} else {
+			cmdresponse(response,app->msgqueue);
+		}
 	}
-	cmdresponse(response,app->msgqueue);
 	return NULL;
 }
 
