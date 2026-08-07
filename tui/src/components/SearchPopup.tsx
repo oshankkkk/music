@@ -1,20 +1,13 @@
 import { useState } from "react";
 import { rpcCall } from "../client/client";
 
-export function SearchPopup({ isOpen, onClose, onSongSelect }: { isOpen: boolean; onClose: () => void; onSongSelect?: (song: any) => void }) {
+export function SearchPopup({isOpen}: {isOpen: boolean}) {
 	const [query, setQuery] = useState("");
 
 	const handleSubmit = async (query: string) => {
-		console.log("hu");
 		try {
-			const response = await rpcCall("playSong", { songName: query });
-			console.log("res", response);
-			if (response.result && onSongSelect) {
-				console.log("resresult", response.result);
-				onSongSelect(response.result);
-				onClose();
-			}
-		} catch (e) {
+			rpcCall("playSong", { songName: query });
+			} catch (e) {
 			console.error(e);
 		}
 	};

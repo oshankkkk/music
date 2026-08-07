@@ -1,12 +1,16 @@
 import { createRequest } from "./request";
-import { parseResponse } from "./response";
+import { Song} from "./song.ts";
+import { parseToSong} from "./response";
 import type { Socket } from "bun";
 
 let tuiSocket: Socket | null = null;
 
-export function startReader() {
+export function startReader(
+song: Song,
+setSong: React.Dispatch<React.SetStateAction<Song>>,
+) {
 	let buff = Buffer.alloc(0);
-
+	
 	Bun.connect({
 		unix: "../build/us.socket",
 		socket: {
@@ -22,8 +26,9 @@ export function startReader() {
 					
 					let rpcmsg = buff.subarray(4, 4 + msgLen);
 					try {
-						const response = parseResponse(rpcmsg);
-						console.log(response);
+						parseToSong(setSong,rpcmsg);
+						console.log(song);
+						console.log("here comes the response");
 					} catch (e) {
 						console.error("Failed to parse message", e);
 					}
@@ -41,14 +46,15 @@ export function startReader() {
 	}).catch(console.error);
 }
 
-export async function rpcCall(method: string, params: any = {}): Promise<void> {
-	return new Promise((resolve, reject) => {
+export function rpcCall(method: string, params: any = {}) {
 		let request = createRequest(method, params);
-		if (tuiSocket) {
-			tuiSocket.write(request);
-			resolve();
+		if (!tuiSocket) {
+			throw new Error ("Socket not connected");
 		} else {
-			reject(new Error("Socket not connected"));
+			tuiSocket.write(request);
 		}
-	});
-}
+	};
+
+
+
+

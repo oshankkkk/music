@@ -6,15 +6,14 @@ import { MainContent } from "./components/MainContent";
 import { ContextPanel } from "./components/ContextPanel";
 import { Playbar } from "./components/Playbar";
 import { SearchPopup } from "./components/SearchPopup";
+import { Song} from "./client/song.ts";
+import { startReader } from "./client/client";
 
 const LEADER_TIMEOUT_MS = 300;
 
+
 function App() {
-  const renderer = useRenderer();
-  const [focusArea, setFocusArea] = useState<"none" | "sidebar" | "quick-access" | "mixes">("none");
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [song, setSong] = useState({
+  const [song, setSong] = useState<Song>({
     title: "Never Gonna Give You Up",
     description: "Rick Astley's greatest hit",
     artist: "Rick Astley",
@@ -25,7 +24,10 @@ function App() {
     playlists: [1, 2, 3],
     isPlayed: false
   });
-
+  const renderer = useRenderer();
+  const [focusArea, setFocusArea] = useState<"none" | "sidebar" | "quick-access" | "mixes">("none");
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
   // Track when space was pressed (timestamp), not a setTimeout handle
   const spaceTimestampRef = useRef<number | null>(null);
 
@@ -34,6 +36,11 @@ function App() {
   const isFirstTickRef = useRef(true);
 
   // When playToggleTick changes (and it's not the initial mount), toggle play
+  useEffect(() => {
+  startReader(song, setSong);
+}, []);
+
+
   useEffect(() => {
     if (isFirstTickRef.current) {
       isFirstTickRef.current = false;
@@ -128,23 +135,11 @@ function App() {
         <ContextPanel />
       </box>
       <Playbar isFocused={focusArea === "none" && !isSearchOpen} isPlaying={isPlaying} onTogglePlay={togglePlay} song={song} setSong={setSong} />
-      <SearchPopup isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} onSongSelect={(newSong) => {
-        setSong(s => ({
-          ...s, 
-          title: newSong.title || s.title,
-          artist: newSong.artist || s.artist,
-          duration: Number(newSong.duration) || s.duration,
-          timestamp: 0,
-          isPlayed: true
-        }));
-        if (!isPlaying) setIsPlaying(true);
-      }} />
+      <SearchPopup isOpen={isSearchOpen}/>
     </box>
   );
 }
 
-import { startReader } from "./client/client";
-
 const renderer = await createCliRenderer();
-startReader();
 createRoot(renderer).render(<App />);
+

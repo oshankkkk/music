@@ -9,3 +9,4 @@ export function createRequest(method: string, params: any = {}): string {
     };
     return JSON.stringify(message);
 }
+
