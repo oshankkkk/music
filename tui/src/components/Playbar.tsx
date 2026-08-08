@@ -23,6 +23,7 @@ function interpolateVol(v: number) {
 }
 
 function formatTime(seconds: number) {
+  if (seconds === undefined || seconds === null || isNaN(seconds)) return "0:00";
   const m = Math.floor(seconds / 60);
   const s = Math.floor(seconds % 60);
   return `${m}:${s.toString().padStart(2, '0')}`;
@@ -146,11 +147,12 @@ export function Playbar({ isFocused, isPlaying, onTogglePlay, song, setSong }: {
   });
 
   const progressWidth = 27;
-  const progressRatio = song.timestamp / song.duration;
+  const safeTimestamp = song?.timestamp || 0;
+  const safeDuration = song?.duration || 0;
+  const progressRatio = safeDuration > 0 ? safeTimestamp / safeDuration : 0;
   const progressFilled = Math.max(0, Math.min(progressWidth, Math.round(progressRatio * progressWidth)));
-  const progressEmpty = Math.max(0, progressWidth - progressFilled);
-  const progressStrFilled = "─".repeat(Math.max(0, progressFilled - 1)) + (progressFilled > 0 ? "●" : "");
-  const progressStrEmpty = "─".repeat(progressEmpty);
+  const progressStrFilled = "─".repeat(Math.max(0, progressFilled - 1)) + "●";
+  const progressStrEmpty = "─".repeat(Math.max(0, progressWidth - Math.max(1, progressFilled)));
 
   return (
 	  <box flexDirection="row" width="100%" height={4} backgroundColor="#181818" alignItems="center" paddingX={2}>

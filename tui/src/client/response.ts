@@ -24,8 +24,19 @@ export function parseToSong(
 		console.log("dataname",data.eventdata.name);
 		// the is the actual time
 		console.log("datadata",data.eventdata.data);
-
-
+		
+		if (data.eventdata.event === "property-change" && data.eventdata.name === "time-pos") {
+			setSong((prevSong) => ({
+				...prevSong,
+				timestamp: data.eventdata.data !== undefined ? data.eventdata.data : prevSong.timestamp
+			}));
+		} else if (data.eventdata.event === "end-file") {
+			setSong((prevSong) => ({
+				...prevSong,
+				timestamp: 0,
+				isPlayed: false
+			}));
+		}
 	}else if (data.replydata){
 		console.log("reply");
 	}else{
