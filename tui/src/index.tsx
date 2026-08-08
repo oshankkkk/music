@@ -128,7 +128,7 @@ function App() {
   return (
     <box flexDirection="column" width="100%" height="100%" backgroundColor="#000000">
       <box width="100%" height={1} justifyContent="center" alignItems="center" backgroundColor="#181818">
-        <text fg="#b3b3b3">Search: space+s | Play/Pause: space | Unfocus: esc | Exit: ctrl+c</text>
+        <text fg="#b3b3b3">Search: space+s | Play/Pause: space | Exit: ctrl+c</text>
       </box>
       <box flexDirection="row" width="100%" flexGrow={1}>
         <Sidebar isFocused={focusArea === "sidebar" && !isSearchOpen} />

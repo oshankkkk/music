@@ -189,13 +189,13 @@ export function Playbar({ isFocused, isPlaying, onTogglePlay, song, setSong }: {
 
       <box flexDirection="row" width={30} justifyContent="flex-end" alignItems="center" gap={1}>
         <text fg={setLyrics? "#1DB954" : "#b3b3b3"} onMouseDown={() => setLyrics(!lyrics)}>🎤</text>
-        <text fg="#b3b3b3">♫</text>
+        <text fg="#b3b3b3">☰</text>
         <text fg="#b3b3b3" onMouseDown={() => { setVolume(v => (v === 0 ? 50 : 0)); triggerFlash(tVol); }}>Vol</text>
         <text fg={interpolateVol(volFlash)}>{volume.toString().padStart(3, ' ')}%</text>
       </box>
       </box>
-		<box width="100%" justifyContent="center" alignItems="center" paddingBottom={1}>
-        <text fg="#888888">Focus: space+b | Vol: j/k | Prev/Next: H/L | Seek: h/l | FF/RW: f/b</text>
+		      <box width="100%" justifyContent="center" alignItems="center" paddingBottom={1}>
+        <text fg="#888888">Select: space+b | Vol: j/k | Prev/Next: H/L | Seek: h/l | FF/RW: f/b</text>
       </box>
     </box>
   );

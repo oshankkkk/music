@@ -42,7 +42,7 @@ export function MainContent({ focusArea }: { focusArea: string }) {
     <box flexGrow={1} backgroundColor="#000000" flexDirection="column" paddingX={3} paddingTop={1}>
       <box flexDirection="column" gap={0}>
         <text fg="#ffffff"><b>Good evening</b></text>
-        <text fg="#888888">Focus: space+n | Nav: h/j/k/l</text>
+        <text fg="#888888">Select: space+n</text>
       </box>
       
       {/* Quick Access Grid */}
@@ -66,7 +66,7 @@ export function MainContent({ focusArea }: { focusArea: string }) {
       <box flexDirection="row" justifyContent="space-between" paddingTop={2} paddingBottom={1} width="100%">
         <box flexDirection="column" gap={0}>
           <text fg="#ffffff"><b>Made for you</b></text>
-          <text fg="#888888">Focus: space+m | Nav: h/l</text>
+          <text fg="#888888">Select: space+m</text>
         </box>
         <text fg="#b3b3b3">Show all</text>
       </box>
