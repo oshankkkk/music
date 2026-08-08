@@ -22,7 +22,10 @@ export function Sidebar({ isFocused }: { isFocused?: boolean }) {
 
   return (
     <box width={30} backgroundColor={isFocused ? "#181818" : "#121212"} flexDirection="column" paddingX={2} paddingTop={1}>
-      <text fg="#b3b3b3"><b>Your Library</b></text>
+      <box flexDirection="column" gap={0}>
+        <text fg="#b3b3b3"><b>Your Library</b></text>
+        <text fg="#888888">Focus: space+p | Nav: j/k</text>
+      </box>
       
       <box flexDirection="column" paddingTop={1} gap={1}>
         {playlists.map((pl, i) => {

@@ -155,8 +155,9 @@ export function Playbar({ isFocused, isPlaying, onTogglePlay, song, setSong }: {
   const progressStrEmpty = "─".repeat(Math.max(0, progressWidth - Math.max(1, progressFilled)));
 
   return (
-	  <box flexDirection="row" width="100%" height={4} backgroundColor="#181818" alignItems="center" paddingX={2}>
-	  <box flexDirection="row" width={30} alignItems="center" gap={1}>
+    <box flexDirection="column" width="100%" backgroundColor="#181818">
+      <box flexDirection="row" width="100%" height={4} alignItems="center" paddingX={2}>
+        <box flexDirection="row" width={30} alignItems="center" gap={1}>
 	  <text fg="#1DB954">██</text>
 	  <box flexDirection="column">
 	  <text fg="#ffffff">{song.title}</text>
@@ -191,6 +192,10 @@ export function Playbar({ isFocused, isPlaying, onTogglePlay, song, setSong }: {
         <text fg="#b3b3b3">♫</text>
         <text fg="#b3b3b3" onMouseDown={() => { setVolume(v => (v === 0 ? 50 : 0)); triggerFlash(tVol); }}>Vol</text>
         <text fg={interpolateVol(volFlash)}>{volume.toString().padStart(3, ' ')}%</text>
+      </box>
+      </box>
+		<box width="100%" justifyContent="center" alignItems="center" paddingBottom={1}>
+        <text fg="#888888">Focus: space+b | Vol: j/k | Prev/Next: H/L | Seek: h/l | FF/RW: f/b</text>
       </box>
     </box>
   );
