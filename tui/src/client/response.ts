@@ -7,23 +7,23 @@ export function parseToSong(
   try {
     const data = JSON.parse(messageBuffer.toString());
     if (data.songdata) {
-		setSong(data.songdata)
-   //   setSong((prevSong) => ({
-   //     ...prevSong,
-   //     title: data.result.title || prevSong.title,
-   //     artist: data.result.artist || prevSong.artist,
-   //     duration: data.result.duration || prevSong.duration,
-   //     isLiked: data.result.isliked !== undefined ? data.result.isliked : prevSong.isLiked,
-   //   }));
+//		setSong(data.songdata)
+    setSong((prevSong) => ({
+      ...prevSong,
+      title: data.songdata.title || prevSong.title,
+      artist: data.songdata.artist || prevSong.artist,
+      duration: data.songdata.duration || prevSong.duration,
+      isLiked: data.songdata.isliked !== undefined ? data.songdata.isliked : prevSong.isLiked,
+	  isPlayed:true,
+    }));
 
-      console.log("set song wuna");
-      console.log("mekada undefined",data.songdata);
+      //console.log("mekada undefined",data.songdata);
     }else if (data.eventdata){
-// if event is end-file it means song is over, if its property change and the .name is time-pos is means its the time stamp and you should take the .eventdata.data and change the time in the playbar and also the progress bar.
-		console.log("event",data.eventdata.event);
-		console.log("dataname",data.eventdata.name);
+	// if event is end-file it means song is over, if its property change and the .name is time-pos is means its the time stamp and you should take the .eventdata.data and change the time in the playbar and also the progress bar.
+		//console.log("event",data.eventdata.event);
+		//console.log("dataname",data.eventdata.name);
 		// the is the actual time
-		console.log("datadata",data.eventdata.data);
+		//console.log("datadata",data.eventdata.data);
 		
 		if (data.eventdata.event === "property-change" && data.eventdata.name === "time-pos") {
 			setSong((prevSong) => ({
@@ -38,7 +38,14 @@ export function parseToSong(
 			}));
 		}
 	}else if (data.replydata){
-		console.log("reply");
+		if (data.replydata.request_id=="2"){
+		setSong((prevSong) => ({
+      ...prevSong,
+      duration: data.replydata.data|| prevSong.duration,
+    }));
+		console.log("reply",data.replydata.data);
+		}
+
 	}else{
 		console.log("no song");
 	}

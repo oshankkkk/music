@@ -1,4 +1,4 @@
-let nextRequestId = 1;
+let nextRequestId = 3;
 
 export function createRequest(method: string, params: any = {}): string {
     const message = {

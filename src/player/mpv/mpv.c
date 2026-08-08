@@ -60,11 +60,21 @@ int mpvinit(char *socketpath){
 int mpvplay(int ipcfd,char *path){
 
 	char cmd[5050] = {0};
-	snprintf(cmd, sizeof(cmd),"{\"command\":[\"loadfile\",\"%s\"]}\n",path);		
+	snprintf(cmd, sizeof(cmd),"{\"command\":[\"loadfile\",\"%s\"],\"request_id\":\"1\"}\n",path);		
 	snprintf(cmd+strlen(cmd),sizeof(cmd)-strlen(cmd),
 			"{\"command\":[\"set_property\",\"pause\",false]}\n");
+	return write(ipcfd, cmd, strlen(cmd));
+
+}
+
+int mpvgetDuration(int ipcfd){
+
+char cmd[1024] = {0};
+snprintf(cmd+strlen(cmd),sizeof(cmd)-strlen(cmd),
+			"{\"command\":[\"get_property\",\"duration\"],\"request_id\":\"2\"}\n");
 
 	return write(ipcfd, cmd, strlen(cmd));
+
 }
 
 int mpvsongtimer(int ipcfd,int observer_id,int id){
@@ -207,18 +217,20 @@ void *mpvread(void *arg){
 		if (error==NULL){
 
 			cJSON *event = cJSON_GetObjectItemCaseSensitive(response, "event");
-
 			if (event==NULL){
 				cJSON_Delete(response);
 				continue;
 			}
-
+			if (cJSON_IsString(event) && strcmp(event->valuestring, "file-loaded") == 0) {
+				mpvgetDuration(app->mpvfd);
+			}
 			eventresponse(response,app->msgqueue);
 
 		} else {
 			cmdresponse(response,app->msgqueue);
 		}
 	}
-	return NULL;
+
+		return NULL;
 }
 
