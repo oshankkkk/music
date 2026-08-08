@@ -27,8 +27,8 @@ setSong: React.Dispatch<React.SetStateAction<Song>>,
 					let rpcmsg = buff.subarray(4, 4 + msgLen);
 					try {
 						parseToSong(setSong,rpcmsg);
-						console.log(song);
-						console.log("here comes the response");
+						//console.log("meh song obj",song);
+						//console.log("here comes the response");
 					} catch (e) {
 						console.error("Failed to parse message", e);
 					}
@@ -49,6 +49,7 @@ setSong: React.Dispatch<React.SetStateAction<Song>>,
 export function rpcCall(method: string, params: any = {}) {
 		let request = createRequest(method, params);
 		if (!tuiSocket) {
+			console.log("yoyo")
 			throw new Error ("Socket not connected");
 		} else {
 			tuiSocket.write(request);

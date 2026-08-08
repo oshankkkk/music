@@ -156,7 +156,7 @@ void eventresponse(cJSON *response,queue *msgqueue){
 
 	cJSON *resp = cJSON_CreateObject();
 	cJSON_AddStringToObject(resp, "jsonrpc", "2.0");
-	cJSON_AddItemToObject(resp, "result", response);
+	cJSON_AddItemToObject(resp, "eventdata", response);
 
 	char *item=cJSON_PrintUnformatted(resp);
 
@@ -169,10 +169,17 @@ void cmdresponse(cJSON *response,queue *msgqueue){
 
 	cJSON *resp = cJSON_CreateObject();
 	cJSON_AddStringToObject(resp, "jsonrpc", "2.0");
-	cJSON_AddItemToObject(resp, "result", response);
+	cJSON_AddStringToObject(resp, "type", "2.0");
+
+	if (cJSON_GetObjectItemCaseSensitive(response, "songid")){
+		cJSON_AddItemToObject(resp, "songdata", response);
+	}else{
+		cJSON_AddItemToObject(resp, "replydata", response);
+	}
 
 	char *item=cJSON_PrintUnformatted(resp);
 
+	printf("this is the the string song %s\n",item);
 	push(msgqueue,strlen(item),item);
 	free(item);
 	cJSON_Delete(resp);

@@ -103,35 +103,45 @@ export function Playbar({ isFocused, isPlaying, onTogglePlay, song, setSong }: {
 
   useKeyboard((key) => {
 	  if (!isFocused) return;
-	  switch (key.name) {
-		  case "j":
-			  rpcCall("player-volume-down").catch(console.error);
-		  setVolume((v) => Math.max(0, v - 5));
-		  triggerFlash(tVol);
-		  break;
-		  case "k":
-			  rpcCall("player-volume-up").catch(console.error);
-		  setVolume((v) => Math.min(100, v + 5));
-		  triggerFlash(tVol);
-		  break;
-		  case "h":
-			  rpcCall("player-seek-backward").catch(console.error);
-		  break;
-		  case "l":
-			  rpcCall("player-seek-forward").catch(console.error);
-		  break;
-		  case "H":
-			  handlePrev();
-		  break;
-		  case "L":
-			  handleNext();
-		  break;
-		  case "f":
-			  rpcCall("player-fast-forward").catch(console.error);
-		  break;
-		  case "b":
-			  rpcCall("player-rewind").catch(console.error);
-		  break;
+	  try{
+		  switch (key.name) {
+			  case "j":
+				  rpcCall("player-volume-down")
+
+			  setVolume((v) => Math.max(0, v - 5));
+			  triggerFlash(tVol);
+			  break;
+			  case "k":
+				  rpcCall("player-volume-up")
+
+			  setVolume((v) => Math.min(100, v + 5));
+			  triggerFlash(tVol);
+			  break;
+			  case "h":
+				  rpcCall("player-seek-backward")
+
+			  break;
+			  case "l":
+				  rpcCall("player-seek-forward")
+
+			  break;
+			  case "H":
+				  handlePrev();
+			  break;
+			  case "L":
+				  handleNext();
+			  break;
+			  case "f":
+				  rpcCall("player-fast-forward")
+
+			  break;
+			  case "b":
+				  rpcCall("player-rewind")
+
+			  break;
+		  }
+	  }catch (err){
+		  console.error(err);
 	  }
   });
 
@@ -143,13 +153,13 @@ export function Playbar({ isFocused, isPlaying, onTogglePlay, song, setSong }: {
   const progressStrEmpty = "─".repeat(progressEmpty);
 
   return (
-    <box flexDirection="row" width="100%" height={4} backgroundColor="#181818" alignItems="center" paddingX={2}>
-      <box flexDirection="row" width={30} alignItems="center" gap={1}>
-        <text fg="#1DB954">██</text>
-        <box flexDirection="column">
-          <text fg="#ffffff">{song.title}</text>
-          <text fg="#b3b3b3">{song.artist}</text>
-        </box>
+	  <box flexDirection="row" width="100%" height={4} backgroundColor="#181818" alignItems="center" paddingX={2}>
+	  <box flexDirection="row" width={30} alignItems="center" gap={1}>
+	  <text fg="#1DB954">██</text>
+	  <box flexDirection="column">
+	  <text fg="#ffffff">{song.title}</text>
+	  <text fg="#b3b3b3">{song.artist}</text>
+	  </box>
         <text 
           fg="#1DB954" 
           paddingLeft={1} 

@@ -47,7 +47,8 @@ function App() {
       return;
     }
     import("./client/client").then(({ rpcCall }) => {
-      rpcCall("player-toggle-pause").catch(console.error);
+      rpcCall("player-toggle-pause")
+	  //.catch(console.error);
     });
     setIsPlaying((p) => !p);
   }, [playToggleTick]);

@@ -1,6 +1,8 @@
 #include <cjson/cJSON.h>
 #include <unistd.h>
 #include "./msg.h"
+#include <stdlib.h>
+#include <string.h>
 
 void *rpcerror(int code, const char *message, int  id,queue *msgqueue) {
     cJSON *resp = cJSON_CreateObject();
