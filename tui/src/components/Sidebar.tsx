@@ -1,12 +1,9 @@
 import { useState } from "react";
 import { useKeyboard } from "@opentui/react";
 
-export function Sidebar({ isFocused }: { isFocused?: boolean }) {
-  const [playlists, setPlaylists] = useState([
-    { title: "Liked Songs", desc: "Playlist • 234 songs", color: "#7b68ee" },
-    { title: "Daily Mix 1", desc: "Playlist • Spotify", color: "#1DB954" },
-    { title: "Discover Weekly", desc: "Playlist • Spotify", color: "#ff6347" },
-  ]);
+export type Playlist = { title: string; desc: string; color: string; };
+
+export function Sidebar({ isFocused, playlists, setPlaylists }: { isFocused?: boolean, playlists: Playlist[], setPlaylists: (p: Playlist[]) => void }) {
   const [currentPlaylist, setCurrentPlaylist] = useState(null);
   
   const [selectedIndex, setSelectedIndex] = useState(0);

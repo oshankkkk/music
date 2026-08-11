@@ -123,6 +123,7 @@ This document outlines the step-by-step plan to build the Spotify Terminal UI us
 | `j/k` | Volume down/up | Playbar focused |
 | `h/l` | Prev/next track | Playbar focused |
 
+
 The application completely mimics the ~90% visual static layout of the Spotify desktop client in a terminal environment while injecting robust local keyboard interactivity!
 
 21. **Space Key Crash Fix:** The app crashed when pressing `space` alone because `togglePlay()` was called from a raw `setTimeout` callback, triggering React state updates and OpenTUI `useTimeline` animations outside the renderer's managed event processing cycle. Replaced the `setTimeout` approach with a timestamp-based ref (`spaceTimestampRef`) and a `setInterval` poller that safely defers the play toggle through a React `useEffect` (via a `playToggleTick` state counter). Also fixed a secondary bug where `escape` was grouped with `ctrl+c` in the same exit handler, making the escape-unfocus code dead — `escape` now correctly resets focus without killing the app.
@@ -158,3 +159,18 @@ The application completely mimics the ~90% visual static layout of the Spotify d
 - **Separation of Concerns:** Separated the Unix socket logic into a dedicated continuous reader (`startReader()`) and a one-off writer (`rpcCall()`) to decouple reading and writing. The reader continuously parses incoming length-prefixed messages and prints them.
 - **Request & Response Helpers:** Refactored JSON-RPC request creation and response parsing into modular files (`request.ts` and `response.ts`). `request.ts` now auto-increments a unique request ID for each call.
 - **Initialization:** Hooked `startReader()` into `index.tsx` so the continuous socket reader starts automatically on app launch.
+
+## Phase 10: Playlist Creation & Queue Window
+**Goal:** Implement the ability to create new playlists and manage an active play queue.
+- **Playlist Creation Popup (`space+p+n`):**
+  - Add a new state in `App` (`isCreatePlaylistOpen`) to toggle visibility.
+  - Listen for the key sequence `space p n` in `index.tsx` `useKeyboard` hook.
+  - Create a new component `CreatePlaylistPopup.tsx` positioned absolutely with a centered box and an `<input>` field asking "enter new playlist name".
+  - On submit, append the new playlist name to the `playlists` state array. The `playlists` state from `Sidebar.tsx` must be hoisted to `App.tsx` and passed down as a prop so the popup can update it.
+- **Queue Window (`space+q`):**
+  - Create a `QueuePopup.tsx` component that renders an overlay window or replaces MainContent.
+  - Add `isQueueOpen` state in `App` and bind it to `space q`.
+  - Render rows of dummy songs inside, showing small Unicode boxes for album art, title, and artist.
+- **Song Deletion (`DD` shortcut):**
+  - Implement a key sequence tracker for `D` `D` (two rapid 'D' keystrokes) in both the Queue window and the future Playlist detail view.
+  - When pressed while hovering/focused on a song row, remove that item from the corresponding state array (queue or playlist).
