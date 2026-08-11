@@ -4,6 +4,7 @@ import { createRoot, useKeyboard, useRenderer } from "@opentui/react";
 import { Sidebar } from "./components/Sidebar";
 import type { Playlist } from "./components/Sidebar";
 import { MainContent } from "./components/MainContent";
+import { PlaylistDetail } from "./components/PlaylistDetail";
 import { ContextPanel } from "./components/ContextPanel";
 import { Playbar } from "./components/Playbar";
 import { SearchPopup } from "./components/SearchPopup";
@@ -33,7 +34,8 @@ function App() {
     { title: "Daily Mix 1", desc: "Playlist • Spotify", color: "#1DB954" },
     { title: "Discover Weekly", desc: "Playlist • Spotify", color: "#ff6347" },
   ]);
-  const [focusArea, setFocusArea] = useState<"none" | "sidebar" | "quick-access" | "mixes">("none");
+  const [selectedPlaylist, setSelectedPlaylist] = useState<Playlist | null>(null);
+  const [focusArea, setFocusArea] = useState<"none" | "sidebar" | "quick-access" | "mixes" | "playlist" | "recently-played">("none");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isCreatePlaylistOpen, setIsCreatePlaylistOpen] = useState(false);
   const [isQueueOpen, setIsQueueOpen] = useState(false);
@@ -105,8 +107,11 @@ function App() {
         setIsCreatePlaylistOpen(false);
       } else if (isQueueOpen) {
         setIsQueueOpen(false);
-      } else {
+      } else if (focusArea !== "none") {
         setFocusArea("none");
+      } else if (selectedPlaylist) {
+        setSelectedPlaylist(null);
+        setFocusArea("sidebar");
       }
       return;
     }
@@ -129,6 +134,7 @@ function App() {
         case "p": setFocusArea("sidebar"); return;
         case "n": setFocusArea("quick-access"); return;
         case "m": setFocusArea("mixes"); return;
+        case "r": setFocusArea("recently-played"); return;
         case "b": setFocusArea("none"); return;
         case "s": setIsSearchOpen(true); return;
         case "q": setIsQueueOpen(true); return;
@@ -152,8 +158,21 @@ function App() {
         <text fg="#b3b3b3">Search: space+s | Play/Pause: space | Exit: ctrl+c</text>
       </box>
       <box flexDirection="row" width="100%" flexGrow={1}>
-        <Sidebar isFocused={focusArea === "sidebar" && !isSearchOpen && !isCreatePlaylistOpen && !isQueueOpen} playlists={playlists} setPlaylists={setPlaylists} />
-        <MainContent focusArea={isSearchOpen || isCreatePlaylistOpen || isQueueOpen ? "none" : focusArea} />
+        <Sidebar 
+          isFocused={focusArea === "sidebar" && !isSearchOpen && !isCreatePlaylistOpen && !isQueueOpen} 
+          playlists={playlists} 
+          setPlaylists={setPlaylists}
+          onSelectPlaylist={(p) => { setSelectedPlaylist(p); setFocusArea("playlist"); }}
+        />
+        {selectedPlaylist ? (
+          <PlaylistDetail 
+            playlist={selectedPlaylist} 
+            isFocused={focusArea === "playlist" && !isSearchOpen && !isCreatePlaylistOpen && !isQueueOpen} 
+            onBack={() => { setSelectedPlaylist(null); setFocusArea("sidebar"); }} 
+          />
+        ) : (
+          <MainContent focusArea={isSearchOpen || isCreatePlaylistOpen || isQueueOpen ? "none" : focusArea} />
+        )}
         <ContextPanel />
       </box>
       <Playbar isFocused={focusArea === "none" && !isSearchOpen && !isCreatePlaylistOpen && !isQueueOpen} isPlaying={isPlaying} onTogglePlay={togglePlay} song={song} setSong={setSong} />

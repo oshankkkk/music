@@ -3,7 +3,7 @@ import { useKeyboard } from "@opentui/react";
 
 export type Playlist = { title: string; desc: string; color: string; };
 
-export function Sidebar({ isFocused, playlists, setPlaylists }: { isFocused?: boolean, playlists: Playlist[], setPlaylists: (p: Playlist[]) => void }) {
+export function Sidebar({ isFocused, playlists, setPlaylists, onSelectPlaylist }: { isFocused?: boolean, playlists: Playlist[], setPlaylists: (p: Playlist[]) => void, onSelectPlaylist: (p: Playlist) => void }) {
   const [currentPlaylist, setCurrentPlaylist] = useState(null);
   
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -14,6 +14,10 @@ export function Sidebar({ isFocused, playlists, setPlaylists }: { isFocused?: bo
       setSelectedIndex((prev) => Math.min(prev + 1, playlists.length - 1));
     } else if (key.name === "k") {
       setSelectedIndex((prev) => Math.max(prev - 1, 0));
+    } else if (key.name === "enter" || key.name === "return") {
+      if (playlists[selectedIndex]) {
+        onSelectPlaylist(playlists[selectedIndex]);
+      }
     }
   });
 
@@ -31,7 +35,7 @@ export function Sidebar({ isFocused, playlists, setPlaylists }: { isFocused?: bo
         {playlists.map((pl, i) => {
           const isSelected = isFocused && selectedIndex === i;
           return (
-            <box key={i} flexDirection="row" gap={1} alignItems="center" paddingX={1} backgroundColor={isSelected ? "#282828" : undefined}>
+            <box key={i} flexDirection="row" gap={1} alignItems="center" paddingX={1} backgroundColor={isSelected ? "#282828" : undefined} onMouseDown={() => { setSelectedIndex(i); onSelectPlaylist(pl); }}>
               <text fg={pl.color}>██</text>
               <box flexDirection="column">
                 <text fg={isSelected ? "#1DB954" : "#ffffff"}>{pl.title}</text>

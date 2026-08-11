@@ -174,3 +174,17 @@ The application completely mimics the ~90% visual static layout of the Spotify d
 - **Song Deletion (`DD` shortcut):**
   - Implement a key sequence tracker for `D` `D` (two rapid 'D' keystrokes) in both the Queue window and the future Playlist detail view.
   - When pressed while hovering/focused on a song row, remove that item from the corresponding state array (queue or playlist).
+## playlist open implementation
+  1. Interactive Sidebar: You can now open a playlist from the sidebar by either clicking on it or navigating to it and pressing Enter.
+  2. Playlist Detail UI: When a playlist is selected, it replaces the main content area with a design reminiscent of Spotify.
+      • It features a large "album cover" block on the left side and the playlist title on the right.
+      • Just below the title, it displays the total number of songs and the overall playback duration.
+  3. Song List with Interactions: Below the header is the table of dummy songs. When the playlist detail is focused, you can use j and k to
+  navigate up and down the list.
+  4. Delete Shortcut: Just like in the queue window we built earlier, pressing DD while hovering/focused on a song in the playlist will instantly
+  delete it.
+  5. Easy Escape: Pressing Escape while looking at the playlist detail view will back out of it, returning you to the main home view.
+
+  The dummy values are all wired up and ready. Give it a spin! Let me know if you want to tweak the aesthetics or add anything else.
+
+
