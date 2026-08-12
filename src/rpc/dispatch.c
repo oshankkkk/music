@@ -9,6 +9,10 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #include <sys/un.h>
+#include "../lib/playlists.h"
+#include "../lib/queue.h"
+
+void playerhandler(App *app, char *method, cJSON *params, int id, queue *mq);
 
 void dispatch(App *app,const char *method,char *type, cJSON *params, int id) {
 	queue *mq=app->msgqueue;
@@ -33,7 +37,7 @@ void dispatch(App *app,const char *method,char *type, cJSON *params, int id) {
 			cJSON_AddBoolToObject(song, "isliked", app->currentsong->isliked);
 			cJSON_AddNumberToObject(song, "personalplaycount", app->currentsong->personalplaycount);
 
-			cmdresponse(song,app->msgqueue);
+			cmdresponse(song,app->msgqueue,"song");
 		} else {
 			rpcerror(-32603, "Internal error: currentsong is NULL", id, mq);
 		}

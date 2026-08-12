@@ -78,7 +78,7 @@ int queuehandler(App *app, char *method, cJSON *params, int id) {
     } else {
         cJSON_AddFalseToObject(resp, "success");
     }
-    cmdresponse(resp, app->msgqueue);
+    cmdresponse(resp, app->msgqueue,"queue");
     return success ? 0 : -1;
 }
 

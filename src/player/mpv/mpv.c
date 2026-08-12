@@ -166,7 +166,8 @@ void eventresponse(cJSON *response,queue *msgqueue){
 
 	cJSON *resp = cJSON_CreateObject();
 	cJSON_AddStringToObject(resp, "jsonrpc", "2.0");
-	cJSON_AddItemToObject(resp, "eventdata", response);
+	cJSON_AddStringToObject(resp, "type", "mpv-event");
+	cJSON_AddItemToObject(resp, "response", response);
 
 	char *item=cJSON_PrintUnformatted(resp);
 
@@ -175,17 +176,29 @@ void eventresponse(cJSON *response,queue *msgqueue){
 	cJSON_Delete(resp);
 }
 
-void cmdresponse(cJSON *response,queue *msgqueue){
+void cmdresponse(cJSON *response,queue *msgqueue,char *type){
 
 	cJSON *resp = cJSON_CreateObject();
 	cJSON_AddStringToObject(resp, "jsonrpc", "2.0");
-	cJSON_AddStringToObject(resp, "type", "2.0");
+	if (strcmp(type,"song")){
 
-	if (cJSON_GetObjectItemCaseSensitive(response, "songid")){
-		cJSON_AddItemToObject(resp, "songdata", response);
+	cJSON_AddStringToObject(resp, "type", "song");
+	}else if (strcmp(type,"mpv")){
+
+	cJSON_AddStringToObject(resp, "type", "mpv-reply");
+	}else if (strcmp(type,"playlist")){
+
+	cJSON_AddStringToObject(resp, "type", "playlist");
+	}else if (strcmp(type,"queue")){
+
+	cJSON_AddStringToObject(resp, "type", "queue");
 	}else{
-		cJSON_AddItemToObject(resp, "replydata", response);
+
+	cJSON_AddStringToObject(resp, "type", "unknown");
+
 	}
+
+	cJSON_AddItemToObject(resp, "result", response);
 
 	char *item=cJSON_PrintUnformatted(resp);
 
@@ -225,9 +238,8 @@ void *mpvread(void *arg){
 				mpvgetDuration(app->mpvfd);
 			}
 			eventresponse(response,app->msgqueue);
-
 		} else {
-			cmdresponse(response,app->msgqueue);
+			cmdresponse(response,app->msgqueue,"mpv");
 		}
 	}
 

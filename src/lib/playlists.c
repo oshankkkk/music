@@ -1,6 +1,5 @@
 #include <sqlite3.h>
 #include <cjson/cJSON.h>
-//#include "./response.h"
 #include <stdio.h>
 #include <string.h>
 #include "../models/app.h"
@@ -155,6 +154,6 @@ int libhandler(App *app, char *method, cJSON *params, int id) {
     } else {
         cJSON_AddFalseToObject(resp, "success");
     }
-    cmdresponse(resp, app->msgqueue);
+    cmdresponse(resp, app->msgqueue,"playlist");
     return success ? 0 : -1;
 }
