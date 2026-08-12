@@ -19,10 +19,6 @@ export function parseToSong(
 
       //console.log("mekada undefined",data.response);
     }else if (data.type ==="mpv-event"){
-    }else if (data.type ==="playlist"){
-
-    }else if (data.type ==="queue"){
-		
 		if (data.response.event === "property-change" && data.response.name === "time-pos") {
 			setSong((prevSong) => ({
 				...prevSong,
@@ -34,6 +30,16 @@ export function parseToSong(
 				timestamp: 0,
 				isPlayed: false
 			}));
+		}
+    }else if (data.type ==="playlist"){
+		console.log(data.response.id)	
+		console.log(data.response.name)	
+		console.log(data.response.songcount)	
+		console.log(data.response.songtime)	
+		console.log(data.response.songs)
+    }else if (data.type ==="queue"){
+		if (data.response.songs){
+	// this is a list of all the songs in a queue
 		}
 	}else if (data.type==="mpv-reply"){
 		if (data.response.request_id=="2"){
