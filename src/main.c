@@ -75,23 +75,6 @@ void *tuiwriter(void *arg){
 			}
 		}
 	}
-	//while (1) {
-	//	int clientFd=accept(app->serverfd,NULL,NULL);	
-	//	app->clientfd=clientFd;
-	//	if (clientFd< 0) {
-	//		printf("prob here\n");
-	//		perror("accept");
-	//		continue;
-	//	}	
-	//	char *buf=malloc(6063);	
-	//	size_t n=read(clientFd,buf,5051);
-	//	if (n>0){
-	//		buf[n]='\0';
-	//	}else{
-	//		buf[0]='\0';
-	//	}
-	//	handler(app,buf);
-	//}
 	
 }
 

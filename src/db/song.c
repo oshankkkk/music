@@ -4,7 +4,7 @@
 #include <sqlite3.h>
 #include <string.h>
 #include "../models/song.h"
-#include "song.h"
+//#include "song.h"
 
 sqlite3 * InitDb(void){
 	sqlite3 *db;	

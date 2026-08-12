@@ -1,7 +1,13 @@
 ### my spotify replacement
 
 ```
-gcc music.c -o musix -Wall -Werror -lsqlite3 -lcjson
+./build.sh
+
+and 
+
+nix develop
+cd tui
+bun run dev
 ```
 
 ```
@@ -11,87 +17,35 @@ gcc music.c -o musix -Wall -Werror -lsqlite3 -lcjson
 // Response: {"jsonrpc":"2.0","result":5,"id":1}
 
 ```
-#### Figure out the RPC connection
-#### Library
-- Search YouTube (via yt-dlp)
-- Stream music
-- Download/cache songs
-- Mark songs as favorites
-- View recently played
-- View most played
-- Fetch album art
-- Fetch lyrics
-#### Queue
-- Queue songs
-- Clear queue
-- Shuffle
-- Repeat (off, one, all)
-#### Playlists
-- Create playlist
-- Rename playlist
-- Delete playlist
-- Add songs to playlist
-- Remove songs from playlist
-- Reorder songs
-- Duplicate playlist
 
-#### User Interface
-- Keyboard-driven TUI
-- View now playing
-- Remember playback position
-#### Infrastructure
-- SQLite library
-- Configuration files
-- Theme support
-- Lua plugin system
+```
+//TODO for later:
 
-### mpv Features 
-uses mpv IPC
+//Both queue and the lib we need a better way to identify them uniquely,once made a id  is automatically generated. i want you to 
+//(we need to get the id back from the db and put that in the ui so when it calls a lib or the song,
+//there is a queue and a playlist table in the music.db, (go look at the migrations and read it). 
+//make a clear queue function in src/lib/queue.
+//make db function to store the queue only once the program is closed.(snapshot of the queue saved in the db when the app closes)..
+//it reference the db identifer.
+//we need a rename playlist function.
+//need to fix the funciton declaration error in the dispatch.c
+//need to send RPC responses back to the ui after anything happen rn its only for mpv
+```
 
-- Play audio
-- Pause
-- Resume
-- Stop
-- Seek (forward/backward)
-- Skip to next song*
-- Skip to previous song*
-- Fast forward
-- Rewind
-- Volume control
-- Mute/unmute
+### Keybinding Reference
 
-> **Note:** "Next" and "Previous" are handled by **your queue**, but the actual playback of the next file is still performed by mpv.
-
-### Plugins (Lua)
-- Spotify migration
-- Discord Rich Presence
-- Last.fm scrobbling
-- MPRIS integration
-- Desktop notifications
-
-- Additional lyrics providers
-- Additional album art providers
-- MusicBrainz metadata lookup
-- Genius integration
-- Custom search providers
-
-- Smart playlists
-- Auto-DJ
-- Recommendation algorithms
-- Queue automation
-- Playback rules (e.g. skip short songs)
-
-- Custom keybindings
-- Custom commands
-- Status bar widgets
-- Startup dashboard
-- Themes (optional if not built into core)
-
-- Statistics dashboards
-- Tag editing
-- Import/export tools
-- Custom file naming for downloads
-
-
+| Sequence | Action | Scope |
+|---|---|---|
+| `space` (alone) | Toggle play/pause | Global |
+| `space p` | Focus sidebar | Global |
+| `space n` | Focus quick-access grid | Global |
+| `space m` | Focus mixes section | Global |
+| `space b` | Focus bottom playbar | Global |
+| `escape` | Unfocus / exit app | Global |
+| `Ctrl+C` | Exit app | Global |
+| `j/k` | Navigate down/up | Sidebar, Quick-access |
+| `h/l` | Navigate left/right | Quick-access, Mixes |
+| `j/k` | Volume down/up | Playbar focused |
+| `h/l` | Prev/next track | Playbar focused |
 
 

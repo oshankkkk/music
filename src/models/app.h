@@ -4,6 +4,7 @@
 #include <sqlite3.h>
 #include "./song.h"
 #include "./msg.h"
+#include "./lib.h"
 
 typedef struct{
 	sqlite3 *db;
@@ -13,6 +14,7 @@ typedef struct{
 	int serverfd;
 	int clientfd;
 	queue *msgqueue;
+	SongQueue *songqueue;
 
 }App;
 

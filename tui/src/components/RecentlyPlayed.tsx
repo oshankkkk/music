@@ -39,7 +39,6 @@ export function RecentlyPlayed({ isFocused }: { isFocused: boolean }) {
     <box flexDirection="column" width="100%">
       <box flexDirection="column" gap={0} paddingBottom={1}>
         <text fg="#ffffff"><b>Recently Played</b></text>
-        <text fg="#888888">Your recent listening history</text>
       </box>
       
       <box flexDirection="row" width="100%" paddingBottom={1} paddingX={1}>
