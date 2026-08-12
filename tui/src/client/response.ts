@@ -1,4 +1,4 @@
-import { Song } from "./song.ts";
+import type { Song } from "./types";
 
 export function parseToSong(
   setSong: React.Dispatch<React.SetStateAction<Song>>,

@@ -1,10 +1,10 @@
 import { useState, useRef } from "react";
 import { useKeyboard } from "@opentui/react";
-import type { Playlist } from "./Sidebar";
+import type { PlaylistInfo } from "../client/types";
 
 type SongInfo = { id: number; title: string; artist: string; duration: string; albumArtColor: string; };
 
-export function PlaylistDetail({ playlist, isFocused, onBack }: { playlist: Playlist, isFocused: boolean, onBack: () => void }) {
+export function PlaylistDetail({ playlist, isFocused, onBack }: { playlist: PlaylistInfo, isFocused: boolean, onBack: () => void }) {
   const [songs, setSongs] = useState<SongInfo[]>([
     { id: 1, title: "Song 1", artist: "Artist 1", duration: "3:45", albumArtColor: "#ff6347" },
     { id: 2, title: "Song 2", artist: "Artist 2", duration: "4:20", albumArtColor: "#4169e1" },
@@ -53,18 +53,18 @@ export function PlaylistDetail({ playlist, isFocused, onBack }: { playlist: Play
       {/* Header */}
       <box flexDirection="row" gap={3} paddingBottom={2}>
         <box flexDirection="column">
-            <text fg={playlist.color}>██████████████</text>
-            <text fg={playlist.color}>██████████████</text>
-            <text fg={playlist.color}>██████████████</text>
-            <text fg={playlist.color}>██████████████</text>
-            <text fg={playlist.color}>██████████████</text>
-            <text fg={playlist.color}>██████████████</text>
-            <text fg={playlist.color}>██████████████</text>
+            <text fg="#1DB954">██████████████</text>
+            <text fg="#1DB954">██████████████</text>
+            <text fg="#1DB954">██████████████</text>
+            <text fg="#1DB954">██████████████</text>
+            <text fg="#1DB954">██████████████</text>
+            <text fg="#1DB954">██████████████</text>
+            <text fg="#1DB954">██████████████</text>
         </box>
         <box flexDirection="column" justifyContent="flex-end" paddingBottom={0}>
           <text fg="#ffffff">Playlist</text>
-          <text fg="#ffffff"><b>{playlist.title}</b></text>
-          <text fg="#b3b3b3">{playlist.desc} • {songs.length} songs, 19 min 40 sec</text>
+          <text fg="#ffffff"><b>{playlist.name}</b></text>
+          <text fg="#b3b3b3">Playlist • {songs.length} songs, 19 min 40 sec</text>
         </box>
       </box>
       

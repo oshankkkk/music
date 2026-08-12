@@ -20,7 +20,7 @@ export function QuickAccessGrid({ isFocused }: { isFocused: boolean }) {
     if (isFocused) {
       if (key.name === "j") setQaRow((r) => Math.min(r + 1, QUICK_ACCESS.length - 1));
       if (key.name === "k") setQaRow((r) => Math.max(r - 1, 0));
-      if (key.name === "l") setQaCol((c) => Math.min(c + 1, QUICK_ACCESS[qaRow].length - 1));
+      if (key.name === "l") setQaCol((c) => Math.min(c + 1, (QUICK_ACCESS[qaRow]?.length || 1) - 1));
       if (key.name === "h") setQaCol((c) => Math.max(c - 1, 0));
     }
   });

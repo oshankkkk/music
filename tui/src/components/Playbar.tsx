@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useKeyboard, useTimeline } from "@opentui/react";
 import { rpcCall } from "../client/client";
+import type { Song } from "../client/types";
 
 function interpolateGray(v: number) {
   const val = Math.round(179 + (255 - 179) * v);
@@ -29,7 +30,7 @@ function formatTime(seconds: number) {
   return `${m}:${s.toString().padStart(2, '0')}`;
 }
 
-export function Playbar({ isFocused, isPlaying, onTogglePlay, song, setSong }: { isFocused?: boolean; isPlaying: boolean; onTogglePlay?: () => void; song: any; setSong: any }) {
+export function Playbar({ isFocused, isPlaying, onTogglePlay, song, setSong }: { isFocused?: boolean; isPlaying: boolean; onTogglePlay?: () => void; song: Song; setSong: React.Dispatch<React.SetStateAction<Song>> }) {
   
   const [volume, setVolume] = useState(50);
   const [lyrics, setLyrics] = useState(false);
@@ -188,7 +189,7 @@ export function Playbar({ isFocused, isPlaying, onTogglePlay, song, setSong }: {
       </box>
 
       <box flexDirection="row" width={30} justifyContent="flex-end" alignItems="center" gap={1}>
-        <text fg={setLyrics? "#1DB954" : "#b3b3b3"} onMouseDown={() => setLyrics(!lyrics)}>🎤</text>
+        <text fg={lyrics ? "#1DB954" : "#b3b3b3"} onMouseDown={() => setLyrics(!lyrics)}>🎤</text>
         <text fg="#b3b3b3">☰</text>
         <text fg="#b3b3b3" onMouseDown={() => { setVolume(v => (v === 0 ? 50 : 0)); triggerFlash(tVol); }}>Vol</text>
         <text fg={interpolateVol(volFlash)}>{volume.toString().padStart(3, ' ')}%</text>

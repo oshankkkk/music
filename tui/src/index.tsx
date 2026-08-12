@@ -2,7 +2,6 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { createCliRenderer } from "@opentui/core";
 import { createRoot, useKeyboard, useRenderer } from "@opentui/react";
 import { Sidebar } from "./components/Sidebar";
-import type { Playlist } from "./components/Sidebar";
 import { MainContent } from "./components/MainContent";
 import { PlaylistDetail } from "./components/PlaylistDetail";
 import { ContextPanel } from "./components/ContextPanel";
@@ -10,7 +9,7 @@ import { Playbar } from "./components/Playbar";
 import { SearchPopup } from "./components/SearchPopup";
 import { CreatePlaylistPopup } from "./components/CreatePlaylistPopup";
 import { QueuePopup } from "./components/QueuePopup";
-import type { Song } from "./client/song.ts";
+import type { Song, PlaylistInfo, QueueItem, RecentlyPlayedItem } from "./client/types";
 import { startReader } from "./client/client";
 
 const LEADER_TIMEOUT_MS = 300;
@@ -29,12 +28,24 @@ function App() {
     isPlayed: false
   });
   const renderer = useRenderer();
-  const [playlists, setPlaylists] = useState<Playlist[]>([
-    { title: "Liked Songs", desc: "Playlist • 234 songs", color: "#7b68ee" },
-    { title: "Daily Mix 1", desc: "Playlist • Spotify", color: "#1DB954" },
-    { title: "Discover Weekly", desc: "Playlist • Spotify", color: "#ff6347" },
+  const [playlists, setPlaylists] = useState<PlaylistInfo[]>([
+    { id: "1", name: "Liked Songs" },
+    { id: "2", name: "Daily Mix 1" },
+    { id: "3", name: "Discover Weekly" },
   ]);
-  const [selectedPlaylist, setSelectedPlaylist] = useState<Playlist | null>(null);
+  const [queue, setQueue] = useState<QueueItem[]>([
+    { queueId: "q1", songId: "1", name: "Bohemian Rhapsody" },
+    { queueId: "q2", songId: "2", name: "Hotel California" },
+    { queueId: "q3", songId: "3", name: "Stairway to Heaven" },
+    { queueId: "q4", songId: "4", name: "Imagine" },
+  ]);
+  const [recentlyPlayed, setRecentlyPlayed] = useState<RecentlyPlayedItem[]>([
+    { songId: "1", name: "Shape of You", isLiked: true },
+    { songId: "2", name: "Blinding Lights", isLiked: false },
+    { songId: "3", name: "Dance Monkey", isLiked: true },
+    { songId: "4", name: "Rockstar", isLiked: false },
+  ]);
+  const [selectedPlaylist, setSelectedPlaylist] = useState<PlaylistInfo | null>(null);
   const [focusArea, setFocusArea] = useState<"none" | "sidebar" | "quick-access" | "mixes" | "playlist" | "recently-played">("none");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isCreatePlaylistOpen, setIsCreatePlaylistOpen] = useState(false);
@@ -171,7 +182,7 @@ function App() {
             onBack={() => { setSelectedPlaylist(null); setFocusArea("sidebar"); }} 
           />
         ) : (
-          <MainContent focusArea={isSearchOpen || isCreatePlaylistOpen || isQueueOpen ? "none" : focusArea} />
+          <MainContent focusArea={isSearchOpen || isCreatePlaylistOpen || isQueueOpen ? "none" : focusArea} recentlyPlayed={recentlyPlayed} />
         )}
         <ContextPanel />
       </box>
@@ -180,9 +191,9 @@ function App() {
       <CreatePlaylistPopup 
         isOpen={isCreatePlaylistOpen} 
         onClose={() => setIsCreatePlaylistOpen(false)} 
-        onSubmit={(name) => setPlaylists([...playlists, { title: name, desc: "Playlist • 0 songs", color: "#1DB954" }])} 
+        onSubmit={(name) => setPlaylists([...playlists, { id: Date.now().toString(), name }])} 
       />
-      <QueuePopup isOpen={isQueueOpen} onClose={() => setIsQueueOpen(false)} />
+      <QueuePopup isOpen={isQueueOpen} onClose={() => setIsQueueOpen(false)} queue={queue} setQueue={setQueue} />
     </box>
   );
 }

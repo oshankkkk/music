@@ -1,5 +1,5 @@
 import { createRequest } from "./request";
-import { Song} from "./song.ts";
+import type { Song } from "./types";
 import { parseToSong} from "./response";
 import type { Socket } from "bun";
 

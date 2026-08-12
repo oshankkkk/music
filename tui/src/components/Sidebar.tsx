@@ -1,11 +1,8 @@
 import { useState } from "react";
 import { useKeyboard } from "@opentui/react";
+import type { PlaylistInfo } from "../client/types";
 
-export type Playlist = { title: string; desc: string; color: string; };
-
-export function Sidebar({ isFocused, playlists, setPlaylists, onSelectPlaylist }: { isFocused?: boolean, playlists: Playlist[], setPlaylists: (p: Playlist[]) => void, onSelectPlaylist: (p: Playlist) => void }) {
-  const [currentPlaylist, setCurrentPlaylist] = useState(null);
-  
+export function Sidebar({ isFocused, playlists, setPlaylists, onSelectPlaylist }: { isFocused?: boolean, playlists: PlaylistInfo[], setPlaylists: (p: PlaylistInfo[]) => void, onSelectPlaylist: (p: PlaylistInfo) => void }) {
   const [selectedIndex, setSelectedIndex] = useState(0);
 
   useKeyboard((key) => {
@@ -35,11 +32,11 @@ export function Sidebar({ isFocused, playlists, setPlaylists, onSelectPlaylist }
         {playlists.map((pl, i) => {
           const isSelected = isFocused && selectedIndex === i;
           return (
-            <box key={i} flexDirection="row" gap={1} alignItems="center" paddingX={1} backgroundColor={isSelected ? "#282828" : undefined} onMouseDown={() => { setSelectedIndex(i); onSelectPlaylist(pl); }}>
-              <text fg={pl.color}>██</text>
+            <box key={pl.id} flexDirection="row" gap={1} alignItems="center" paddingX={1} backgroundColor={isSelected ? "#282828" : undefined} onMouseDown={() => { setSelectedIndex(i); onSelectPlaylist(pl); }}>
+              <text fg="#1DB954">██</text>
               <box flexDirection="column">
-                <text fg={isSelected ? "#1DB954" : "#ffffff"}>{pl.title}</text>
-                <text fg="#b3b3b3">{pl.desc}</text>
+                <text fg={isSelected ? "#1DB954" : "#ffffff"}>{pl.name}</text>
+                <text fg="#b3b3b3">Playlist</text>
               </box>
             </box>
           );
