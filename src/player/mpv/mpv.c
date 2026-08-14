@@ -72,7 +72,6 @@ int mpvgetDuration(int ipcfd){
 char cmd[1024] = {0};
 snprintf(cmd+strlen(cmd),sizeof(cmd)-strlen(cmd),
 			"{\"command\":[\"get_property\",\"duration\"],\"request_id\":\"2\"}\n");
-
 	return write(ipcfd, cmd, strlen(cmd));
 
 }
@@ -180,16 +179,16 @@ void cmdresponse(cJSON *response,queue *msgqueue,char *type){
 
 	cJSON *resp = cJSON_CreateObject();
 	cJSON_AddStringToObject(resp, "jsonrpc", "2.0");
-	if (strcmp(type,"song")){
+	if (strcmp(type,"song")==0){
 
 	cJSON_AddStringToObject(resp, "type", "song");
-	}else if (strcmp(type,"mpv")){
+	}else if (strcmp(type,"mpv")==0){
 
 	cJSON_AddStringToObject(resp, "type", "mpv-reply");
-	}else if (strcmp(type,"playlist")){
+	}else if (strcmp(type,"playlist")==0){
 
 	cJSON_AddStringToObject(resp, "type", "playlist");
-	}else if (strcmp(type,"queue")){
+	}else if (strcmp(type,"queue")==0){
 
 	cJSON_AddStringToObject(resp, "type", "queue");
 	}else{
@@ -198,7 +197,7 @@ void cmdresponse(cJSON *response,queue *msgqueue,char *type){
 
 	}
 
-	cJSON_AddItemToObject(resp, "result", response);
+	cJSON_AddItemToObject(resp, "response", response);
 
 	char *item=cJSON_PrintUnformatted(resp);
 

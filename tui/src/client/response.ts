@@ -6,24 +6,24 @@ export function parseToSong(
 ) {
   try {
     const data = JSON.parse(messageBuffer.toString());
+	console.log("this is the audio",data);
     if (data.type==="song") {
-
     setSong((prevSong) => ({
       ...prevSong,
-      title: data.result.title || prevSong.title,
-      artist: data.result.artist || prevSong.artist,
-      duration: data.result.duration || prevSong.duration,
-      isLiked: data.result.isliked !== undefined ? data.result.isliked : prevSong.isLiked,
+      title: data.response.title || prevSong.title,
+      artist: data.response.artist || prevSong.artist,
+      duration: data.response.duration || prevSong.duration,
+      isLiked: data.response.isliked !== undefined ? data.response.isliked : prevSong.isLiked,
 	  isPlayed:true,
     }));
-
     }else if (data.type ==="mpv-event"){
-		if (data.result.event === "property-change" && data.result.name === "time-pos") {
+		console.log("mvp event",data);
+		if (data.response.event === "property-change" && data.response.name === "time-pos") {
 			setSong((prevSong) => ({
 				...prevSong,
-				timestamp: data.result.data !== undefined ? data.result.data : prevSong.timestamp
+				timestamp: data.response.data !== undefined ? data.response.data : prevSong.timestamp
 			}));
-		} else if (data.result.event === "end-file") {
+		} else if (data.response.event === "end-file") {
 			setSong((prevSong) => ({
 				...prevSong,
 				timestamp: 0,
@@ -31,29 +31,28 @@ export function parseToSong(
 			}));
 		}
     }else if (data.type ==="playlist"){
-		console.log(data.result.id)	
-		console.log(data.result.name)	
-		console.log(data.result.songcount)	
-		console.log(data.result.songtime)	
-		console.log(data.result.songs)
+		console.log(data.response.id)	
+		console.log(data.response.name)	
+		console.log(data.response.songcount)	
+		console.log(data.response.songtime)	
+		console.log(data.response.songs)
     }else if (data.type ==="queue"){
-		if (data.result.songs){
+		if (data.response.songs){
 	// this is a list of all the songs in a queue
 		}
 	}else if (data.type==="mpv-reply"){
-		if (data.result.request_id=="2"){
+		if (data.response.request_id=="2"){
 		setSong((prevSong) => ({
       ...prevSong,
-      duration: data.result.data|| prevSong.duration,
+      duration: data.response.data|| prevSong.duration,
     }));
-		console.log("reply",data.result.data);
+		console.log("reply",data.response.data);
 		}
-
 	}else{
 		console.log("this is prolly unknown type",data.type);
 	}
   } catch (e) {
-    console.error("Failed to parse JSON-RPC result in parseToSong", e);
+    console.error("Failed to parse JSON-RPC response in parseToSong", e);
   }
 }
 

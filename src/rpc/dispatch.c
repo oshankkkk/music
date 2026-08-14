@@ -33,7 +33,7 @@ void dispatch(App *app,char *method,char *type, cJSON *params, int id) {
 			cJSON_AddStringToObject(song, "songid", app->currentsong->id);
 			cJSON_AddStringToObject(song, "title", app->currentsong->title);
 			cJSON_AddStringToObject(song, "artist", app->currentsong->artist);
-			//cJSON_AddNumberToObject(song, "duration", app->currentsong->duration);
+			cJSON_AddNumberToObject(song, "duration", app->currentsong->duration);
 			cJSON_AddBoolToObject(song, "isliked", app->currentsong->isliked);
 			cJSON_AddNumberToObject(song, "personalplaycount", app->currentsong->personalplaycount);
 
