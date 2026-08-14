@@ -10,21 +10,20 @@ export function parseToSong(
 
     setSong((prevSong) => ({
       ...prevSong,
-      title: data.response.title || prevSong.title,
-      artist: data.response.artist || prevSong.artist,
-      duration: data.response.duration || prevSong.duration,
-      isLiked: data.response.isliked !== undefined ? data.response.isliked : prevSong.isLiked,
+      title: data.result.title || prevSong.title,
+      artist: data.result.artist || prevSong.artist,
+      duration: data.result.duration || prevSong.duration,
+      isLiked: data.result.isliked !== undefined ? data.result.isliked : prevSong.isLiked,
 	  isPlayed:true,
     }));
 
-      //console.log("mekada undefined",data.response);
     }else if (data.type ==="mpv-event"){
-		if (data.response.event === "property-change" && data.response.name === "time-pos") {
+		if (data.result.event === "property-change" && data.result.name === "time-pos") {
 			setSong((prevSong) => ({
 				...prevSong,
-				timestamp: data.response.data !== undefined ? data.response.data : prevSong.timestamp
+				timestamp: data.result.data !== undefined ? data.result.data : prevSong.timestamp
 			}));
-		} else if (data.response.event === "end-file") {
+		} else if (data.result.event === "end-file") {
 			setSong((prevSong) => ({
 				...prevSong,
 				timestamp: 0,
@@ -32,29 +31,29 @@ export function parseToSong(
 			}));
 		}
     }else if (data.type ==="playlist"){
-		console.log(data.response.id)	
-		console.log(data.response.name)	
-		console.log(data.response.songcount)	
-		console.log(data.response.songtime)	
-		console.log(data.response.songs)
+		console.log(data.result.id)	
+		console.log(data.result.name)	
+		console.log(data.result.songcount)	
+		console.log(data.result.songtime)	
+		console.log(data.result.songs)
     }else if (data.type ==="queue"){
-		if (data.response.songs){
+		if (data.result.songs){
 	// this is a list of all the songs in a queue
 		}
 	}else if (data.type==="mpv-reply"){
-		if (data.response.request_id=="2"){
+		if (data.result.request_id=="2"){
 		setSong((prevSong) => ({
       ...prevSong,
-      duration: data.response.data|| prevSong.duration,
+      duration: data.result.data|| prevSong.duration,
     }));
-		console.log("reply",data.response.data);
+		console.log("reply",data.result.data);
 		}
 
 	}else{
 		console.log("this is prolly unknown type",data.type);
 	}
   } catch (e) {
-    console.error("Failed to parse JSON-RPC response in parseToSong", e);
+    console.error("Failed to parse JSON-RPC result in parseToSong", e);
   }
 }
 

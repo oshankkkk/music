@@ -46,10 +46,9 @@ setSong: React.Dispatch<React.SetStateAction<Song>>,
 	}).catch(console.error);
 }
 
-export function rpcCall(method: string, params: any = {}) {
-		let request = createRequest(method, params);
+export function rpcCall(method: string,type:string, params: any = {}) {
+		let request = createRequest(method, params,type);
 		if (!tuiSocket) {
-			console.log("yoyo")
 			throw new Error ("Socket not connected");
 		} else {
 			tuiSocket.write(request);

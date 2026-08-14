@@ -14,7 +14,7 @@
 
 void playerhandler(App *app, char *method, cJSON *params, int id, queue *mq);
 
-void dispatch(App *app,const char *method,char *type, cJSON *params, int id) {
+void dispatch(App *app,char *method,char *type, cJSON *params, int id) {
 	queue *mq=app->msgqueue;
 	int err=0;
 	if (strcmp(method, "playSong") == 0){

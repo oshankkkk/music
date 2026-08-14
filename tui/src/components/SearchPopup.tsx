@@ -6,7 +6,7 @@ export function SearchPopup({isOpen}: {isOpen: boolean}) {
 
 	const handleSubmit = async (query: string) => {
 		try {
-			rpcCall("playSong", { songName: query });
+			rpcCall("playSong", "song",{ songName: query });
 			} catch (e) {
 			console.error(e);
 		}

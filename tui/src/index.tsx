@@ -14,7 +14,6 @@ import { startReader } from "./client/client";
 
 const LEADER_TIMEOUT_MS = 300;
 
-
 function App() {
   const [song, setSong] = useState<Song>({
     title: "Unknown song",
@@ -70,7 +69,7 @@ function App() {
       return;
     }
     import("./client/client").then(({ rpcCall }) => {
-      rpcCall("player-toggle-pause")
+      rpcCall("player-toggle-pause","mpv")
 	  //.catch(console.error);
     });
     setIsPlaying((p) => !p);

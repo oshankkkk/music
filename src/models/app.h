@@ -4,7 +4,7 @@
 #include <sqlite3.h>
 #include "./song.h"
 #include "./msg.h"
-#include "./lib.h"
+#include "./queue.h"
 
 typedef struct{
 	sqlite3 *db;

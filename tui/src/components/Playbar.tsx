@@ -65,7 +65,7 @@ export function Playbar({ isFocused, isPlaying, onTogglePlay, song, setSong }: {
 
   const handleRepeat = async () => {
     try {
-      await rpcCall("player-toggle-repeat");
+      await rpcCall("player-toggle-repeat","mpv");
       setIsRepeat(r => !r);
     } catch (e) {
       console.error(e);
@@ -74,7 +74,7 @@ export function Playbar({ isFocused, isPlaying, onTogglePlay, song, setSong }: {
 
   const handleNext = async () => {
     try {
-      await rpcCall("player-next");
+      await rpcCall("player-next","mpv");
     } catch (e) {
       console.error(e);
     }
@@ -84,7 +84,7 @@ export function Playbar({ isFocused, isPlaying, onTogglePlay, song, setSong }: {
 
   const handlePrev = async () => {
     try {
-      await rpcCall("player-previous");
+      await rpcCall("player-previous","mpv");
     } catch (e) {
       console.error(e);
 	}
@@ -108,23 +108,23 @@ export function Playbar({ isFocused, isPlaying, onTogglePlay, song, setSong }: {
 	  try{
 		  switch (key.name) {
 			  case "j":
-				  rpcCall("player-volume-down")
+				  rpcCall("player-volume-down","mpv")
 
 			  setVolume((v) => Math.max(0, v - 5));
 			  triggerFlash(tVol);
 			  break;
 			  case "k":
-				  rpcCall("player-volume-up")
+				  rpcCall("player-volume-up","mpv")
 
 			  setVolume((v) => Math.min(100, v + 5));
 			  triggerFlash(tVol);
 			  break;
 			  case "h":
-				  rpcCall("player-seek-backward")
+				  rpcCall("player-seek-backward","mpv")
 
 			  break;
 			  case "l":
-				  rpcCall("player-seek-forward")
+				  rpcCall("player-seek-forward","mpv")
 
 			  break;
 			  case "H":
@@ -134,11 +134,11 @@ export function Playbar({ isFocused, isPlaying, onTogglePlay, song, setSong }: {
 				  handleNext();
 			  break;
 			  case "f":
-				  rpcCall("player-fast-forward")
+				  rpcCall("player-fast-forward","mpv")
 
 			  break;
 			  case "b":
-				  rpcCall("player-rewind")
+				  rpcCall("player-rewind","mpv")
 
 			  break;
 		  }

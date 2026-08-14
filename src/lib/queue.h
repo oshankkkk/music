@@ -3,7 +3,6 @@
 
 #include <cjson/cJSON.h>
 #include "../models/app.h"
-#include "../models/lib.h"
 
 int addtoqueue(SongQueue *q, int songid);
 int removesongfromqueue(SongQueue *q, int index);
