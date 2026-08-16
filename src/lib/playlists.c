@@ -54,12 +54,13 @@ int deleteplaylist(sqlite3 *db, int playlistid) {
 }
 
 int deletesongfromplaylist(sqlite3 *db, int playlistid, int songid) {
-    const char *sql = "DELETE FROM collection WHERE songid=? AND playlistid=?";
+    const char *sql = "DELETE FROM collection WHERE song_id=? AND playlist_id=?";
     sqlite3_stmt *stmt;
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK) {
         handleError(sqlite3_errcode(db), db);
         return -1;
     }
+
 
     sqlite3_bind_int(stmt, 1, songid);
     sqlite3_bind_int(stmt, 2, playlistid);
@@ -93,7 +94,7 @@ int renameplaylist(sqlite3 *db, int playlistid, char *newname) {
 }
 
 int addsongtoplaylist(sqlite3 *db, int songid, int playlistid) {
-    const char *sql = "INSERT INTO collection(playlistid,songid) VALUES (?, ?)";
+    const char *sql = "INSERT INTO collection(playlist_id,song_id) VALUES (?, ?)";
     sqlite3_stmt *stmt;
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK) {
         handleError(sqlite3_errcode(db), db);
@@ -109,6 +110,80 @@ int addsongtoplaylist(sqlite3 *db, int songid, int playlistid) {
         return -1;
     }
     return 0;
+}
+
+cJSON *getplaylist(sqlite3 *db, int playlistid) {
+    const char *sql = "SELECT id, title, date_made, song_count FROM playlist WHERE id = ?";
+    sqlite3_stmt *stmt;
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK) {
+        handleError(sqlite3_errcode(db), db);
+        return NULL;
+    }
+    sqlite3_bind_int(stmt, 1, playlistid);
+
+    cJSON *playlist = NULL;
+    if (sqlite3_step(stmt) == SQLITE_ROW) {
+        playlist = cJSON_CreateObject();
+        cJSON_AddNumberToObject(playlist, "id", sqlite3_column_int(stmt, 0));
+        cJSON_AddStringToObject(playlist, "title", (const char *)sqlite3_column_text(stmt, 1));
+        cJSON_AddStringToObject(playlist, "date_made", (const char *)sqlite3_column_text(stmt, 2));
+        cJSON_AddNumberToObject(playlist, "song_count", sqlite3_column_int(stmt, 3));
+    }
+    sqlite3_finalize(stmt);
+    return playlist;
+}
+
+cJSON *getallplaylists(sqlite3 *db) {
+    const char *sql = "SELECT id, title, date_made, song_count FROM playlist";
+    sqlite3_stmt *stmt;
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK) {
+        handleError(sqlite3_errcode(db), db);
+        return NULL;
+    }
+
+    cJSON *playlists = cJSON_CreateArray();
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+        cJSON *playlist = cJSON_CreateObject();
+        cJSON_AddNumberToObject(playlist, "id", sqlite3_column_int(stmt, 0));
+        cJSON_AddStringToObject(playlist, "title", (const char *)sqlite3_column_text(stmt, 1));
+        cJSON_AddStringToObject(playlist, "date_made", (const char *)sqlite3_column_text(stmt, 2));
+        cJSON_AddNumberToObject(playlist, "song_count", sqlite3_column_int(stmt, 3));
+        cJSON_AddItemToArray(playlists, playlist);
+    }
+    sqlite3_finalize(stmt);
+    return playlists;
+}
+
+cJSON *getplaylistsongs(sqlite3 *db, int playlistid) {
+    const char *sql = "SELECT s.id, s.title, s.artist, s.duration, s.isLiked "
+                      "FROM song s "
+                      "JOIN collection c ON s.id = c.song_id "
+                      "WHERE c.playlist_id = ?";
+    sqlite3_stmt *stmt;
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK) {
+        handleError(sqlite3_errcode(db), db);
+        return NULL;
+    }
+    sqlite3_bind_int(stmt, 1, playlistid);
+
+    cJSON *songs = cJSON_CreateArray();
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+        cJSON *song = cJSON_CreateObject();
+        const char *id_text = (const char *)sqlite3_column_text(stmt, 0);
+        if (id_text) cJSON_AddStringToObject(song, "id", id_text);
+        
+        const char *title_text = (const char *)sqlite3_column_text(stmt, 1);
+        if (title_text) cJSON_AddStringToObject(song, "title", title_text);
+        
+        const char *artist_text = (const char *)sqlite3_column_text(stmt, 2);
+        if (artist_text) cJSON_AddStringToObject(song, "artist", artist_text);
+        
+        cJSON_AddNumberToObject(song, "duration", sqlite3_column_int(stmt, 3));
+        cJSON_AddBoolToObject(song, "isLiked", sqlite3_column_int(stmt, 4));
+        cJSON_AddItemToArray(songs, song);
+    }
+    sqlite3_finalize(stmt);
+    return songs;
 }
 
 int libhandler(App *app, char *method, cJSON *params, int id) {
@@ -146,6 +221,30 @@ int libhandler(App *app, char *method, cJSON *params, int id) {
         cJSON *songid = cJSON_GetObjectItemCaseSensitive(params, "songid");
         if (playlistid && songid && deletesongfromplaylist(app->db, playlistid->valueint, songid->valueint) == 0) {
             success = 1;
+        }
+    } else if (strcmp(method, "lib-getplaylist") == 0) {
+        cJSON *playlistid = cJSON_GetObjectItemCaseSensitive(params, "playlistid");
+        if (playlistid) {
+            cJSON *playlist = getplaylist(app->db, playlistid->valueint);
+            if (playlist) {
+                success = 1;
+                cJSON_AddItemToObject(resp, "playlist", playlist);
+            }
+        }
+    } else if (strcmp(method, "lib-getallplaylists") == 0) {
+        cJSON *playlists = getallplaylists(app->db);
+        if (playlists) {
+            success = 1;
+            cJSON_AddItemToObject(resp, "playlists", playlists);
+        }
+    } else if (strcmp(method, "lib-getplaylistsongs") == 0) {
+        cJSON *playlistid = cJSON_GetObjectItemCaseSensitive(params, "playlistid");
+        if (playlistid) {
+            cJSON *songs = getplaylistsongs(app->db, playlistid->valueint);
+            if (songs) {
+                success = 1;
+                cJSON_AddItemToObject(resp, "songs", songs);
+            }
         }
     }
 

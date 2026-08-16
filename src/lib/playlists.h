@@ -10,6 +10,9 @@ int deleteplaylist(sqlite3 *db, int playlistid);
 int deletesongfromplaylist(sqlite3 *db, int playlistid, int songid);
 int renameplaylist(sqlite3 *db, int playlistid, char *newname);
 int addsongtoplaylist(sqlite3 *db, int songid, int playlistid);
+cJSON *getplaylist(sqlite3 *db, int playlistid);
+cJSON *getallplaylists(sqlite3 *db);
+cJSON *getplaylistsongs(sqlite3 *db, int playlistid);
 int libhandler(App *app, char *method, cJSON *params, int id);
 
 #endif // PLAYLISTS_H
