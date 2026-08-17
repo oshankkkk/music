@@ -3,7 +3,7 @@ import { MainContent } from "./components/MainContent";
 import { PlaylistDetail } from "./components/PlaylistDetail";
 import { ContextPanel } from "./components/ContextPanel";
 import { Playbar } from "./components/Playbar";
-import { SearchPopup } from "./components/SearchPopup";
+import { SongPlaySearch } from "./components/SongPlaySearch";
 import { CreatePlaylistPopup } from "./components/CreatePlaylistPopup";
 import { QueuePopup } from "./components/QueuePopup";
 import { SelectPlaylistPopup } from "./components/SelectPlaylistPopup";
@@ -52,7 +52,7 @@ export function App() {
         <ContextPanel />
       </box>
       <Playbar isFocused={focusArea === "none" && !isSearchOpen && !isCreatePlaylistOpen && !isQueueOpen && !isAddSongOpen} isPlaying={isPlaying} onTogglePlay={togglePlay} song={song} setSong={setSong} />
-      <SearchPopup isOpen={isSearchOpen}/>
+      <SongPlaySearch isOpen={isSearchOpen}/>
       <CreatePlaylistPopup 
         isOpen={isCreatePlaylistOpen} 
         onClose={() => setIsCreatePlaylistOpen(false)} 

@@ -62,8 +62,8 @@ int deletesongfromplaylist(sqlite3 *db, int playlistid, int songid) {
     }
 
 
-    sqlite3_bind_int(stmt, 1, songid);
-    sqlite3_bind_int(stmt, 2, playlistid);
+    sqlite3_bind_int(stmt, 1, playlistid);
+    sqlite3_bind_int(stmt, 2, songid);
 
     int rc = sqlite3_step(stmt);
     sqlite3_finalize(stmt);

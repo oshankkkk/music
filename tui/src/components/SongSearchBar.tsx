@@ -1,16 +1,13 @@
 import { useState } from "react";
-import { rpcCall } from "../client/client";
 
-export function SearchPopup({isOpen}: {isOpen: boolean}) {
+export function SongSearchBar({
+	isOpen,
+	onSubmit,
+}: {
+	isOpen: boolean;
+	onSubmit: (query: string) => void;
+}) {
 	const [query, setQuery] = useState("");
-
-	const handleSubmit = async (query: string) => {
-		try {
-			rpcCall("playSong", "song",{ songName: query });
-			} catch (e) {
-			console.error(e);
-		}
-	};
 
 	if (!isOpen) return null;
 
@@ -34,12 +31,10 @@ export function SearchPopup({isOpen}: {isOpen: boolean}) {
 		<input
 		placeholder="Type here..."
 		onInput={setQuery}
-		onSubmit={()=>{handleSubmit(query)}}
+		onSubmit={() => onSubmit(query)}
 		focused={true}
 		/>
 		</box>
 		</box>
 	);
 }
-
-
