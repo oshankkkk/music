@@ -44,6 +44,8 @@ export function useAppLogic() {
   const [isAddSongOpen, setIsAddSongOpen] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
 
+  const [isPlaylistSearchOpen, setIsPlaylistSearchOpen] = useState(false);
+
   const spaceTimestampRef = useRef<number | null>(null);
   const [playToggleTick, setPlayToggleTick] = useState(0);
   const isFirstTickRef = useRef(true);
@@ -148,6 +150,8 @@ export function useAppLogic() {
       spaceTimestampRef.current = null;
       if (isSearchOpen) {
         setIsSearchOpen(false);
+      } else if (isPlaylistSearchOpen) {
+        setIsPlaylistSearchOpen(false);
       } else if (isCreatePlaylistOpen) {
         setIsCreatePlaylistOpen(false);
       } else if (isQueueOpen) {
@@ -163,7 +167,7 @@ export function useAppLogic() {
       return;
     }
 
-    if (isSearchOpen || isCreatePlaylistOpen || isQueueOpen || isAddSongOpen) {
+    if (isSearchOpen || isCreatePlaylistOpen || isQueueOpen || isAddSongOpen || isPlaylistSearchOpen) {
       return;
     }
 
@@ -182,6 +186,7 @@ export function useAppLogic() {
         case "r": setFocusArea("recently-played"); return;
         case "b": setFocusArea("none"); return;
         case "s": setIsSearchOpen(true); return;
+        case "i": setIsPlaylistSearchOpen(true); return;
         case "q": setIsQueueOpen(true); return;
         case "a": setIsAddSongOpen(true); return;
         default:
@@ -204,6 +209,7 @@ export function useAppLogic() {
     selectedPlaylist, setSelectedPlaylist,
     focusArea, setFocusArea,
     isSearchOpen, setIsSearchOpen,
+    isPlaylistSearchOpen, setIsPlaylistSearchOpen,
     isCreatePlaylistOpen, setIsCreatePlaylistOpen,
     isQueueOpen, setIsQueueOpen,
     isAddSongOpen, setIsAddSongOpen,

@@ -19,6 +19,7 @@ export function App() {
     selectedPlaylist, setSelectedPlaylist,
     focusArea, setFocusArea,
     isSearchOpen, setIsSearchOpen,
+    isPlaylistSearchOpen, setIsPlaylistSearchOpen,
     isCreatePlaylistOpen, setIsCreatePlaylistOpen,
     isQueueOpen, setIsQueueOpen,
     isAddSongOpen, setIsAddSongOpen,
@@ -32,7 +33,7 @@ export function App() {
       </box>
       <box flexDirection="row" width="100%" flexGrow={1}>
         <Sidebar 
-          isFocused={focusArea === "sidebar" && !isSearchOpen && !isCreatePlaylistOpen && !isQueueOpen && !isAddSongOpen} 
+          isFocused={focusArea === "sidebar" && !isSearchOpen && !isCreatePlaylistOpen && !isQueueOpen && !isAddSongOpen && !isPlaylistSearchOpen} 
           playlists={playlists} 
           setPlaylists={setPlaylists}
           onSelectPlaylist={(p) => { setSelectedPlaylist(p); setFocusArea("playlist"); }}
@@ -43,15 +44,16 @@ export function App() {
         {selectedPlaylist ? (
           <PlaylistDetail 
             playlist={selectedPlaylist} 
-            isFocused={focusArea === "playlist" && !isSearchOpen && !isCreatePlaylistOpen && !isQueueOpen && !isAddSongOpen} 
+            isFocused={focusArea === "playlist" && !isSearchOpen && !isCreatePlaylistOpen && !isQueueOpen && !isAddSongOpen && !isPlaylistSearchOpen} 
+            isPlaylistSearchOpen={isPlaylistSearchOpen}
             onBack={() => { setSelectedPlaylist(null); setFocusArea("sidebar"); }} 
           />
         ) : (
-          <MainContent focusArea={isSearchOpen || isCreatePlaylistOpen || isQueueOpen || isAddSongOpen ? "none" : focusArea} recentlyPlayed={recentlyPlayed} />
+          <MainContent focusArea={isSearchOpen || isCreatePlaylistOpen || isQueueOpen || isAddSongOpen || isPlaylistSearchOpen ? "none" : focusArea} recentlyPlayed={recentlyPlayed} />
         )}
         <ContextPanel />
       </box>
-      <Playbar isFocused={focusArea === "none" && !isSearchOpen && !isCreatePlaylistOpen && !isQueueOpen && !isAddSongOpen} isPlaying={isPlaying} onTogglePlay={togglePlay} song={song} setSong={setSong} />
+      <Playbar isFocused={focusArea === "none" && !isSearchOpen && !isCreatePlaylistOpen && !isQueueOpen && !isAddSongOpen && !isPlaylistSearchOpen} isPlaying={isPlaying} onTogglePlay={togglePlay} song={song} setSong={setSong} />
       <SongPlaySearch isOpen={isSearchOpen}/>
       <CreatePlaylistPopup 
         isOpen={isCreatePlaylistOpen} 

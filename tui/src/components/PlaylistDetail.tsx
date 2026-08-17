@@ -2,10 +2,11 @@ import { useState, useRef, useEffect } from "react";
 import { useKeyboard } from "@opentui/react";
 import type { PlaylistInfo } from "../client/types";
 import { rpcCall, addRpcListener } from "../client/client";
+import { SongPlaylistAddSearch } from "./SongPlaylistAddSearch";
 
 type SongInfo = { id: number; title: string; artist: string; duration: string; albumArtColor: string; };
 
-export function PlaylistDetail({ playlist, isFocused, onBack }: { playlist: PlaylistInfo, isFocused: boolean, onBack: () => void }) {
+export function PlaylistDetail({ playlist, isFocused, isPlaylistSearchOpen, onBack }: { playlist: PlaylistInfo, isFocused: boolean, isPlaylistSearchOpen: boolean, onBack: () => void }) {
   const [songs, setSongs] = useState<SongInfo[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const lastDPress = useRef<number>(0);
@@ -31,12 +32,14 @@ export function PlaylistDetail({ playlist, isFocused, onBack }: { playlist: Play
   }, [playlist.id]);
 
   useKeyboard((key) => {
-    if (!isFocused) return;
+    if (!isFocused && !isPlaylistSearchOpen) return;
     
     if (key.name === "escape") {
       onBack();
       return;
     }
+
+    if (isPlaylistSearchOpen) return;
 
     if (key.name === "j") {
       setSelectedIndex((prev) => Math.min(prev + 1, songs.length - 1));
@@ -103,6 +106,7 @@ export function PlaylistDetail({ playlist, isFocused, onBack }: { playlist: Play
           );
         })}
       </box>
+      <SongPlaylistAddSearch isOpen={isPlaylistSearchOpen} />
     </box>
   );
 }
