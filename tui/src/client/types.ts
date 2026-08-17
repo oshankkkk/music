@@ -25,5 +25,6 @@ export type QueueItem = {
 export type RecentlyPlayedItem = {
   songId: string;
   name: string;
+  artist: string;
   isLiked: boolean;
 };

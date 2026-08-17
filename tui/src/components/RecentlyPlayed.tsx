@@ -20,9 +20,8 @@ export function RecentlyPlayed({ isFocused, recentlyPlayed }: { isFocused: boole
       
       <box flexDirection="row" width="100%" paddingBottom={1} paddingX={1}>
         <text fg="#b3b3b3" width={4}>#</text>
-        <text fg="#b3b3b3" width={30}>Title</text>
+        <text fg="#b3b3b3" flexGrow={1}>Title</text>
         <text fg="#b3b3b3" width={20}>Liked</text>
-        <text fg="#b3b3b3" width={10}>ID</text>
       </box>
       
       <box flexDirection="column" flexGrow={1} gap={0}>
@@ -31,12 +30,14 @@ export function RecentlyPlayed({ isFocused, recentlyPlayed }: { isFocused: boole
           return (
             <box key={song.songId} flexDirection="row" width="100%" alignItems="center" paddingX={1} backgroundColor={isSelected ? "#282828" : undefined}>
               <text fg={isSelected ? "#1DB954" : "#b3b3b3"} width={4}>{String(i + 1)}</text>
-              <box flexDirection="row" gap={1} width={30} alignItems="center">
+              <box flexDirection="row" gap={1} flexGrow={1} alignItems="center">
                 <text fg="#1DB954">██</text>
-                <text fg={isSelected ? "#1DB954" : "#ffffff"}>{song.name}</text>
+                <box flexDirection="column">
+                  <text fg={isSelected ? "#1DB954" : "#ffffff"}>{song.name}</text>
+                  <text fg="#b3b3b3">{song.artist}</text>
+                </box>
               </box>
               <text fg="#b3b3b3" width={20}>{song.isLiked ? "♥" : "♡"}</text>
-              <text fg="#b3b3b3" width={10}>{song.songId}</text>
             </box>
           );
         })}

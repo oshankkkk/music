@@ -31,10 +31,10 @@ export function useAppLogic() {
     { queueId: "q4", songId: "4", name: "Imagine" },
   ]);
   const [recentlyPlayed, setRecentlyPlayed] = useState<RecentlyPlayedItem[]>([
-    { songId: "1", name: "Shape of You", isLiked: true },
-    { songId: "2", name: "Blinding Lights", isLiked: false },
-    { songId: "3", name: "Dance Monkey", isLiked: true },
-    { songId: "4", name: "Rockstar", isLiked: false },
+    { songId: "1", name: "Shape of You", artist: "Ed Sheeran", isLiked: true },
+    { songId: "2", name: "Blinding Lights", artist: "The Weeknd", isLiked: false },
+    { songId: "3", name: "Dance Monkey", artist: "Tones and I", isLiked: true },
+    { songId: "4", name: "Rockstar", artist: "Post Malone", isLiked: false },
   ]);
   const [selectedPlaylist, setSelectedPlaylist] = useState<PlaylistInfo | null>(null);
   const [focusArea, setFocusArea] = useState<"none" | "sidebar" | "quick-access" | "mixes" | "playlist" | "recently-played">("none");
