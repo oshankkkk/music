@@ -1,0 +1,78 @@
+import { Sidebar } from "./components/Sidebar";
+import { MainContent } from "./components/MainContent";
+import { PlaylistDetail } from "./components/PlaylistDetail";
+import { ContextPanel } from "./components/ContextPanel";
+import { Playbar } from "./components/Playbar";
+import { SearchPopup } from "./components/SearchPopup";
+import { CreatePlaylistPopup } from "./components/CreatePlaylistPopup";
+import { QueuePopup } from "./components/QueuePopup";
+import { SelectPlaylistPopup } from "./components/SelectPlaylistPopup";
+import { rpcCall } from "./client/client";
+import { useAppLogic } from "./hooks/useAppLogic";
+
+export function App() {
+  const {
+    song, setSong,
+    playlists, setPlaylists,
+    queue, setQueue,
+    recentlyPlayed,
+    selectedPlaylist, setSelectedPlaylist,
+    focusArea, setFocusArea,
+    isSearchOpen, setIsSearchOpen,
+    isCreatePlaylistOpen, setIsCreatePlaylistOpen,
+    isQueueOpen, setIsQueueOpen,
+    isAddSongOpen, setIsAddSongOpen,
+    isPlaying, togglePlay
+  } = useAppLogic();
+
+  return (
+    <box flexDirection="column" width="100%" height="100%" backgroundColor="#000000">
+      <box width="100%" height={1} justifyContent="center" alignItems="center" backgroundColor="#181818">
+        <text fg="#b3b3b3">Search: space+s | Add to Playlist: space+a | Exit: ctrl+c</text>
+      </box>
+      <box flexDirection="row" width="100%" flexGrow={1}>
+        <Sidebar 
+          isFocused={focusArea === "sidebar" && !isSearchOpen && !isCreatePlaylistOpen && !isQueueOpen && !isAddSongOpen} 
+          playlists={playlists} 
+          setPlaylists={setPlaylists}
+          onSelectPlaylist={(p) => { setSelectedPlaylist(p); setFocusArea("playlist"); }}
+          onDeletePlaylist={(id) => {
+            rpcCall("lib-removeplaylist", "lib", { playlistid: parseInt(id) });
+          }}
+        />
+        {selectedPlaylist ? (
+          <PlaylistDetail 
+            playlist={selectedPlaylist} 
+            isFocused={focusArea === "playlist" && !isSearchOpen && !isCreatePlaylistOpen && !isQueueOpen && !isAddSongOpen} 
+            onBack={() => { setSelectedPlaylist(null); setFocusArea("sidebar"); }} 
+          />
+        ) : (
+          <MainContent focusArea={isSearchOpen || isCreatePlaylistOpen || isQueueOpen || isAddSongOpen ? "none" : focusArea} recentlyPlayed={recentlyPlayed} />
+        )}
+        <ContextPanel />
+      </box>
+      <Playbar isFocused={focusArea === "none" && !isSearchOpen && !isCreatePlaylistOpen && !isQueueOpen && !isAddSongOpen} isPlaying={isPlaying} onTogglePlay={togglePlay} song={song} setSong={setSong} />
+      <SearchPopup isOpen={isSearchOpen}/>
+      <CreatePlaylistPopup 
+        isOpen={isCreatePlaylistOpen} 
+        onClose={() => setIsCreatePlaylistOpen(false)} 
+        onSubmit={(name) => {
+          rpcCall("lib-createplaylist", "lib", { title: name });
+        }} 
+      />
+      <QueuePopup isOpen={isQueueOpen} onClose={() => setIsQueueOpen(false)} queue={queue} setQueue={setQueue} />
+      <SelectPlaylistPopup
+        isOpen={isAddSongOpen}
+        playlists={playlists}
+        onClose={() => setIsAddSongOpen(false)}
+        onSelect={(playlistId) => {
+          rpcCall("lib-addsongtoplaylist", "lib", { playlistid: parseInt(playlistId), songid: parseInt(song.id) });
+          if (selectedPlaylist && selectedPlaylist.id === playlistId) {
+            rpcCall("lib-getplaylistsongs", "lib", { playlistid: parseInt(playlistId) });
+          }
+          setIsAddSongOpen(false);
+        }}
+      />
+    </box>
+  );
+}

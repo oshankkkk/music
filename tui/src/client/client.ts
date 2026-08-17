@@ -11,7 +11,9 @@ export function addRpcListener(type: string, callback: RPCCallback) {
     if (!rpcListeners[type]) rpcListeners[type] = [];
     rpcListeners[type].push(callback);
     return () => {
-        rpcListeners[type] = rpcListeners[type].filter(cb => cb !== callback);
+        if (rpcListeners[type]) {
+            rpcListeners[type] = rpcListeners[type].filter(cb => cb !== callback);
+        }
     };
 }
 
