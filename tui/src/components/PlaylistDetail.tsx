@@ -1,25 +1,38 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useKeyboard } from "@opentui/react";
 import type { PlaylistInfo } from "../client/types";
+import { rpcCall, addRpcListener } from "../client/client";
 
 type SongInfo = { id: number; title: string; artist: string; duration: string; albumArtColor: string; };
 
 export function PlaylistDetail({ playlist, isFocused, onBack }: { playlist: PlaylistInfo, isFocused: boolean, onBack: () => void }) {
-  const [songs, setSongs] = useState<SongInfo[]>([
-    { id: 1, title: "Song 1", artist: "Artist 1", duration: "3:45", albumArtColor: "#ff6347" },
-    { id: 2, title: "Song 2", artist: "Artist 2", duration: "4:20", albumArtColor: "#4169e1" },
-    { id: 3, title: "Song 3", artist: "Artist 3", duration: "2:55", albumArtColor: "#1DB954" },
-    { id: 4, title: "Song 4", artist: "Artist 4", duration: "5:10", albumArtColor: "#7b68ee" },
-    { id: 5, title: "Song 5", artist: "Artist 5", duration: "3:30", albumArtColor: "#ff1493" },
-  ]);
-  
+  const [songs, setSongs] = useState<SongInfo[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const lastDPress = useRef<number>(0);
+
+  useEffect(() => {
+    rpcCall("lib-getplaylistsongs", "lib", { playlistid: parseInt(playlist.id) });
+
+    const unsubscribe = addRpcListener("playlist", (data) => {
+      if (data.response.method === "lib-getplaylistsongs" && data.response.success && data.response.songs) {
+        setSongs(data.response.songs.map((s: any) => ({
+          id: parseInt(s.id),
+          title: s.title || "Unknown",
+          artist: s.artist || "Unknown",
+          duration: s.duration ? `${Math.floor(s.duration / 60)}:${String(s.duration % 60).padStart(2, '0')}` : "0:00",
+          albumArtColor: "#1DB954"
+        })));
+      } else if (data.response.method === "lib-deletesongfromplaylist" && data.response.success) {
+        rpcCall("lib-getplaylistsongs", "lib", { playlistid: parseInt(playlist.id) });
+      }
+    });
+
+    return unsubscribe;
+  }, [playlist.id]);
 
   useKeyboard((key) => {
     if (!isFocused) return;
     
-    // Add escape to go back
     if (key.name === "escape") {
       onBack();
       return;
@@ -32,14 +45,11 @@ export function PlaylistDetail({ playlist, isFocused, onBack }: { playlist: Play
     } else if (key.name === "d") {
       const now = Date.now();
       if (now - lastDPress.current < 500) {
-        if (songs.length > 0) {
-            setSongs((prev) => {
-                const newSongs = prev.filter((_, i) => i !== selectedIndex);
-                if (selectedIndex >= newSongs.length) {
-                    setSelectedIndex(Math.max(0, newSongs.length - 1));
-                }
-                return newSongs;
-            });
+        if (songs.length > 0 && songs[selectedIndex]) {
+          rpcCall("lib-deletesongfromplaylist", "lib", { 
+            playlistid: parseInt(playlist.id), 
+            songid: songs[selectedIndex].id 
+          });
         }
         lastDPress.current = 0;
       } else {

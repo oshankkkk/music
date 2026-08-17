@@ -4,6 +4,7 @@ export type PlaylistInfo = {
 };
 
 export type Song = {
+  id: string;
   title: string;
   description: string;
   artist: string;

@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useKeyboard } from "@opentui/react";
 import type { PlaylistInfo } from "../client/types";
 
-export function Sidebar({ isFocused, playlists, setPlaylists, onSelectPlaylist }: { isFocused?: boolean, playlists: PlaylistInfo[], setPlaylists: (p: PlaylistInfo[]) => void, onSelectPlaylist: (p: PlaylistInfo) => void }) {
+export function Sidebar({ isFocused, playlists, setPlaylists, onSelectPlaylist, onDeletePlaylist }: { isFocused?: boolean, playlists: PlaylistInfo[], setPlaylists: (p: PlaylistInfo[]) => void, onSelectPlaylist: (p: PlaylistInfo) => void, onDeletePlaylist: (id: string) => void }) {
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const lastDPress = useRef<number>(0);
 
   useKeyboard((key) => {
     if (!isFocused) return;
@@ -14,6 +15,17 @@ export function Sidebar({ isFocused, playlists, setPlaylists, onSelectPlaylist }
     } else if (key.name === "enter" || key.name === "return") {
       if (playlists[selectedIndex]) {
         onSelectPlaylist(playlists[selectedIndex]);
+      }
+    } else if (key.name === "d") {
+      const now = Date.now();
+      if (now - lastDPress.current < 500) {
+        if (playlists.length > 0 && playlists[selectedIndex]) {
+          onDeletePlaylist(playlists[selectedIndex].id);
+          // Don't modify the state locally, rely on the server refresh
+        }
+        lastDPress.current = 0;
+      } else {
+        lastDPress.current = now;
       }
     }
   });

@@ -1,14 +1,27 @@
 import { createRequest } from "./request";
 import type { Song } from "./types";
-import { parseToSong} from "./response";
 import type { Socket } from "bun";
 
 let tuiSocket: Socket | null = null;
 
-export function startReader(
-song: Song,
-setSong: React.Dispatch<React.SetStateAction<Song>>,
-) {
+type RPCCallback = (data: any) => void;
+const rpcListeners: Record<string, RPCCallback[]> = {};
+
+export function addRpcListener(type: string, callback: RPCCallback) {
+    if (!rpcListeners[type]) rpcListeners[type] = [];
+    rpcListeners[type].push(callback);
+    return () => {
+        rpcListeners[type] = rpcListeners[type].filter(cb => cb !== callback);
+    };
+}
+
+export function emitRpcResponse(type: string, data: any) {
+    if (rpcListeners[type]) {
+        rpcListeners[type].forEach(cb => cb(data));
+    }
+}
+
+export function startReader() {
 	let buff = Buffer.alloc(0);
 	
 	Bun.connect({
@@ -26,9 +39,8 @@ setSong: React.Dispatch<React.SetStateAction<Song>>,
 					
 					let rpcmsg = buff.subarray(4, 4 + msgLen);
 					try {
-						parseToSong(setSong,rpcmsg);
-						//console.log("meh song obj",song);
-						//console.log("here comes the response");
+                        const msg = JSON.parse(rpcmsg.toString());
+                        emitRpcResponse(msg.type, msg);
 					} catch (e) {
 						console.error("Failed to parse message", e);
 					}
@@ -53,8 +65,4 @@ export function rpcCall(method: string,type:string, params: any = {}) {
 		} else {
 			tuiSocket.write(request);
 		}
-	};
-
-
-
-
+};
