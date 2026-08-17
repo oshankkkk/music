@@ -11,7 +11,7 @@ import { CreatePlaylistPopup } from "./components/CreatePlaylistPopup";
 import { QueuePopup } from "./components/QueuePopup";
 import { SelectPlaylistPopup } from "./components/SelectPlaylistPopup";
 import type { Song, PlaylistInfo, QueueItem, RecentlyPlayedItem } from "./client/types";
-import { startReader } from "./client/client";
+import { startReader, addRpcListener, rpcCall } from "./client/client";
 
 const LEADER_TIMEOUT_MS = 300;
 
@@ -62,69 +62,64 @@ function App() {
 
   // When playToggleTick changes (and it's not the initial mount), toggle play
   useEffect(() => {
-    import("./client/client").then(({ startReader, addRpcListener, rpcCall }) => {
-      startReader();
-      
-      const unsubscribeSong = addRpcListener("song", (data) => {
+    const unsubscribeSong = addRpcListener("song", (data) => {
+      setSong((prevSong) => ({
+        ...prevSong,
+        id: data.response.songid || prevSong.id,
+        title: data.response.title || prevSong.title,
+        artist: data.response.artist || prevSong.artist,
+        duration: data.response.duration || prevSong.duration,
+        isLiked: data.response.isliked !== undefined ? data.response.isliked : prevSong.isLiked,
+        isPlayed: true,
+      }));
+    });
+    
+    const unsubscribeMpvEvent = addRpcListener("mpv-event", (data) => {
+      if (data.response.event === "property-change" && data.response.name === "time-pos") {
         setSong((prevSong) => ({
           ...prevSong,
-          id: data.response.songid || prevSong.id,
-          title: data.response.title || prevSong.title,
-          artist: data.response.artist || prevSong.artist,
-          duration: data.response.duration || prevSong.duration,
-          isLiked: data.response.isliked !== undefined ? data.response.isliked : prevSong.isLiked,
-          isPlayed: true,
+          timestamp: data.response.data !== undefined ? data.response.data : prevSong.timestamp
         }));
-      });
-      
-      const unsubscribeMpvEvent = addRpcListener("mpv-event", (data) => {
-        if (data.response.event === "property-change" && data.response.name === "time-pos") {
-          setSong((prevSong) => ({
-            ...prevSong,
-            timestamp: data.response.data !== undefined ? data.response.data : prevSong.timestamp
-          }));
-        } else if (data.response.event === "end-file") {
-          setSong((prevSong) => ({
-            ...prevSong,
-            timestamp: 0,
-            isPlayed: false
-          }));
-        }
-      });
-      
-      const unsubscribeMpvReply = addRpcListener("mpv-reply", (data) => {
-        if (data.response.request_id == "2") {
-          setSong((prevSong) => ({
-            ...prevSong,
-            duration: data.response.data || prevSong.duration,
-          }));
-        }
-      });
-      
-      const unsubscribePlaylist = addRpcListener("playlist", (data) => {
-        if (data.response.method === "lib-getallplaylists" && data.response.success && data.response.playlists) {
-          setPlaylists(data.response.playlists.map((pl: any) => ({
-            id: String(pl.id),
-            name: pl.title
-          })));
-        } else if (data.response.method === "lib-createplaylist" && data.response.success) {
-          // Re-fetch all playlists to update the list
-          rpcCall("lib-getallplaylists", "lib", {});
-        } else if (data.response.method === "lib-removeplaylist" && data.response.success) {
-          rpcCall("lib-getallplaylists", "lib", {});
-        }
-      });
-
-      // Fetch playlists on mount
-      rpcCall("lib-getallplaylists", "lib", {});
-
-      return () => {
-        unsubscribeSong();
-        unsubscribeMpvEvent();
-        unsubscribeMpvReply();
-        unsubscribePlaylist();
-      };
+      } else if (data.response.event === "end-file") {
+        setSong((prevSong) => ({
+          ...prevSong,
+          timestamp: 0,
+          isPlayed: false
+        }));
+      }
     });
+    
+    const unsubscribeMpvReply = addRpcListener("mpv-reply", (data) => {
+      if (data.response.request_id == "2") {
+        setSong((prevSong) => ({
+          ...prevSong,
+          duration: data.response.data || prevSong.duration,
+        }));
+      }
+    });
+    
+    const unsubscribePlaylist = addRpcListener("playlist", (data) => {
+      if (data.response.method === "lib-getallplaylists" && data.response.success && data.response.playlists) {
+        setPlaylists(data.response.playlists.map((pl: any) => ({
+          id: String(pl.id),
+          name: pl.title
+        })));
+      } else if (data.response.method === "lib-createplaylist" && data.response.success) {
+        rpcCall("lib-getallplaylists", "lib", {});
+      } else if (data.response.method === "lib-removeplaylist" && data.response.success) {
+        rpcCall("lib-getallplaylists", "lib", {});
+      }
+    });
+
+    // Fetch playlists on mount — rpcCall internally awaits the socket connection
+    rpcCall("lib-getallplaylists", "lib", {});
+
+    return () => {
+      unsubscribeSong();
+      unsubscribeMpvEvent();
+      unsubscribeMpvReply();
+      unsubscribePlaylist();
+    };
   }, []);
 
   useEffect(() => {
@@ -132,10 +127,7 @@ function App() {
       isFirstTickRef.current = false;
       return;
     }
-    import("./client/client").then(({ rpcCall }) => {
-      rpcCall("player-toggle-pause","mpv")
-	  //.catch(console.error);
-    });
+    rpcCall("player-toggle-pause","mpv");
     setIsPlaying((p) => !p);
   }, [playToggleTick]);
 
@@ -241,9 +233,7 @@ function App() {
           setPlaylists={setPlaylists}
           onSelectPlaylist={(p) => { setSelectedPlaylist(p); setFocusArea("playlist"); }}
           onDeletePlaylist={(id) => {
-            import("./client/client").then(({ rpcCall }) => {
-              rpcCall("lib-removeplaylist", "lib", { playlistid: parseInt(id) });
-            });
+            rpcCall("lib-removeplaylist", "lib", { playlistid: parseInt(id) });
           }}
         />
         {selectedPlaylist ? (
@@ -263,9 +253,7 @@ function App() {
         isOpen={isCreatePlaylistOpen} 
         onClose={() => setIsCreatePlaylistOpen(false)} 
         onSubmit={(name) => {
-          import("./client/client").then(({ rpcCall }) => {
-            rpcCall("lib-createplaylist", "lib", { title: name });
-          });
+          rpcCall("lib-createplaylist", "lib", { title: name });
         }} 
       />
       <QueuePopup isOpen={isQueueOpen} onClose={() => setIsQueueOpen(false)} queue={queue} setQueue={setQueue} />
@@ -274,13 +262,10 @@ function App() {
         playlists={playlists}
         onClose={() => setIsAddSongOpen(false)}
         onSelect={(playlistId) => {
-          import("./client/client").then(({ rpcCall }) => {
-            rpcCall("lib-addsongtoplaylist", "lib", { playlistid: parseInt(playlistId), songid: parseInt(song.id) });
-            // optionally refresh selected playlist if it's currently open
-            if (selectedPlaylist && selectedPlaylist.id === playlistId) {
-              rpcCall("lib-getplaylistsongs", "lib", { playlistid: parseInt(playlistId) });
-            }
-          });
+          rpcCall("lib-addsongtoplaylist", "lib", { playlistid: parseInt(playlistId), songid: parseInt(song.id) });
+          if (selectedPlaylist && selectedPlaylist.id === playlistId) {
+            rpcCall("lib-getplaylistsongs", "lib", { playlistid: parseInt(playlistId) });
+          }
           setIsAddSongOpen(false);
         }}
       />

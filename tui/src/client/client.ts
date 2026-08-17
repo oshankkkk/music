@@ -21,14 +21,19 @@ export function emitRpcResponse(type: string, data: any) {
     }
 }
 
-export function startReader() {
+const connection:Promise<void> = new Promise((resolve,reject)=>{
+
+	console.log("sokcing -->")
 	let buff = Buffer.alloc(0);
 	
 	Bun.connect({
 		unix: "../build/us.socket",
 		socket: {
 			open(socket) {
+				console.log("sokcing")
 				tuiSocket = socket;
+				resolve();
+				console.log("sokcing -->",tuiSocket)
 			},
 			data(socket, data) {
 				buff = Buffer.concat([buff, data]);
@@ -55,10 +60,14 @@ export function startReader() {
 				tuiSocket = null;
 			}
 		}
-	}).catch(console.error);
-}
+	}).catch(reject);
+});
 
-export function rpcCall(method: string,type:string, params: any = {}) {
+export function startReader(): Promise<void>{
+	return connection;
+}
+export async function rpcCall(method: string,type:string, params: any = {}) {
+	await connection;
 		let request = createRequest(method, params,type);
 		if (!tuiSocket) {
 			throw new Error ("Socket not connected");
