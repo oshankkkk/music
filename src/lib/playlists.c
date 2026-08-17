@@ -192,9 +192,9 @@ int libhandler(App *app, char *method, cJSON *params, int id) {
     cJSON_AddNumberToObject(resp, "id", id);
     cJSON_AddStringToObject(resp, "method", method);
 
+    int playlistid = 0;
     if (strcmp(method, "lib-createplaylist") == 0) {
         cJSON *title = cJSON_GetObjectItemCaseSensitive(params, "title");
-        int playlistid = 0;
         if (title && createplaylist(app->db, title->valuestring, &playlistid) == 0) {
             success = 1;
             cJSON_AddNumberToObject(resp, "playlistid", playlistid);
@@ -253,6 +253,7 @@ int libhandler(App *app, char *method, cJSON *params, int id) {
     } else {
         cJSON_AddFalseToObject(resp, "success");
     }
+    cJSON_AddNumberToObject(resp, "id",playlistid);
     cmdresponse(resp, app->msgqueue,"playlist");
     return success ? 0 : -1;
 }

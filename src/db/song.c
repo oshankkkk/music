@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <sqlite3.h>
 #include <string.h>
+#include <time.h>
 #include "../models/song.h"
 //#include "song.h"
 
@@ -41,9 +42,10 @@ int CheckSong(sqlite3 *db, const char *id) {
 }
 
 int AddSong(sqlite3 *db, const Song *s) {
+	time_t now=time(NULL);
     const char *sql =
-        "INSERT INTO song (id, title, artist, duration, isliked, genre) "
-        "VALUES (?, ?, ?, ?, ?, ?)";
+        "INSERT INTO song (id, title, artist, duration, isliked, genre, lastPlayed) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?,)";
     sqlite3_stmt *stmt;
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK) {
         handleError(sqlite3_errcode(db), db);
@@ -54,7 +56,9 @@ int AddSong(sqlite3 *db, const Song *s) {
     sqlite3_bind_text(stmt, 3, s->artist, -1, SQLITE_STATIC);
     sqlite3_bind_int(stmt, 4, s->duration);
     sqlite3_bind_int(stmt, 5, s->isliked);
+   	 
     sqlite3_bind_text(stmt, 6, s->genre, -1, SQLITE_STATIC);
+    sqlite3_bind_int(stmt, 7,now);
 
     int rc = sqlite3_step(stmt);
     sqlite3_finalize(stmt);
