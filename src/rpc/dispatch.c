@@ -1,5 +1,6 @@
 #include <cjson/cJSON.h>
 #include "./response.h"
+#include <stdio.h>
 #include <string.h>
 #include "../models/app.h"
 #include "../db/song.h"
@@ -15,8 +16,9 @@ void playerhandler(App *app, char *method, cJSON *params, int id, queue *mq);
 
 void dispatch(App *app,char *method,char *type, cJSON *params, int id) {
 	queue *mq=app->msgqueue;
-	int err=0;
+	//int err=0;
 	if (strcmp(type, "song") == 0){
+//		printf("mekan giya---->%s,\n",method);
 		songhandler(app,method,params,id);
 	}else if(strcmp(type, "player") == 0){
 		playerhandler(app,method,params,id,app->msgqueue);

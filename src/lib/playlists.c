@@ -113,7 +113,7 @@ int addsongtoplaylist(sqlite3 *db, int songid, int playlistid) {
 }
 
 cJSON *getplaylist(sqlite3 *db, int playlistid) {
-    const char *sql = "SELECT id, title, date_made, song_count FROM playlist WHERE id = ?";
+    const char *sql = "SELECT id, title, createdAt, song_count FROM playlist WHERE id = ?";
     sqlite3_stmt *stmt;
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK) {
         handleError(sqlite3_errcode(db), db);
@@ -126,7 +126,7 @@ cJSON *getplaylist(sqlite3 *db, int playlistid) {
         playlist = cJSON_CreateObject();
         cJSON_AddNumberToObject(playlist, "id", sqlite3_column_int(stmt, 0));
         cJSON_AddStringToObject(playlist, "title", (const char *)sqlite3_column_text(stmt, 1));
-        cJSON_AddStringToObject(playlist, "date_made", (const char *)sqlite3_column_text(stmt, 2));
+        cJSON_AddStringToObject(playlist, "createdAt", (const char *)sqlite3_column_text(stmt, 2));
         cJSON_AddNumberToObject(playlist, "song_count", sqlite3_column_int(stmt, 3));
     }
     sqlite3_finalize(stmt);
@@ -134,7 +134,7 @@ cJSON *getplaylist(sqlite3 *db, int playlistid) {
 }
 
 cJSON *getallplaylists(sqlite3 *db) {
-    const char *sql = "SELECT id, title, date_made, song_count FROM playlist";
+    const char *sql = "SELECT id, title,createdAt, song_count FROM playlist";
     sqlite3_stmt *stmt;
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK) {
         handleError(sqlite3_errcode(db), db);
@@ -146,7 +146,7 @@ cJSON *getallplaylists(sqlite3 *db) {
         cJSON *playlist = cJSON_CreateObject();
         cJSON_AddNumberToObject(playlist, "id", sqlite3_column_int(stmt, 0));
         cJSON_AddStringToObject(playlist, "title", (const char *)sqlite3_column_text(stmt, 1));
-        cJSON_AddStringToObject(playlist, "date_made", (const char *)sqlite3_column_text(stmt, 2));
+        cJSON_AddStringToObject(playlist, "createdAt", (const char *)sqlite3_column_text(stmt, 2));
         cJSON_AddNumberToObject(playlist, "song_count", sqlite3_column_int(stmt, 3));
         cJSON_AddItemToArray(playlists, playlist);
     }

@@ -198,8 +198,12 @@ int songhandler(App *app, char *method, cJSON *params, int id) {
     cJSON_AddNumberToObject(resp, "id", id);
     cJSON_AddStringToObject(resp, "method", method);
 
+
+		//printf("method------->%s",method);
 	if (strcmp(method, "song-playSong") == 0){
+
 		cJSON *songName = cJSON_GetObjectItemCaseSensitive(params, "songName");
+	//	printf("songname-->%s",songName->valuestring);
 		if (songName == NULL || !cJSON_IsString(songName)) {
 			rpcerror(-32602, "Invalid params: requires string songName", id, app->msgqueue);
 			return -1;

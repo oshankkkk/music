@@ -4,7 +4,7 @@ import { SongSearchBar } from "./SongSearchBar";
 export function SongPlaySearch({ isOpen }: { isOpen: boolean }) {
 	const handleSubmit = async (query: string) => {
 		try {
-			rpcCall("playSong", "song", { songName: query });
+			rpcCall("song-playSong", "song", { songName: query });
 		} catch (e) {
 			console.error(e);
 		}
