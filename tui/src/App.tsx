@@ -5,6 +5,7 @@ import { ContextPanel } from "./components/ContextPanel";
 import { Playbar } from "./components/Playbar";
 import { SongPlaySearch } from "./components/SongPlaySearch";
 import { CreatePlaylistPopup } from "./components/CreatePlaylistPopup";
+import { RenamePlaylistPopup } from "./components/RenamePlaylistPopup";
 import { QueuePopup } from "./components/QueuePopup";
 import { SelectPlaylistPopup } from "./components/SelectPlaylistPopup";
 import { rpcCall } from "./client/client";
@@ -21,6 +22,7 @@ export function App() {
     isSearchOpen, setIsSearchOpen,
     isPlaylistSearchOpen, setIsPlaylistSearchOpen,
     isCreatePlaylistOpen, setIsCreatePlaylistOpen,
+    playlistToRename, setPlaylistToRename,
     isQueueOpen, setIsQueueOpen,
     isAddSongOpen, setIsAddSongOpen,
     isPlaying, togglePlay
@@ -33,27 +35,30 @@ export function App() {
       </box>
       <box flexDirection="row" width="100%" flexGrow={1}>
         <Sidebar 
-          isFocused={focusArea === "sidebar" && !isSearchOpen && !isCreatePlaylistOpen && !isQueueOpen && !isAddSongOpen && !isPlaylistSearchOpen} 
+          isFocused={focusArea === "sidebar" && !isSearchOpen && !isCreatePlaylistOpen && !isQueueOpen && !isAddSongOpen && !isPlaylistSearchOpen && !playlistToRename} 
           playlists={playlists} 
           setPlaylists={setPlaylists}
           onSelectPlaylist={(p) => { setSelectedPlaylist(p); setFocusArea("playlist"); }}
           onDeletePlaylist={(id) => {
             rpcCall("lib-removeplaylist", "lib", { playlistid: parseInt(id) });
           }}
+          onRenamePlaylist={(p) => {
+            setPlaylistToRename(p);
+          }}
         />
         {selectedPlaylist ? (
           <PlaylistDetail 
             playlist={selectedPlaylist} 
-            isFocused={focusArea === "playlist" && !isSearchOpen && !isCreatePlaylistOpen && !isQueueOpen && !isAddSongOpen && !isPlaylistSearchOpen} 
+            isFocused={focusArea === "playlist" && !isSearchOpen && !isCreatePlaylistOpen && !isQueueOpen && !isAddSongOpen && !isPlaylistSearchOpen && !playlistToRename} 
             isPlaylistSearchOpen={isPlaylistSearchOpen}
             onBack={() => { setSelectedPlaylist(null); setFocusArea("sidebar"); }} 
           />
         ) : (
-          <MainContent focusArea={isSearchOpen || isCreatePlaylistOpen || isQueueOpen || isAddSongOpen || isPlaylistSearchOpen ? "none" : focusArea} recentlyPlayed={recentlyPlayed} />
+          <MainContent focusArea={isSearchOpen || isCreatePlaylistOpen || isQueueOpen || isAddSongOpen || isPlaylistSearchOpen || playlistToRename ? "none" : focusArea} recentlyPlayed={recentlyPlayed} />
         )}
         <ContextPanel />
       </box>
-      <Playbar isFocused={focusArea === "none" && !isSearchOpen && !isCreatePlaylistOpen && !isQueueOpen && !isAddSongOpen && !isPlaylistSearchOpen} isPlaying={isPlaying} onTogglePlay={togglePlay} song={song} setSong={setSong} />
+      <Playbar isFocused={focusArea === "none" && !isSearchOpen && !isCreatePlaylistOpen && !isQueueOpen && !isAddSongOpen && !isPlaylistSearchOpen && !playlistToRename} isPlaying={isPlaying} onTogglePlay={togglePlay} song={song} setSong={setSong} />
       <SongPlaySearch isOpen={isSearchOpen}/>
       <CreatePlaylistPopup 
         isOpen={isCreatePlaylistOpen} 
@@ -61,6 +66,13 @@ export function App() {
         onSubmit={(name) => {
           rpcCall("lib-createplaylist", "lib", { title: name });
         }} 
+      />
+      <RenamePlaylistPopup
+        playlist={playlistToRename}
+        onClose={() => setPlaylistToRename(null)}
+        onSubmit={(name) => {
+          rpcCall("lib-renameplaylist", "lib", { playlistid: parseInt(playlistToRename!.id), name: name });
+        }}
       />
       <QueuePopup isOpen={isQueueOpen} onClose={() => setIsQueueOpen(false)} queue={queue} setQueue={setQueue} />
       <SelectPlaylistPopup

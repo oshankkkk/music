@@ -45,6 +45,7 @@ export function useAppLogic() {
   const [isPlaying, setIsPlaying] = useState(false);
 
   const [isPlaylistSearchOpen, setIsPlaylistSearchOpen] = useState(false);
+  const [playlistToRename, setPlaylistToRename] = useState<PlaylistInfo | null>(null);
 
   const spaceTimestampRef = useRef<number | null>(null);
   const [playToggleTick, setPlayToggleTick] = useState(0);
@@ -107,7 +108,7 @@ export function useAppLogic() {
         })));
       } else if (data.response.method === "lib-createplaylist" && data.response.success) {
         rpcCall("lib-getallplaylists", "lib", {});
-      } else if (data.response.method === "lib-removeplaylist" && data.response.success) {
+      } else if ((data.response.method === "lib-removeplaylist" || data.response.method === "lib-renameplaylist") && data.response.success) {
         rpcCall("lib-getallplaylists", "lib", {});
       }
     });
@@ -170,6 +171,8 @@ export function useAppLogic() {
         setIsQueueOpen(false);
       } else if (isAddSongOpen) {
         setIsAddSongOpen(false);
+      } else if (playlistToRename) {
+        setPlaylistToRename(null);
       } else if (focusArea !== "none") {
         setFocusArea("none");
       } else if (selectedPlaylist) {
@@ -179,7 +182,7 @@ export function useAppLogic() {
       return;
     }
 
-    if (isSearchOpen || isCreatePlaylistOpen || isQueueOpen || isAddSongOpen || isPlaylistSearchOpen) {
+    if (isSearchOpen || isCreatePlaylistOpen || isQueueOpen || isAddSongOpen || isPlaylistSearchOpen || playlistToRename) {
       return;
     }
 
@@ -223,6 +226,7 @@ export function useAppLogic() {
     isSearchOpen, setIsSearchOpen,
     isPlaylistSearchOpen, setIsPlaylistSearchOpen,
     isCreatePlaylistOpen, setIsCreatePlaylistOpen,
+    playlistToRename, setPlaylistToRename,
     isQueueOpen, setIsQueueOpen,
     isAddSongOpen, setIsAddSongOpen,
     isPlaying, togglePlay

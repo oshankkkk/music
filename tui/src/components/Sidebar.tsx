@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { useKeyboard } from "@opentui/react";
 import type { PlaylistInfo } from "../client/types";
 
-export function Sidebar({ isFocused, playlists, setPlaylists, onSelectPlaylist, onDeletePlaylist }: { isFocused?: boolean, playlists: PlaylistInfo[], setPlaylists: (p: PlaylistInfo[]) => void, onSelectPlaylist: (p: PlaylistInfo) => void, onDeletePlaylist: (id: string) => void }) {
+export function Sidebar({ isFocused, playlists, setPlaylists, onSelectPlaylist, onDeletePlaylist, onRenamePlaylist }: { isFocused?: boolean, playlists: PlaylistInfo[], setPlaylists: (p: PlaylistInfo[]) => void, onSelectPlaylist: (p: PlaylistInfo) => void, onDeletePlaylist: (id: string) => void, onRenamePlaylist: (p: PlaylistInfo) => void }) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const lastDPress = useRef<number>(0);
 
@@ -15,6 +15,10 @@ export function Sidebar({ isFocused, playlists, setPlaylists, onSelectPlaylist, 
     } else if (key.name === "enter" || key.name === "return") {
       if (playlists[selectedIndex]) {
         onSelectPlaylist(playlists[selectedIndex]);
+      }
+    } else if (key.name === "r") {
+      if (playlists.length > 0 && playlists[selectedIndex]) {
+        onRenamePlaylist(playlists[selectedIndex]);
       }
     } else if (key.name === "d") {
       const now = Date.now();
