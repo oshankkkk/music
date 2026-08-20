@@ -7,16 +7,33 @@ export function parseToSong(
   try {
     const data = JSON.parse(messageBuffer.toString());
 	console.log("this is the audio",data);
-    if (data.type==="song") {
-    setSong((prevSong) => ({
-      ...prevSong,
-      title: data.response.title || prevSong.title,
-      artist: data.response.artist || prevSong.artist,
-      duration: data.response.duration || prevSong.duration,
-      isLiked: data.response.isliked !== undefined ? data.response.isliked : prevSong.isLiked,
-	  isPlayed:true,
-    }));
-    }else if (data.type ==="mpv-event"){
+    if (data.type === "song") {
+      // check for the method name and parse accordingly
+      if (data.response.method === "song-playSong") {
+        const songData = data.response.songlist;
+        if (songData) {
+          setSong((prevSong) => ({
+            ...prevSong,
+            title: songData.title || prevSong.title,
+            artist: songData.artist || prevSong.artist,
+            duration: songData.duration !== undefined ? songData.duration : prevSong.duration,
+            isLiked: songData.isliked !== undefined ? songData.isliked : prevSong.isLiked,
+            isPlayed: true,
+          }));
+        }
+      } else if (data.response.method === "song-getallsongs") {
+        // Here songlist is an array of songs. 
+		//need a different state function for that.
+        console.log("All songs received:", data.response.songlist);
+      } else if (data.response.method === "song-likesong" || data.response.method === "song-unlikesong") {
+        if (data.response.success) {
+          setSong((prevSong) => ({
+            ...prevSong,
+            isLiked: data.response.method === "song-likesong",
+          }));
+        }
+      }
+    } else if (data.type === "mpv-event") {
 		console.log("mvp event",data);
 		if (data.response.event === "property-change" && data.response.name === "time-pos") {
 			setSong((prevSong) => ({

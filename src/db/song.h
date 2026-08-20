@@ -3,6 +3,8 @@
 
 #include <sqlite3.h>
 #include "../models/song.h"
+#include "../models/app.h"
+#include <cjson/cJSON.h>
 
 sqlite3 * InitDb(void);
 int CheckSong(sqlite3 *db, const char *id);
@@ -13,5 +15,6 @@ int play_song(sqlite3 *db, const char *id);
 int like_song(sqlite3 *db, const char *id);
 int unlike_song(sqlite3 *db, const char *id);
 int GetSongList(sqlite3 *db, Song **out, int *count);
+int songhandler(App *app, char *method, cJSON *params, int id);
 
 #endif // DB_SONG_H

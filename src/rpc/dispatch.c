@@ -1,9 +1,8 @@
 #include <cjson/cJSON.h>
 #include "./response.h"
-#include <stdio.h>
 #include <string.h>
 #include "../models/app.h"
-#include "../player/player.h"
+#include "../db/song.h"
 #include "../player/mpv/mpv.h"
 #include <stddef.h>
 #include <unistd.h>
@@ -17,35 +16,13 @@ void playerhandler(App *app, char *method, cJSON *params, int id, queue *mq);
 void dispatch(App *app,char *method,char *type, cJSON *params, int id) {
 	queue *mq=app->msgqueue;
 	int err=0;
-	if (strcmp(method, "playSong") == 0){
-		cJSON *songName = cJSON_GetObjectItemCaseSensitive(params, "songName");
-		if (cJSON_IsNumber(songName)) {
- 			rpcerror(-32602, "Invalid params: no numbers only song names ", id,mq);
-		}
-
-		err=playSong(app,songName->valuestring);
-		if (err!=0){
-			perror("rpc start song");
-		}
-		
-		if (app->currentsong != NULL) {
-			cJSON *song=cJSON_CreateObject();	
-			cJSON_AddStringToObject(song, "songid", app->currentsong->id);
-			cJSON_AddStringToObject(song, "title", app->currentsong->title);
-			cJSON_AddStringToObject(song, "artist", app->currentsong->artist);
-			cJSON_AddNumberToObject(song, "duration", app->currentsong->duration);
-			cJSON_AddBoolToObject(song, "isliked", app->currentsong->isliked);
-			cJSON_AddNumberToObject(song, "personalplaycount", app->currentsong->personalplaycount);
-
-			cmdresponse(song,app->msgqueue,"song");
-		} else {
-			rpcerror(-32603, "Internal error: currentsong is NULL", id, mq);
-		}
-	}else if(strcmp(type, "player")){
+	if (strcmp(type, "song") == 0){
+		songhandler(app,method,params,id);
+	}else if(strcmp(type, "player") == 0){
 		playerhandler(app,method,params,id,app->msgqueue);
-	}else if (strcmp(type,"lib")){
+	}else if (strcmp(type,"lib") == 0){
 		libhandler(app,method,params,id);
-	}else if (strcmp(type,"queue")){
+	}else if (strcmp(type,"queue") == 0){
 		queuehandler(app,method,params,id);
 	}else{
 		 rpcerror(-32601, "Method not found", id,mq);
@@ -180,11 +157,11 @@ void handler(App *app,const char *raw) {
 		cJSON *method = cJSON_GetObjectItemCaseSensitive(req, "method");
 		cJSON *params = cJSON_GetObjectItemCaseSensitive(req, "params");
 		cJSON *id = cJSON_GetObjectItemCaseSensitive(req, "id");
-		if (!cJSON_IsString(method)) {
-			 rpcerror(-32600, "Invalid Request: missing 'method'", id->valueint,app->msgqueue);
-	;
+		int req_id = (id && cJSON_IsNumber(id)) ? id->valueint : -1;
+		if (!cJSON_IsString(method) || !cJSON_IsString(type)) {
+			rpcerror(-32600, "Invalid Request: missing 'method' or 'type'", req_id, app->msgqueue);
 		} else {
-			dispatch(app,method->valuestring,type->valuestring, params, id->valueint);
+			dispatch(app, method->valuestring, type->valuestring, params, req_id);
 		}
 		cJSON_Delete(req);
 	}

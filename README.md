@@ -1,5 +1,13 @@
 ### my spotify replacement
 
+# TODO:
+- make recent songs work with song handler and all of that and make sure responses are parsed in the tui
+- make playlist work 
+- make queue work, once a song is played and if its a playlist then add the all the songs into a app.songqueue and play one by one.
+    - make db function to store the queue only once the program is closed.(snapshot of the queue saved in the db when the app closes)..
+- Get the genius API to get album art, album details, artist details, search on genius and then get the url from ytdlp and run it with mpv
+
+
 ```
 ./build.sh
 
@@ -20,7 +28,6 @@ Response: {"jsonrpc":"2.0",type"mpv/mpv-event/song/playlist/queue/unknown,"respo
 
 ```
 TODO:
-make db function to store the queue only once the program is closed.(snapshot of the queue saved in the db when the app closes)..
 ```
 
 ### Keybinding Reference

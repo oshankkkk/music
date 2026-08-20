@@ -5,6 +5,11 @@
 #include <string.h>
 #include <time.h>
 #include "../models/song.h"
+#include "../models/app.h"
+#include <cjson/cJSON.h>
+#include "../player/mpv/mpv.h"
+#include "../player/player.h"
+#include "../rpc/response.h"
 //#include "song.h"
 
 sqlite3 * InitDb(void){
@@ -90,13 +95,6 @@ int GetSong(sqlite3 *db, const char *id, Song *s) {
         s->isliked  = sqlite3_column_int(stmt, 4) != 0;
         s->genre  = strdup((const char *)sqlite3_column_text(stmt, 5));
 
- //       snprintf(out->id, sizeof(out->id), "%s", sqlite3_column_text(stmt, 0));
- //       snprintf(out->title, sizeof(out->title), "%s", sqlite3_column_text(stmt, 1));
- //       snprintf(out->artist, sizeof(out->artist), "%s", sqlite3_column_text(stmt, 2));
- //       out->duration = sqlite3_column_int(stmt, 3);
- //       out->isliked  = sqlite3_column_int(stmt, 4) != 0;
- //       snprintf(out->genre, sizeof(out->genre), "%s", sqlite3_column_text(stmt, 5));
- //       sqlite3_finalize(stmt);
         return 0;
     }
     sqlite3_finalize(stmt);
@@ -153,6 +151,7 @@ static int updateSong(sqlite3 *db, const char *sql, bool has_bool, bool val, con
 int play_song(sqlite3 *db, const char *id) {
     return updateSong(db, "UPDATE song SET playcount = playcount + 1 WHERE id=?", false, false, id);
 }
+
 int like_song(sqlite3 *db, const char *id) {
     return updateSong(db, "UPDATE song SET isliked=? WHERE id=?", true, true, id);
 }
@@ -176,13 +175,6 @@ int GetSongList(sqlite3 *db, Song **out, int *count) {
         if (n == cap) { cap *= 2; arr = realloc(arr, cap * sizeof(Song)); }
         Song *s = &arr[n++];
 
-//        snprintf(s->id, sizeof(s->id), "%s", sqlite3_column_text(stmt, 0));
-//        snprintf(s->title, sizeof(s->title), "%s", sqlite3_column_text(stmt, 1));
-//        snprintf(s->artist, sizeof(s->artist), "%s", sqlite3_column_text(stmt, 2));
-//        s->duration = sqlite3_column_int(stmt, 3);
-//        s->isliked  = sqlite3_column_int(stmt, 4) != 0;
-//        snprintf(s->genre, sizeof(s->genre), "%s", sqlite3_column_text(stmt, 5));
-//
        memset(s, 0, sizeof(Song)); // zero all pointers so a failed strdup leaves NULL, not garbage
 		s->id     = strdup((const char *)sqlite3_column_text(stmt, 0));
         s->title  = strdup((const char *)sqlite3_column_text(stmt, 1));
@@ -200,3 +192,77 @@ int GetSongList(sqlite3 *db, Song **out, int *count) {
     return 0;
 }
 
+int songhandler(App *app, char *method, cJSON *params, int id) {
+    int success = 0;
+    cJSON *resp = cJSON_CreateObject();
+    cJSON_AddNumberToObject(resp, "id", id);
+    cJSON_AddStringToObject(resp, "method", method);
+
+	if (strcmp(method, "song-playSong") == 0){
+		cJSON *songName = cJSON_GetObjectItemCaseSensitive(params, "songName");
+		if (songName == NULL || !cJSON_IsString(songName)) {
+			rpcerror(-32602, "Invalid params: requires string songName", id, app->msgqueue);
+			return -1;
+		}
+		success=playSong(app,songName->valuestring);
+		if (success!=0){
+			perror("rpc start song");
+		}
+
+		if (app->currentsong != NULL) {
+			cJSON *song=cJSON_CreateObject();	
+			cJSON_AddStringToObject(song, "songid", app->currentsong->id);
+			cJSON_AddStringToObject(song, "title", app->currentsong->title);
+			cJSON_AddStringToObject(song, "artist", app->currentsong->artist);
+			cJSON_AddNumberToObject(song, "duration", app->currentsong->duration);
+			cJSON_AddBoolToObject(song, "isliked", app->currentsong->isliked);
+			cJSON_AddNumberToObject(song, "personalplaycount", app->currentsong->personalplaycount);
+
+            cJSON_AddItemToObject(resp, "songlist",song);
+			success=1;
+		}
+	}else if (strcmp(method, "song-getallsongs") == 0) {
+        Song *songs = NULL;
+        int count = 0;
+        if (GetSongList(app->db, &songs, &count) == 0) {
+            cJSON *songlist = cJSON_CreateArray();
+            for (int i = 0; i < count; i++) {
+                cJSON *song = cJSON_CreateObject();
+                cJSON_AddStringToObject(song, "id", songs[i].id ? songs[i].id : "");
+                cJSON_AddStringToObject(song, "title", songs[i].title ? songs[i].title : "");
+                cJSON_AddStringToObject(song, "artist", songs[i].artist ? songs[i].artist : "");
+                cJSON_AddNumberToObject(song, "duration", songs[i].duration);
+                cJSON_AddBoolToObject(song, "isliked", songs[i].isliked);
+                cJSON_AddStringToObject(song, "genre", songs[i].genre ? songs[i].genre : "");
+                cJSON_AddItemToArray(songlist, song);
+
+                free(songs[i].id);
+                free(songs[i].title);
+                free(songs[i].artist);
+                free(songs[i].genre);
+            }
+            free(songs);
+            cJSON_AddItemToObject(resp, "songlist", songlist);
+            success = 1;
+        }
+    } else if (strcmp(method, "song-likesong") == 0) {
+        cJSON *song_id = cJSON_GetObjectItem(params, "id");
+        if (cJSON_IsString(song_id) && song_id->valuestring) {
+            success = (like_song(app->db, song_id->valuestring) == 0);
+        }
+    } else if (strcmp(method, "song-unlikesong") == 0) {
+        cJSON *song_id = cJSON_GetObjectItem(params, "id");
+        if (cJSON_IsString(song_id) && song_id->valuestring) {
+            success = (unlike_song(app->db, song_id->valuestring) == 0);
+        }
+    } else {
+        success = 0;
+    }
+    if (success) {
+        cJSON_AddTrueToObject(resp, "success");
+    } else {
+        cJSON_AddFalseToObject(resp, "success");
+    }
+    cmdresponse(resp, app->msgqueue, "song");
+    return success ? 0 : -1;
+}
