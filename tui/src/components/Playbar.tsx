@@ -65,7 +65,7 @@ export function Playbar({ isFocused, isPlaying, onTogglePlay, song, setSong }: {
 
   const handleRepeat = async () => {
     try {
-      await rpcCall("player-toggle-repeat","mpv");
+      await rpcCall("player-toggle-repeat","player");
       setIsRepeat(r => !r);
     } catch (e) {
       console.error(e);
@@ -74,7 +74,7 @@ export function Playbar({ isFocused, isPlaying, onTogglePlay, song, setSong }: {
 
   const handleNext = async () => {
     try {
-      await rpcCall("player-next","mpv");
+      await rpcCall("player-next","player");
     } catch (e) {
       console.error(e);
     }
@@ -84,7 +84,7 @@ export function Playbar({ isFocused, isPlaying, onTogglePlay, song, setSong }: {
 
   const handlePrev = async () => {
     try {
-      await rpcCall("player-previous","mpv");
+      await rpcCall("player-previous","player");
     } catch (e) {
       console.error(e);
 	}
@@ -108,23 +108,23 @@ export function Playbar({ isFocused, isPlaying, onTogglePlay, song, setSong }: {
 	  try{
 		  switch (key.name) {
 			  case "j":
-				  rpcCall("player-volume-down","mpv")
+				  rpcCall("player-volume-down","player")
 
 			  setVolume((v) => Math.max(0, v - 5));
 			  triggerFlash(tVol);
 			  break;
 			  case "k":
-				  rpcCall("player-volume-up","mpv")
+				  rpcCall("player-volume-up","player")
 
 			  setVolume((v) => Math.min(100, v + 5));
 			  triggerFlash(tVol);
 			  break;
 			  case "h":
-				  rpcCall("player-seek-backward","mpv")
+				  rpcCall("player-seek-backward","player")
 
 			  break;
 			  case "l":
-				  rpcCall("player-seek-forward","mpv")
+				  rpcCall("player-seek-forward","player")
 
 			  break;
 			  case "H":
@@ -134,11 +134,11 @@ export function Playbar({ isFocused, isPlaying, onTogglePlay, song, setSong }: {
 				  handleNext();
 			  break;
 			  case "f":
-				  rpcCall("player-fast-forward","mpv")
+				  rpcCall("player-fast-forward","player")
 
 			  break;
 			  case "b":
-				  rpcCall("player-rewind","mpv")
+				  rpcCall("player-rewind","player")
 
 			  break;
 		  }

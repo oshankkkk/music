@@ -52,15 +52,27 @@ export function useAppLogic() {
 
   useEffect(() => {
     const unsubscribeSong = addRpcListener("song", (data) => {
-      setSong((prevSong) => ({
-        ...prevSong,
-        id: data.response.songid || prevSong.id,
-        title: data.response.title || prevSong.title,
-        artist: data.response.artist || prevSong.artist,
-        duration: data.response.duration || prevSong.duration,
-        isLiked: data.response.isliked !== undefined ? data.response.isliked : prevSong.isLiked,
-        isPlayed: true,
-      }));
+      if (data.response.method === "song-playSong") {
+        const songData = data.response.songlist;
+        if (songData) {
+          setSong((prevSong) => ({
+            ...prevSong,
+            id: songData.songid || prevSong.id,
+            title: songData.title || prevSong.title,
+            artist: songData.artist || prevSong.artist,
+            duration: songData.duration !== undefined ? songData.duration : prevSong.duration,
+            isLiked: songData.isliked !== undefined ? songData.isliked : prevSong.isLiked,
+            isPlayed: true,
+          }));
+        }
+      } else if (data.response.method === "song-likesong" || data.response.method === "song-unlikesong") {
+        if (data.response.success) {
+          setSong((prevSong) => ({
+            ...prevSong,
+            isLiked: data.response.method === "song-likesong",
+          }));
+        }
+      }
     });
     
     const unsubscribeMpvEvent = addRpcListener("mpv-event", (data) => {
@@ -115,7 +127,7 @@ export function useAppLogic() {
       isFirstTickRef.current = false;
       return;
     }
-    rpcCall("player-toggle-pause","mpv");
+    rpcCall("player-toggle-pause","player");
     setIsPlaying((p) => !p);
   }, [playToggleTick]);
 
