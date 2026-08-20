@@ -10,5 +10,5 @@ export function SongPlaySearch({ isOpen }: { isOpen: boolean }) {
 		}
 	};
 
-	return <SongSearchBar isOpen={isOpen} onSubmit={handleSubmit} />;
+	return <SongSearchBar isOpen={isOpen} onSubmit={handleSubmit} isPlaylist={false} />;
 }

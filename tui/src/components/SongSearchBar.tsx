@@ -3,9 +3,11 @@ import { useState } from "react";
 export function SongSearchBar({
 	isOpen,
 	onSubmit,
+	isPlaylist
 }: {
 	isOpen: boolean;
 	onSubmit: (query: string) => void;
+ isPlaylist: boolean;
 }) {
 	const [query, setQuery] = useState("");
 
@@ -27,7 +29,7 @@ export function SongSearchBar({
 		flexDirection="column"
 		paddingX={1}
 		>
-		<text fg="#1DB954"><b>Search</b></text>
+		<text fg="#1DB954"><b>isPlaylist?Search Song:Search songs for playlist</b></text>
 		<input
 		placeholder="Type here..."
 		onInput={setQuery}
