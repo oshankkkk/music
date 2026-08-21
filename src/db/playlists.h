@@ -7,9 +7,9 @@
 
 int createplaylist(sqlite3 *db, char *title, int *id);
 int deleteplaylist(sqlite3 *db, int playlistid);
-int deletesongfromplaylist(sqlite3 *db, int playlistid, int songid);
+int deletesongfromplaylist(sqlite3 *db, int playlistid, const char *songid);
 int renameplaylist(sqlite3 *db, int playlistid, char *newname);
-int addsongtoplaylist(sqlite3 *db, int songid, int playlistid);
+int addsongtoplaylist(sqlite3 *db, const char *songid, int playlistid);
 cJSON *getplaylist(sqlite3 *db, int playlistid);
 cJSON *getallplaylists(sqlite3 *db);
 cJSON *getplaylistsongs(sqlite3 *db, int playlistid);

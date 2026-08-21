@@ -45,40 +45,4 @@ int clearqueue(SongQueue *q){
 	return 0;
 }
 
-int queuehandler(App *app, char *method, cJSON *params, int id) {
-    int success = 0;
-    cJSON *resp = cJSON_CreateObject();
-    cJSON_AddNumberToObject(resp, "id", id);
-    cJSON_AddStringToObject(resp, "method", method);
-
-    if (strcmp(method, "lib-addtoqueue") == 0) {
-        cJSON *songid_node = cJSON_GetObjectItemCaseSensitive(params, "songid");
-        if (songid_node) {
-            int qid = addtoqueue(app->songqueue, songid_node->valueint);
-            if (qid >= 0) {
-                success = 1;
-                cJSON_AddNumberToObject(resp, "queueid", qid);
-            }
-        }
-    } else if (strcmp(method, "lib-removefromqueue") == 0) {
-        cJSON *songid_node = cJSON_GetObjectItemCaseSensitive(params, "songid");
-        if (songid_node) {
-            if (removesongfromqueue(app->songqueue, songid_node->valueint) == 0) {
-                success = 1;
-            }
-        }
-    } else if (strcmp(method, "lib-clearqueue") == 0) {
-        if (clearqueue(app->songqueue) == 0) {
-            success = 1;
-        }
-    }
-
-    if (success) {
-        cJSON_AddTrueToObject(resp, "success");
-    } else {
-        cJSON_AddFalseToObject(resp, "success");
-    }
-    cmdresponse(resp, app->msgqueue,"queue");
-    return success ? 0 : -1;
-}
 

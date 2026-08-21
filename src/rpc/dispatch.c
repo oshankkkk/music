@@ -9,7 +9,7 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #include <sys/un.h>
-#include "../lib/playlists.h"
+#include "../db/playlists.h"
 #include "../lib/queue.h"
 
 void playerhandler(App *app, char *method, cJSON *params, int id, queue *mq);
