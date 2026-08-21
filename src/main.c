@@ -11,8 +11,6 @@
 #include "./rpc/dispatch.h"
 #include "./rpc/msg.h"
 #include "./player/mpv/mpv.h"
-#include "./db/song.h"
-#include "./db/cache/cache.h"
 
 #define TUISOCK_PATH "./build/us.socket"
 #define MPVSOCK_PATH "./build/mpv.socket"
@@ -90,6 +88,12 @@ int main(void) {
 
 	pthread_t tui,mpvreader;
 	App app;
+
+	SongQueue songqueue={
+	.queue=&int[10],
+	.capacity=10,
+	.count=1;
+	};
 	memset(&app, 0, sizeof(app));
 	int err=0;
 	
@@ -109,6 +113,7 @@ int main(void) {
 	}	
 
 	app.msgqueue=&msgqueue;
+	app.songqueue=&songqueue;
 
 	struct sockaddr_un addr;
 	addr.sun_family=AF_UNIX;

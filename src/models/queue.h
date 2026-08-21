@@ -1,6 +1,6 @@
 
 typedef struct {
-	int *queue;
+	char **queue;
 	int capacity;
 	int count;
 } SongQueue;

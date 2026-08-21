@@ -4,7 +4,7 @@
 #include <cjson/cJSON.h>
 #include "../models/app.h"
 
-int addtoqueue(SongQueue *q, int songid);
+int addtoqueue(SongQueue *q, char *songid);
 int removesongfromqueue(SongQueue *q, int index);
 int clearqueue(SongQueue *q);
 int queuehandler(App *app, char *method, cJSON *params, int id);

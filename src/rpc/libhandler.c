@@ -97,7 +97,6 @@ int libhandler(App *app, char *method, cJSON *params, int id) {
             }
         }
     }
-
     if (success) {
         cJSON_AddTrueToObject(resp, "success");
     } else {
@@ -116,17 +115,17 @@ int queuehandler(App *app, char *method, cJSON *params, int id) {
 
     if (strcmp(method, "lib-addtoqueue") == 0) {
         cJSON *songid_node = cJSON_GetObjectItemCaseSensitive(params, "songid");
-        if (songid_node) {
-            int qid = addtoqueue(app->songqueue, songid_node->valueint);
+        if (songid_node && cJSON_IsString(songid_node)) {
+            int qid = addtoqueue(app->songqueue, songid_node->valuestring);
             if (qid >= 0) {
                 success = 1;
                 cJSON_AddNumberToObject(resp, "queueid", qid);
             }
-        }
+        } 
     } else if (strcmp(method, "lib-removefromqueue") == 0) {
-        cJSON *songid_node = cJSON_GetObjectItemCaseSensitive(params, "songid");
-        if (songid_node) {
-            if (removesongfromqueue(app->songqueue, songid_node->valueint) == 0) {
+        cJSON *songindex = cJSON_GetObjectItemCaseSensitive(params, "songindex");
+        if (songindex) {
+            if (removesongfromqueue(app->songqueue,songindex->valueint) == 0) {
                 success = 1;
             }
         }
@@ -134,7 +133,29 @@ int queuehandler(App *app, char *method, cJSON *params, int id) {
         if (clearqueue(app->songqueue) == 0) {
             success = 1;
         }
+    } else if (strcmp(method, "lib-getqueuesongs") == 0) {
+
+    cJSON *songlist = cJSON_CreateArray();
+
+    for (int i = 0; i < app->songqueue->count; i++) {
+
+        char *songid = app->songqueue->queue[i];
+
+        Song song = {0};
+        GetSong(app->db, songid, &song);
+
+        cJSON *songobj = cJSON_CreateObject();
+
+        cJSON_AddStringToObject(songobj, "songid", song.id);
+        cJSON_AddStringToObject(songobj, "title", song.title);
+        cJSON_AddStringToObject(songobj, "artist", song.artist);
+        cJSON_AddBoolToObject(songobj, "isliked", song.isliked);
+
+        cJSON_AddItemToArray(songlist, songobj);
     }
+
+    cJSON_AddItemToObject(resp, "queuelist", songlist);
+}
 
     if (success) {
         cJSON_AddTrueToObject(resp, "success");

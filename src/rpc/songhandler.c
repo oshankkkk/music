@@ -13,8 +13,7 @@ int songhandler(App *app, char *method, cJSON *params, int id) {
     cJSON_AddNumberToObject(resp, "id", id);
     cJSON_AddStringToObject(resp, "method", method);
 
-
-		//printf("method------->%s",method);
+	//printf("method------->%s",method);
 	if (strcmp(method, "song-playSong") == 0){
 
 		cJSON *songName = cJSON_GetObjectItemCaseSensitive(params, "songName");

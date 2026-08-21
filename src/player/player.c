@@ -24,8 +24,10 @@ int getSong(App *app,char *songName){
 		return 1;
 		//RPCerror
 	}
-	app->currentsong=song;
-
+	if (app->currentsong != NULL) {
+		// free previous song if necessary? Since this is a prototype, I'll just replace it.
+	}
+	app->currentsong = song;
 	if (app->currentsong->url == NULL || app->currentsong->url[0] == '\0') {
 		fprintf(stderr, "no url found for that result\n");
 		return 1;
@@ -111,17 +113,21 @@ int playSong(App *app,char *songName) {
 	int err=0;	
 
 	err = getSong(app, songName);
-
+	
     if (err != 0) {
         perror("initPlay");
 			return err;
     }
+
+	int qid = addtoqueue(app->songqueue, app->currentsong->id);
+	app->currentsong->queueid = qid;
 
 	char *path = getAudioPath(app);
     if (path == NULL) {
         fprintf(stderr, "audio: failed to get audio path\n");
         return 1;
     }
+
 
 //    mpvstart();
 	err=mpvplay(app->mpvfd,path);

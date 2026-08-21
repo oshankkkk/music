@@ -21,6 +21,7 @@ typedef struct {
     char *genre;
 	time_t playedTime;
 	bool isCached;
+	int queueid;
 } Song;
 
 #endif 
