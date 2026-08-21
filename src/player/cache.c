@@ -21,6 +21,7 @@ int backgroundCaching(Song *song, sqlite3 *cache) {
 			snprintf(filepath, sizeof(filepath), "../cache/%s", song->id);
 
 			printf("\nfilenamebackgroundtop====>%s\n",filepath);
+
 			//char path[1024];
 			//char *path = ytDownload(filepath, song->url);
 			char *path = ytDownload(filepath, song->url);
@@ -32,17 +33,8 @@ int backgroundCaching(Song *song, sqlite3 *cache) {
 		//		free(path);
 				_exit(rc != 0);
 			 }
-			// sqlite3 *cache = InitCache();
-			// if (!cache){
-			// 	perror("cache db init");
-			// 	return 1;
-			// }else{
-			// 	printf("cache db works hjah\n");
-			// }
-				
-		//sqlite3_close(app->cache);
 
-		}
+				}
 		_exit(0);
 	} else if (pid > 0) {
 		int status;

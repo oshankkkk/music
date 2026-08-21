@@ -2,7 +2,6 @@
 //#include "../models/ytresponse.h"
 #include "yt.h"
 #include "../models/song.h"
-#include "../models/app.h"
 //#include <cstddef>
 //#include <cstring>
 #include <stdio.h>
@@ -59,11 +58,10 @@ char *ytDownload(char *filepath, char *url){
     return output;
 }
 
-int ytSearch(char *songName, App *app){
-	//Song *song;
-	Song *song = malloc(sizeof(Song));
+int ytSearch(char *songName, Song *song){
+
 	song->isCached=false;	
-	printf("this is the song name tui gives: %s",songName);
+
 	char cmd [1024];
 	snprintf(cmd, sizeof(cmd),
     "yt-dlp --dump-json --no-playlist --no-warnings \"ytsearch1:%s\" 2>/dev/null",
@@ -105,45 +103,45 @@ int ytSearch(char *songName, App *app){
 	cJSON *url      = cJSON_GetObjectItemCaseSensitive(root, "webpage_url");
 
 	memset(song, 0, sizeof(*song));
-if (cJSON_IsString(id))
-    song->id = strdup(id->valuestring);
+	if (cJSON_IsString(id))
+		song->id = strdup(id->valuestring);
 
-if (cJSON_IsString(title))
-    song->title = strdup(title->valuestring);
+	if (cJSON_IsString(title))
+		song->title = strdup(title->valuestring);
 
-if (cJSON_IsString(artist))
-    song->artist = strdup(artist->valuestring);
+	if (cJSON_IsString(artist))
+		song->artist = strdup(artist->valuestring);
 
-if (cJSON_IsNumber(duration))
-    song->duration = duration->valuedouble;
+	if (cJSON_IsNumber(duration))
+		song->duration = duration->valuedouble;
 
-if (cJSON_IsString(thumb))
-    song->thumbnail = strdup(thumb->valuestring);
+	if (cJSON_IsString(thumb))
+		song->thumbnail = strdup(thumb->valuestring);
 
-if (cJSON_IsNumber(views))
-    song->viewCount = (i64)views->valuedouble;
+	if (cJSON_IsNumber(views))
+		song->viewCount = (i64)views->valuedouble;
 
-if (cJSON_IsString(upload))
-    song->uploadDate = strdup(upload->valuestring);
+	if (cJSON_IsString(upload))
+		song->uploadDate = strdup(upload->valuestring);
 
-if (cJSON_IsString(url))
-    song->url = strdup(url->valuestring);
+	if (cJSON_IsString(url))
+		song->url = strdup(url->valuestring);
+
 	cJSON_Delete(root);
-	app->currentsong=song;
 
-	printf("this is the song name: %s\n",app->currentsong->title);
-	printf("this is the song url: %s\n",app->currentsong->url);
+	//printf("this is the song name: %s\n",app->currentsong->title);
+	//printf("this is the song url: %s\n",app->currentsong->url);
 	return 0;
 
 }
 
-void freeSong(Song *song)
-{
-    free(song->id);
-    free(song->title);
-    free(song->artist);
-    free(song->thumbnail);
-    free(song->uploadDate);
-    free(song->url);
-    free(song->genre);
-}
+//void freeSong(Song *song){
+//
+//    free(song->id);
+//    free(song->title);
+//    free(song->artist);
+//    free(song->thumbnail);
+//    free(song->uploadDate);
+//    free(song->url);
+//    free(song->genre);
+//}

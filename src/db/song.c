@@ -5,11 +5,7 @@
 #include <string.h>
 #include <time.h>
 #include "../models/song.h"
-#include "../models/app.h"
 #include <cjson/cJSON.h>
-#include "../player/mpv/mpv.h"
-#include "../player/player.h"
-#include "../rpc/response.h"
 //#include "song.h"
 
 sqlite3 * InitDb(void){

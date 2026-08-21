@@ -80,7 +80,7 @@ export function App() {
         playlists={playlists}
         onClose={() => setIsAddSongOpen(false)}
         onSelect={(playlistId) => {
-          rpcCall("lib-addsongtoplaylist", "lib", { playlistid: parseInt(playlistId), songid: parseInt(song.id) });
+          rpcCall("lib-addsongtoplaylist", "lib", { playlistid: parseInt(playlistId), songid: song.id });
           if (selectedPlaylist && selectedPlaylist.id === playlistId) {
             rpcCall("lib-getplaylistsongs", "lib", { playlistid: parseInt(playlistId) });
           }

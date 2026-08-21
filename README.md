@@ -9,7 +9,7 @@
 ### edgecases
 1. what if i run 2 songs backtoback
 2. when i delete the playlist but im still init in the tui
-3.  
+3. open and close together  
 
 ```
 ./build.sh

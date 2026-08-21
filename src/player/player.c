@@ -14,25 +14,27 @@
 #include "./cache.h"
 #include "../models/app.h"
 #include "../yt/yt.h"
+#include "../models/song.h"
 
 int getSong(App *app,char *songName){
 	//take rpc connection with songname from dispacher
-	if (ytSearch(songName,app) != 0) {
+	Song *song = malloc(sizeof(Song));
+	if (ytSearch(songName,song) != 0) {
 		fprintf(stderr, "search failed, try again\n");
 		return 1;
 		//RPCerror
 	}
-	printf("getting song");
+	app->currentsong=song;
+
 	if (app->currentsong->url == NULL || app->currentsong->url[0] == '\0') {
 		fprintf(stderr, "no url found for that result\n");
 		return 1;
 		//RPCerror
 	}
+
 	time_t updated = time(NULL);
 	app->currentsong->playedTime=updated;
 	return 0;
-	//cacheing and mpv sne data back to the rpc
-	//connect ipc with rpc
 }
 
 //int getAudioPath(char **path,App *app){
@@ -67,8 +69,8 @@ int getSong(App *app,char *songName){
 //} 
 //
 
-
 char *getAudioPath(App *app){
+
     int check = CheckSong(app->db, app->currentsong->id);
     char *path = NULL;
 
@@ -131,7 +133,4 @@ int playSong(App *app,char *songName) {
 	free(path);
 	return 0;
 }
-
-
-
 

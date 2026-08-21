@@ -1,3 +1,12 @@
+#include <cjson/cJSON.h>
+#include "../player/mpv/mpv.h"
+#include "../player/player.h"
+#include "../db/song.h"
+#include "./response.h"
+#include <string.h>
+#include <stdio.h>
+
+
 int songhandler(App *app, char *method, cJSON *params, int id) {
     int success = 0;
     cJSON *resp = cJSON_CreateObject();

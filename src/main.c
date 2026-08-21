@@ -98,6 +98,7 @@ int main(void) {
 		perror("startup");
 		goto cleanup;
 	}
+
 	int serverFd=socket(AF_UNIX,SOCK_STREAM,0);
 	app.serverfd=serverFd;
 

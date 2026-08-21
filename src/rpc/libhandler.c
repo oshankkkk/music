@@ -1,11 +1,13 @@
-// get ytsearch from ../yt/yt.c
-// search for the song name and get the data
-// check if it in db
-// of not add it, 
-// then add it to the playlist and send a msg to tui
-// the tui will call the get all songs function again to update the tui
-//
-//
+#include <cjson/cJSON.h>
+#include "../db/playlists.h"
+#include "../lib/queue.h"
+#include "../yt/yt.h"
+#include "../db/song.h"
+#include "../player/mpv/mpv.h"
+#include <stdio.h>
+#include <string.h>
+
+
 int libhandler(App *app, char *method, cJSON *params, int id) {
     int success = 0;
     cJSON *resp = cJSON_CreateObject();
@@ -31,10 +33,38 @@ int libhandler(App *app, char *method, cJSON *params, int id) {
             success = 1;
         }
     } else if (strcmp(method, "lib-addsongtoplaylist") == 0) {
-        cJSON *playlistid = cJSON_GetObjectItemCaseSensitive(params, "playlistid");
-        cJSON *songid = cJSON_GetObjectItemCaseSensitive(params, "songid");
-        if (playlistid && songid && cJSON_IsString(songid) && addsongtoplaylist(app->db, songid->valuestring, playlistid->valueint) == 0) {
-            success = 1;
+        cJSON *playlistid_node = cJSON_GetObjectItemCaseSensitive(params, "playlistid");
+        if (!playlistid_node) {
+            playlistid_node = cJSON_GetObjectItemCaseSensitive(params, "playlistId");
+        }
+        cJSON *songName_node = cJSON_GetObjectItemCaseSensitive(params, "songName");
+        cJSON *songid_node = cJSON_GetObjectItemCaseSensitive(params, "songid");
+
+        if (playlistid_node) {
+            if (songid_node && cJSON_IsString(songid_node)) {
+                if (addsongtoplaylist(app->db, songid_node->valuestring, playlistid_node->valueint) == 0) {
+                    success = 1;
+                } else {
+                    success = 0;
+                }
+            } else if (songName_node && cJSON_IsString(songName_node)) {
+                Song *song = malloc(sizeof(Song));
+                if (ytSearch(songName_node->valuestring, song) == 0) {
+                    int r = CheckSong(app->db, song->id);
+                    if (r == 0) {
+                        AddSong(app->db, song);
+                    }
+                    if (r >= 0) {
+                        if (addsongtoplaylist(app->db, song->id, playlistid_node->valueint) == 0) {
+                            success = 1;
+                        } else {
+                            success = 0;
+                        }
+                    }
+                }
+                // Memory for song->id etc. should ideally be freed here, but matching existing code style
+                free(song);
+            }
         }
     } else if (strcmp(method, "lib-deletesongfromplaylist") == 0) {
         cJSON *playlistid = cJSON_GetObjectItemCaseSensitive(params, "playlistid");

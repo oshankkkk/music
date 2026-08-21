@@ -4,7 +4,7 @@ import type { PlaylistInfo } from "../client/types";
 import { rpcCall, addRpcListener } from "../client/client";
 import { SongPlaylistAddSearch } from "./SongPlaylistAddSearch";
 
-type SongInfo = { id: number; title: string; artist: string; duration: string; albumArtColor: string; };
+type SongInfo = { id: string; title: string; artist: string; duration: string; albumArtColor: string; };
 
 export function PlaylistDetail({ playlist, isFocused, isPlaylistSearchOpen, onBack }: { playlist: PlaylistInfo, isFocused: boolean, isPlaylistSearchOpen: boolean, onBack: () => void }) {
   const [songs, setSongs] = useState<SongInfo[]>([]);
@@ -17,7 +17,7 @@ export function PlaylistDetail({ playlist, isFocused, isPlaylistSearchOpen, onBa
     const unsubscribe = addRpcListener("playlist", (data) => {
       if (data.response.method === "lib-getplaylistsongs" && data.response.success && data.response.songs) {
         setSongs(data.response.songs.map((s: any) => ({
-          id: parseInt(s.id),
+          id: s.id,
           title: s.title || "Unknown",
           artist: s.artist || "Unknown",
           duration: s.duration ? `${Math.floor(s.duration / 60)}:${String(s.duration % 60).padStart(2, '0')}` : "0:00",
@@ -106,7 +106,7 @@ export function PlaylistDetail({ playlist, isFocused, isPlaylistSearchOpen, onBa
           );
         })}
       </box>
-      <SongPlaylistAddSearch isOpen={isPlaylistSearchOpen} />
+      <SongPlaylistAddSearch isOpen={isPlaylistSearchOpen} playlistId={parseInt(playlist.id)} />
     </box>
   );
 }

@@ -6,6 +6,6 @@
 #include "../models/app.h"
 
 char * readAll(FILE *fp);
-int ytSearch(char *songName, App *app);
+int ytSearch(char *songName, Song *app);
 char *ytDownload(char *filepath, char *url);
 #endif // YT_H
