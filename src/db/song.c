@@ -45,8 +45,8 @@ int CheckSong(sqlite3 *db, const char *id) {
 int AddSong(sqlite3 *db, const Song *s) {
 	time_t now=time(NULL);
     const char *sql =
-        "INSERT INTO song (id, title, artist, duration, isliked, genre, lastPlayed) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?,)";
+        "INSERT INTO song (id, title, artist, duration, isliked) "
+        "VALUES (?, ?, ?, ?, ?)";
     sqlite3_stmt *stmt;
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK) {
         handleError(sqlite3_errcode(db), db);
