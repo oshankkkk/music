@@ -71,7 +71,7 @@ export function App() {
         playlist={playlistToRename}
         onClose={() => setPlaylistToRename(null)}
         onSubmit={(name) => {
-          rpcCall("lib-renameplaylist", "lib", { playlistid: parseInt(playlistToRename!.id), name: name });
+          rpcCall("lib-renameplaylist", "lib", { playlistid: parseInt(playlistToRename!.id), newname: name });
         }}
       />
       <QueuePopup isOpen={isQueueOpen} onClose={() => setIsQueueOpen(false)} queue={queue} setQueue={setQueue} />
