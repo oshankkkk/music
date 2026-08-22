@@ -90,7 +90,7 @@ int main(void) {
 	App app;
 
 	SongQueue songqueue={
-	.queue=&int[10],
+	.queue=&char[10],
 	.capacity=10,
 	.count=1;
 	};

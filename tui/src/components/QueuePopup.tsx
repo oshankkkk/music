@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { useKeyboard } from "@opentui/react";
 import type { QueueItem } from "../client/types";
+import { rpcCall } from "../client/client";
 
 export function QueuePopup({ isOpen, onClose, queue, setQueue }: { isOpen: boolean, onClose: () => void, queue: QueueItem[], setQueue: (q: QueueItem[]) => void }) {
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -23,10 +24,9 @@ export function QueuePopup({ isOpen, onClose, queue, setQueue }: { isOpen: boole
       if (now - lastDPress.current < 500) {
         // Double D pressed! Remove the selected song
         if (queue.length > 0) {
-            const newQueue = queue.filter((_, i) => i !== selectedIndex);
-            setQueue(newQueue);
-            if (selectedIndex >= newQueue.length) {
-                setSelectedIndex(Math.max(0, newQueue.length - 1));
+            rpcCall("lib-removefromqueue", "queue", { songindex: selectedIndex });
+            if (selectedIndex >= queue.length - 1) {
+                setSelectedIndex(Math.max(0, queue.length - 2));
             }
         }
         lastDPress.current = 0; // reset

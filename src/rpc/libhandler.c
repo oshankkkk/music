@@ -3,6 +3,7 @@
 #include "../lib/queue.h"
 #include "../yt/yt.h"
 #include "../db/song.h"
+#include "../db/queue.h"
 #include "../player/mpv/mpv.h"
 #include <stdio.h>
 #include <string.h>
@@ -150,12 +151,52 @@ int queuehandler(App *app, char *method, cJSON *params, int id) {
         cJSON_AddStringToObject(songobj, "title", song.title);
         cJSON_AddStringToObject(songobj, "artist", song.artist);
         cJSON_AddBoolToObject(songobj, "isliked", song.isliked);
-
         cJSON_AddItemToArray(songlist, songobj);
     }
 
     cJSON_AddItemToObject(resp, "queuelist", songlist);
-}
+    } else if (strcmp(method, "lib-savequeue") == 0) {
+        cJSON *queue = cJSON_GetObjectItemCaseSensitive(params, "queue");
+        if (queue && cJSON_IsArray(queue)) {
+            int count = cJSON_GetArraySize(queue);
+            char **arr = malloc(count * sizeof(char*));
+            for (int i = 0; i < count; i++) {
+                cJSON *item = cJSON_GetArrayItem(queue, i);
+                arr[i] = item->valuestring;
+            }
+            if (savequeue(app->db, arr, count) == 0) {
+                success = 1;
+            }
+            free(arr);
+        }
+    } else if (strcmp(method, "lib-getsavedqueue") == 0) {
+        char **out = NULL;
+        int count = 0;
+        cJSON *songlist = cJSON_CreateArray();
+        
+        if (getsavedqueue(app->db, &out, &count) == 0) {
+            for (int i = 0; i < count; i++) {
+                Song song = {0};
+                if (GetSong(app->db, out[i], &song) == 0) {
+                    cJSON *songobj = cJSON_CreateObject();
+                    cJSON_AddStringToObject(songobj, "songid", song.id);
+                    cJSON_AddStringToObject(songobj, "title", song.title);
+                    cJSON_AddStringToObject(songobj, "artist", song.artist);
+                    cJSON_AddBoolToObject(songobj, "isliked", song.isliked);
+                    cJSON_AddItemToArray(songlist, songobj);
+                    
+                    if (song.id) free(song.id);
+                    if (song.title) free(song.title);
+                    if (song.artist) free(song.artist);
+                    if (song.genre) free(song.genre);
+                }
+                free(out[i]);
+            }
+            free(out);
+            success = 1;
+        }
+        cJSON_AddItemToObject(resp, "queuesongs", songlist);
+    }
 
     if (success) {
         cJSON_AddTrueToObject(resp, "success");

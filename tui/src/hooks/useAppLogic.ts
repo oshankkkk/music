@@ -24,12 +24,7 @@ export function useAppLogic() {
     { id: "2", name: "Daily Mix 1" },
     { id: "3", name: "Discover Weekly" },
   ]);
-  const [queue, setQueue] = useState<QueueItem[]>([
-    { queueId: "q1", songId: "1", name: "Bohemian Rhapsody" },
-    { queueId: "q2", songId: "2", name: "Hotel California" },
-    { queueId: "q3", songId: "3", name: "Stairway to Heaven" },
-    { queueId: "q4", songId: "4", name: "Imagine" },
-  ]);
+  const [queue, setQueue] = useState<QueueItem[]>([]);
   const [recentlyPlayed, setRecentlyPlayed] = useState<RecentlyPlayedItem[]>([
     { songId: "1", name: "Shape of You", artist: "Ed Sheeran", isLiked: true },
     { songId: "2", name: "Blinding Lights", artist: "The Weeknd", isLiked: false },
@@ -56,6 +51,7 @@ export function useAppLogic() {
       if (data.response.method === "song-playSong") {
         const songData = data.response.songlist;
         if (songData) {
+          rpcCall("lib-getqueuesongs", "queue", {});
           setSong((prevSong) => ({
             ...prevSong,
             id: songData.songid || prevSong.id,
@@ -113,13 +109,29 @@ export function useAppLogic() {
       }
     });
 
+    const unsubscribeQueue = addRpcListener("queue", (data) => {
+      if (data.response.method === "lib-getqueuesongs" && data.response.success && data.response.queuelist) {
+        setQueue(data.response.queuelist.map((sq: any, idx: number) => ({
+          queueId: String(idx),
+          songId: sq.songid,
+          name: sq.title || sq.artist || "Unknown"
+        })));
+      } else if (data.response.method === "lib-addtoqueue" || data.response.method === "lib-removefromqueue" || data.response.method === "lib-clearqueue") {
+        if (data.response.success) {
+          rpcCall("lib-getqueuesongs", "queue", {});
+        }
+      }
+    });
+
     rpcCall("lib-getallplaylists", "lib", {});
+    rpcCall("lib-getqueuesongs", "queue", {});
 
     return () => {
       unsubscribeSong();
       unsubscribeMpvEvent();
       unsubscribeMpvReply();
       unsubscribePlaylist();
+      unsubscribeQueue();
     };
   }, []);
 
