@@ -23,6 +23,7 @@
 #define MSG_MAX      4096
 #define QUEUE_CAP    64
 static pid_t mpvpid;
+App *g_app = NULL;
 int startup(App *app){
 	int pid=mpvstart();
 	if(pid==-1){
@@ -99,6 +100,9 @@ queue msgqueue={
 
 void exithandler(int sig){
  	(void)sig;
+	if (g_app && g_app->db && g_app->songqueue && g_app->songqueue->queue) {
+		savequeue(g_app->db, g_app->songqueue->queue, g_app->songqueue->count);
+	}
   	if (mpvpid > 0) {
         kill(mpvpid, SIGTERM);
     }
@@ -109,6 +113,7 @@ int main(void) {
 	signal(SIGTERM,exithandler);
 	pthread_t tui,mpvreader;
 	App app;
+	g_app = &app;
 	SongQueue songqueue={
 	.queue=NULL,
 	.capacity=0,
@@ -203,6 +208,9 @@ int main(void) {
 	return 0;
 
 cleanup:
+	if (app.db && app.songqueue && app.songqueue->queue) {
+		savequeue(app.db, app.songqueue->queue, app.songqueue->count);
+	}
 	if (app.db)    sqlite3_close(app.db);
 	if (app.cache) sqlite3_close(app.cache);
 	unlink(TUISOCK_PATH);
