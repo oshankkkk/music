@@ -45,6 +45,7 @@ export function useAppLogic() {
   const spaceTimestampRef = useRef<number | null>(null);
   const [playToggleTick, setPlayToggleTick] = useState(0);
   const isFirstTickRef = useRef(true);
+  const isInitialQueueLoad = useRef(true);
 
   useEffect(() => {
     const unsubscribeSong = addRpcListener("song", (data) => {
@@ -116,6 +117,20 @@ export function useAppLogic() {
           songId: sq.songid,
           name: sq.title || sq.artist || "Unknown"
         })));
+
+        if (isInitialQueueLoad.current) {
+          isInitialQueueLoad.current = false;
+          if (data.response.queuelist.length > 0) {
+            const topItem = data.response.queuelist[0];
+            setSong((prevSong) => ({
+              ...prevSong,
+              id: topItem.songid || prevSong.id,
+              title: topItem.title || prevSong.title,
+              artist: topItem.artist || prevSong.artist,
+              isLiked: topItem.isliked !== undefined ? topItem.isliked : prevSong.isLiked,
+            }));
+          }
+        }
       } else if (data.response.method === "lib-addtoqueue" || data.response.method === "lib-removefromqueue" || data.response.method === "lib-clearqueue") {
         if (data.response.success) {
           rpcCall("lib-getqueuesongs", "queue", {});
