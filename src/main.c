@@ -72,13 +72,20 @@ void *tuiwriter(void *arg){
 		if(pop(app->msgqueue,&msg, 200)){
 			if (app->clientfd > 0) {
 				len = (uint32_t)msg.len;
-				write(app->clientfd, &len, sizeof(len));
-				write(app->clientfd, msg.msg, msg.len);
+				if (write(app->clientfd, &len, sizeof(len))==-1){
+					perror("write length");
+					return NULL;
+				}
+
+				if(write(app->clientfd, msg.msg, msg.len)==-1){
+					perror("write length");
+					return NULL;
+				}
 			}
 		}
 	}
-	
 }
+
 
 queue msgqueue={
 	.head=0,
