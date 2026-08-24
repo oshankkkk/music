@@ -15,6 +15,7 @@ typedef struct{
 	int clientfd;
 	queue *msgqueue;
 	SongQueue *songqueue;
+	int mpvpid;
 
 }App;
 

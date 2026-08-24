@@ -1,5 +1,7 @@
 #include <cjson/cJSON.h>
 #include <pthread.h>
+#include <sched.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -20,14 +22,14 @@
 #define MPVSOCK_PATH "./build/mpv.socket"
 #define MSG_MAX      4096
 #define QUEUE_CAP    64
-
+static pid_t mpvpid;
 int startup(App *app){
-
-	if(mpvstart()){
+	int pid=mpvstart();
+	if(pid==-1){
 		sleep(1);
 		return -1;
 	}
-
+	mpvpid=pid;
 	int mpvfd=mpvinit(MPVSOCK_PATH);
 	if (mpvfd<0){
 		printf("mpv not set");
@@ -59,7 +61,7 @@ int startup(App *app){
 	Song *song=NULL;
 	app->currentsong=song;
 	mpvsongtimer(app->mpvfd,0,0);
-	return 0;
+	return pid;
 }
 
 void *tuiwriter(void *arg){
@@ -95,8 +97,16 @@ queue msgqueue={
 	.hybernate=PTHREAD_COND_INITIALIZER,
 };
 
-int main(void) {
+void exithandler(int sig){
+ 	(void)sig;
+  	if (mpvpid > 0) {
+        kill(mpvpid, SIGTERM);
+    }
+	exit(0);
+};
 
+int main(void) {
+	signal(SIGTERM,exithandler);
 	pthread_t tui,mpvreader;
 	App app;
 	SongQueue songqueue={

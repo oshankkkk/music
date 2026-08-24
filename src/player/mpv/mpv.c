@@ -29,10 +29,11 @@ int mpvstart(){
 	}
 	else if (pid > 0) {
 		printf("mpv started with PID %d\n", pid);
+
 	}
 	else {
 		perror("fork");
-		return 1;		
+		return -1;		
 	}
 	return 0;
 }
