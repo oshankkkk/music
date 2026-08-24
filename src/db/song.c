@@ -74,29 +74,36 @@ int GetSong(sqlite3 *db, const char *id, Song *s) {
     const char *sql =
         "SELECT id, title, artist, duration, isliked, genre FROM song WHERE id=?";
     sqlite3_stmt *stmt;
+	if (sql==NULL){
+	printf("meka thama awula get song ekek\n");	
+	}
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) != SQLITE_OK) {
         handleError(sqlite3_errcode(db), db);
         return -1;
     }
     sqlite3_bind_text(stmt, 1, id, -1, SQLITE_STATIC);
 
-    int rc = sqlite3_step(stmt);
-    if (rc == SQLITE_ROW) {
+	printf("hwhw");
+	int rc = sqlite3_step(stmt);
+	if (rc == SQLITE_ROW) {
 
-      memset(s, 0, sizeof(Song)); // zero all pointers so a failed strdup leaves NULL, not garbage
-		s->id     = strdup((const char *)sqlite3_column_text(stmt, 0));
-        s->title  = strdup((const char *)sqlite3_column_text(stmt, 1));
-        s->artist = strdup((const char *)sqlite3_column_text(stmt, 2));
-        s->duration = sqlite3_column_int(stmt, 3);
-        s->isliked  = sqlite3_column_int(stmt, 4) != 0;
-        s->genre  = strdup((const char *)sqlite3_column_text(stmt, 5));
+		memset(s, 0, sizeof(Song)); // zero all pointers so a failed strdup leaves NULL, not garbage
+		const unsigned char *id     = sqlite3_column_text(stmt, 0);
+		const unsigned char *title  = sqlite3_column_text(stmt, 1);
+		const unsigned char *artist = sqlite3_column_text(stmt, 2);
+		const unsigned char *genre  = sqlite3_column_text(stmt, 5);
 
-        return 0;
-    }
-    sqlite3_finalize(stmt);
-    if (rc == SQLITE_DONE) {
-        fprintf(stderr, "song not found\n");
-        return 1;
+		s->id     = id     ? strdup((const char *)id)     : NULL;
+		s->title  = title  ? strdup((const char *)title)  : NULL;
+		s->artist = artist ? strdup((const char *)artist) : NULL;
+		s->genre  = genre  ? strdup((const char *)genre)  : NULL;
+		s->isliked  = sqlite3_column_int(stmt, 4) != 0;
+		return 0;
+	}
+	sqlite3_finalize(stmt);
+	if (rc == SQLITE_DONE) {
+		fprintf(stderr, "song not found\n");
+		return 1;
 
     }
     handleError(rc, db);

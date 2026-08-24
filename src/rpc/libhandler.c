@@ -143,15 +143,22 @@ int queuehandler(App *app, char *method, cJSON *params, int id) {
         char *songid = app->songqueue->queue[i];
 
         Song song = {0};
+		printf("methanada awula\n");
         GetSong(app->db, songid, &song);
 
+		printf("methanada awula\n");
         cJSON *songobj = cJSON_CreateObject();
 
-        cJSON_AddStringToObject(songobj, "songid", song.id);
-        cJSON_AddStringToObject(songobj, "title", song.title);
-        cJSON_AddStringToObject(songobj, "artist", song.artist);
+        cJSON_AddStringToObject(songobj, "songid", song.id ? song.id : songid);
+        cJSON_AddStringToObject(songobj, "title", song.title ? song.title : "Unknown Title");
+        cJSON_AddStringToObject(songobj, "artist", song.artist ? song.artist : "Unknown Artist");
         cJSON_AddBoolToObject(songobj, "isliked", song.isliked);
         cJSON_AddItemToArray(songlist, songobj);
+
+        if (song.id) free(song.id);
+        if (song.title) free(song.title);
+        if (song.artist) free(song.artist);
+        if (song.genre) free(song.genre);
     }
 
     cJSON_AddItemToObject(resp, "queuelist", songlist);

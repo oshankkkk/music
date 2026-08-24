@@ -29,9 +29,9 @@ int songhandler(App *app, char *method, cJSON *params, int id) {
 
 		if (app->currentsong != NULL) {
 			cJSON *song=cJSON_CreateObject();	
-			cJSON_AddStringToObject(song, "songid", app->currentsong->id);
-			cJSON_AddStringToObject(song, "title", app->currentsong->title);
-			cJSON_AddStringToObject(song, "artist", app->currentsong->artist);
+			cJSON_AddStringToObject(song, "songid", app->currentsong->id ? app->currentsong->id : "");
+			cJSON_AddStringToObject(song, "title", app->currentsong->title ? app->currentsong->title : "");
+			cJSON_AddStringToObject(song, "artist", app->currentsong->artist ? app->currentsong->artist : "");
 			cJSON_AddNumberToObject(song, "duration", app->currentsong->duration);
 			cJSON_AddBoolToObject(song, "isliked", app->currentsong->isliked);
 			cJSON_AddNumberToObject(song, "personalplaycount", app->currentsong->personalplaycount);

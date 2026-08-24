@@ -22,9 +22,8 @@ int addtoqueue(SongQueue *q, char *songid){
 		q->capacity = newcap;
 	} 
 	q->queue[q->count] = strdup(songid);
-	int queue_id = q->count;
 	q->count++;
-	return queue_id;
+	return 0;
 }
 
 int removesongfromqueue(SongQueue *q,int index ){

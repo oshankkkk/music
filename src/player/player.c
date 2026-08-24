@@ -10,6 +10,7 @@
 #include "../models/song.h"
 #include "../models/cache.h"
 #include "../db/song.h"
+#include "../lib/queue.h"
 #include "../db/cache/cache.h"
 #include "./cache.h"
 #include "../models/app.h"
@@ -76,7 +77,7 @@ char *getAudioPath(App *app){
     int check = CheckSong(app->db, app->currentsong->id);
     char *path = NULL;
 
-    if (check == -1){
+    if (check == 0){
         AddSong(app->db, app->currentsong);
         path = strdup(app->currentsong->url);
         backgroundCaching(app->currentsong, app->cache);
@@ -107,9 +108,6 @@ char *getAudioPath(App *app){
 
 int playSong(App *app,char *songName) {
 
-	//RPC call to search, search gets you the song name
-	// when user press play it calls the init play and then gets the audiopath and runsmpv
-
 	int err=0;	
 
 	err = getSong(app, songName);
@@ -119,12 +117,18 @@ int playSong(App *app,char *songName) {
 			return err;
     }
 
-	int qid = addtoqueue(app->songqueue, app->currentsong->id);
-	app->currentsong->queueid = qid;
+	err=addtoqueue(app->songqueue, app->currentsong->id ? app->currentsong->id : "");
+
+	if(err == -1){
+		perror("player add to queue");
+		return err;
+	}
+
+	//app->currentsong->queueid = qid;
 
 	char *path = getAudioPath(app);
-    if (path == NULL) {
-        fprintf(stderr, "audio: failed to get audio path\n");
+	if (path == NULL) {
+		fprintf(stderr, "audio: failed to get audio path\n");
         return 1;
     }
 

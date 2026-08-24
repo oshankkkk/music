@@ -8,9 +8,12 @@
 #include <sys/un.h>
 #include <stddef.h>
 #include "./models/app.h"
+#include "./db/song.h"
+#include "./db/cache/cache.h"
 #include "./rpc/dispatch.h"
 #include "./rpc/msg.h"
 #include "./player/mpv/mpv.h"
+#include "models/msg.h"
 
 #define TUISOCK_PATH "./build/us.socket"
 #define MPVSOCK_PATH "./build/mpv.socket"
@@ -88,11 +91,10 @@ int main(void) {
 
 	pthread_t tui,mpvreader;
 	App app;
-
 	SongQueue songqueue={
-	.queue=&char[10],
-	.capacity=10,
-	.count=1;
+	.queue=NULL,
+	.capacity=0,
+	.count=0,
 	};
 	memset(&app, 0, sizeof(app));
 	int err=0;
