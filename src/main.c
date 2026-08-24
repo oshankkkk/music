@@ -14,6 +14,7 @@
 #include "./rpc/msg.h"
 #include "./player/mpv/mpv.h"
 #include "models/msg.h"
+#include "./db/queue.h"
 
 #define TUISOCK_PATH "./build/us.socket"
 #define MPVSOCK_PATH "./build/mpv.socket"
@@ -103,6 +104,20 @@ int main(void) {
 	if (err < 0) {
 		perror("startup");
 		goto cleanup;
+	}
+
+	char **saved_queue = NULL;
+	int queue_count = 0;
+	if (getsavedqueue(app.db, &saved_queue, &queue_count) == 0) {
+		songqueue.queue = saved_queue;
+		songqueue.count = queue_count;
+		
+		int cap = 16;
+		while (cap <= queue_count) cap *= 2;
+		songqueue.capacity = cap;
+		printf("Loaded %d songs from saved queue\n", queue_count);
+	} else {
+		printf("Failed to load saved queue\n");
 	}
 
 	int serverFd=socket(AF_UNIX,SOCK_STREAM,0);

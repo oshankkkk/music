@@ -162,6 +162,7 @@ int queuehandler(App *app, char *method, cJSON *params, int id) {
     }
 
     cJSON_AddItemToObject(resp, "queuelist", songlist);
+    success = 1;
     } else if (strcmp(method, "lib-savequeue") == 0) {
         cJSON *queue = cJSON_GetObjectItemCaseSensitive(params, "queue");
         if (queue && cJSON_IsArray(queue)) {
