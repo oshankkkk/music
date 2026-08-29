@@ -47,14 +47,19 @@ int mpvinit(char *socketpath){
 	addr.sun_family = AF_UNIX;
 	strncpy(addr.sun_path,  socketpath, sizeof(addr.sun_path)-1);
 
-	if (connect(sockfd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
-
-		printf("this is the error in mpv init");
-		perror("connect error");
-		//	close(sockfd);
-		return -1;
+	int retries = 10;
+	while (retries > 0) {
+		if (connect(sockfd, (struct sockaddr *)&addr, sizeof(addr)) == 0) {
+			return sockfd;
+		}
+		usleep(100000); // 100ms
+		retries--;
 	}
-	return sockfd;
+
+	printf("this is the error in mpv init");
+	perror("connect error");
+	//	close(sockfd);
+	return -1;
 }
 
 int mpvplay(int ipcfd,char *path){
