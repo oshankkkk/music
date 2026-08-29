@@ -25,6 +25,7 @@
 static pid_t mpvpid;
 App *g_app = NULL;
 int startup(App *app){
+	unlink(MPVSOCK_PATH);
 	int pid=mpvstart();
 	if(pid==-1){
 		sleep(1);
