@@ -9,6 +9,7 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <stddef.h>
+#include <sys/wait.h>
 #include "./models/app.h"
 #include "./db/song.h"
 #include "./db/cache/cache.h"
@@ -35,6 +36,8 @@ int startup(App *app){
 	int mpvfd=mpvinit(MPVSOCK_PATH);
 	if (mpvfd<0){
 		printf("mpv not set");
+		kill(pid, SIGTERM);
+		waitpid(pid, NULL, 0);
 		return -1;
 	}else{
 		printf("mpv socket works\n");
