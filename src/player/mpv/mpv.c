@@ -29,13 +29,12 @@ int mpvstart(){
 	}
 	else if (pid > 0) {
 		printf("mpv started with PID %d\n", pid);
-
+		return pid;
 	}
 	else {
 		perror("fork");
 		return -1;		
 	}
-	return 0;
 }
 int mpvinit(char *socketpath){
 	int sockfd=socket(AF_UNIX,SOCK_STREAM,0);
