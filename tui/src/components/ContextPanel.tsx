@@ -1,11 +1,14 @@
 import { useState } from "react";
 
-export function ContextPanel() {
+interface ContextPanelProps {
+  artistName: string;
+  artistDescription: string;
+}
+
+export function ContextPanel({ artistName, artistDescription }: ContextPanelProps) {
   const [artist] = useState({
     id: "rick_astley_01",
-    name: "Rick Astley",
-    monthlyListeners: 6243182,
-    description: "Rick Astley is a British singer, songwriter and radio personality...",
+    monthlyListeners: "6_243_182",
     socials: {
       twitter: "https://twitter.com/rickastley",
       instagram: "https://instagram.com/rickastley",
@@ -28,11 +31,11 @@ export function ContextPanel() {
       </text>
       
       <box flexDirection="column">
-        <text fg="#ffffff"><b>{artist.name}</b></text>
-        <text fg="#b3b3b3">{artist.monthlyListeners.toLocaleString()} listeners</text>
+        <text fg="#ffffff"><b>{artistName}</b></text>
+        <text fg="#b3b3b3">{artist.monthlyListeners} listeners</text>
       </box>
       
-      <text fg="#b3b3b3">{artist.description}</text>
+      <text fg="#b3b3b3">{artistDescription}</text>
     </box>
   );
 }

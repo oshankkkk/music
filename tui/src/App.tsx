@@ -57,7 +57,7 @@ export function App() {
         ) : (
           <MainContent focusArea={isSearchOpen || isCreatePlaylistOpen || isQueueOpen || isAddSongOpen || isPlaylistSearchOpen || playlistToRename ? "none" : focusArea} recentlyPlayed={recentlyPlayed} />
         )}
-        <ContextPanel />
+        <ContextPanel artistName={song.artist} artistDescription={song.description} />
       </box>
       <Playbar isFocused={focusArea === "none" && !isSearchOpen && !isCreatePlaylistOpen && !isQueueOpen && !isAddSongOpen && !isPlaylistSearchOpen && !playlistToRename} isPlaying={isPlaying} onTogglePlay={togglePlay} song={song} setSong={setSong} volume={volume} setVolume={setVolume} />
       <SongPlaySearch isOpen={isSearchOpen}/>
