@@ -111,6 +111,10 @@ int mpvwrite(int ipcfd, char *action, int id){
 		snprintf(cmd, sizeof(cmd),
 				"{\"command\":[\"cycle\",\"pause\"],\"request_id\":\"%d\"}\n", id);
 	}
+	else if (strcmp(action, "get_volume") == 0) {
+		snprintf(cmd, sizeof(cmd),
+				"{\"command\":[\"get_property\",\"volume\"],\"request_id\":\"%d\"}\n", id);
+	}
 	else if (strcmp(action, "stop") == 0) {
 		snprintf(cmd, sizeof(cmd),
 				"{\"command\":[\"quit\"],\"request_id\":\"%d\"}\n", id);
@@ -179,6 +183,7 @@ void eventresponse(cJSON *response,queue *msgqueue){
 	push(msgqueue,strlen(item),item);
 	free(item);
 	cJSON_Delete(resp);
+
 }
 
 void cmdresponse(cJSON *response,queue *msgqueue,char *type){

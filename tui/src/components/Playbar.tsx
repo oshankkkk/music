@@ -30,9 +30,8 @@ function formatTime(seconds: number) {
   return `${m}:${s.toString().padStart(2, '0')}`;
 }
 
-export function Playbar({ isFocused, isPlaying, onTogglePlay, song, setSong }: { isFocused?: boolean; isPlaying: boolean; onTogglePlay?: () => void; song: Song; setSong: React.Dispatch<React.SetStateAction<Song>> }) {
+export function Playbar({ isFocused, isPlaying, onTogglePlay, song, setSong, volume, setVolume }: { isFocused?: boolean; isPlaying: boolean; onTogglePlay?: () => void; song: Song; setSong: React.Dispatch<React.SetStateAction<Song>>; volume: number; setVolume: React.Dispatch<React.SetStateAction<number>> }) {
   
-  const [volume, setVolume] = useState(50);
   const [lyrics, setLyrics] = useState(false);
   const [isRepeat, setIsRepeat] = useState(false);
 

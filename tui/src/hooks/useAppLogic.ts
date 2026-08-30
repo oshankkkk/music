@@ -38,6 +38,7 @@ export function useAppLogic() {
   const [isQueueOpen, setIsQueueOpen] = useState(false);
   const [isAddSongOpen, setIsAddSongOpen] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [volume, setVolume] = useState(50);
 
   const [isPlaylistSearchOpen, setIsPlaylistSearchOpen] = useState(false);
   const [playlistToRename, setPlaylistToRename] = useState<PlaylistInfo | null>(null);
@@ -94,6 +95,8 @@ export function useAppLogic() {
           ...prevSong,
           duration: data.response.data || prevSong.duration,
         }));
+      } else if (typeof data.response.data === "number") {
+        setVolume(data.response.data);
       }
     });
     
@@ -140,6 +143,7 @@ export function useAppLogic() {
 
     rpcCall("lib-getallplaylists", "lib", {});
     rpcCall("lib-getqueuesongs", "queue", {});
+    rpcCall("player-get-volume", "player", {});
 
     return () => {
       unsubscribeSong();
@@ -256,6 +260,7 @@ export function useAppLogic() {
     playlistToRename, setPlaylistToRename,
     isQueueOpen, setIsQueueOpen,
     isAddSongOpen, setIsAddSongOpen,
-    isPlaying, togglePlay
+    isPlaying, togglePlay,
+    volume, setVolume
   };
 }

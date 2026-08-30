@@ -136,6 +136,11 @@ void playerhandler(App *app,char *method,cJSON *params, int id, queue *mq){
 		}
 
 	}
+	else if (strcmp(method, "player-get-volume") == 0) {
+		if (mpvwrite(app->mpvfd, "get_volume",id) < 0) {
+			rpcerror(-32602, "socket write went wrong", id,mq);
+		}
+	}
 	else if (strcmp(method, "player-toggle-repeat") == 0) {
 
 		if (mpvwrite(app->mpvfd, "toggle_repeat",id) < 0) {
