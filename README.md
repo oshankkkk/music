@@ -1,24 +1,16 @@
 ### my spotify replacement
 
-# TODO:
-- make playlist work 
-- make queue work, once a song is played and if its a playlist then add the all the songs into a app.songqueue and play one by one.
-    - make db function to store the queue only once the program is closed.(snapshot of the queue saved in the db when the app closes)..
-- Get the genius API to get album art, album details, artist details, search on genius and then get the url from ytdlp and run it with mpv
 
 ### edgecases
 1. what if i run 2 songs backtoback
 2. when i delete the playlist but im still init in the tui
 3. open and close together  
 
+> Get the genius API to get album art, album details, artist details, search on genius and then get the url from ytdlp and run it with mpv
+
 ```
-./build.sh
-
-and 
-
 nix develop
-cd tui
-bun run dev
+./build.sh
 ```
 
 ```
@@ -27,10 +19,6 @@ JSON RPC schema
 Request:  {"jsonrpc":"2.0","method":"play-/playlist-/queue-/","params":{},"id":}
 Response: {"jsonrpc":"2.0",type"mpv/mpv-event/song/playlist/queue/unknown,"response":{},"id":}
 
-```
-
-```
-TODO:
 ```
 
 ### Keybinding Reference
