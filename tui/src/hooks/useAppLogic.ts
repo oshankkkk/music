@@ -25,12 +25,7 @@ export function useAppLogic() {
     { id: "3", name: "Discover Weekly" },
   ]);
   const [queue, setQueue] = useState<QueueItem[]>([]);
-  const [recentlyPlayed, setRecentlyPlayed] = useState<RecentlyPlayedItem[]>([
-    { songId: "1", name: "Shape of You", artist: "Ed Sheeran", isLiked: true },
-    { songId: "2", name: "Blinding Lights", artist: "The Weeknd", isLiked: false },
-    { songId: "3", name: "Dance Monkey", artist: "Tones and I", isLiked: true },
-    { songId: "4", name: "Rockstar", artist: "Post Malone", isLiked: false },
-  ]);
+  const [recentlyPlayed, setRecentlyPlayed] = useState<RecentlyPlayedItem[]>([]);
   const [selectedPlaylist, setSelectedPlaylist] = useState<PlaylistInfo | null>(null);
   const [focusArea, setFocusArea] = useState<"none" | "sidebar" | "quick-access" | "mixes" | "playlist" | "recently-played">("none");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -71,6 +66,13 @@ export function useAppLogic() {
             isLiked: data.response.method === "song-likesong",
           }));
         }
+      } else if (data.response.method === "song-getallsongs" && data.response.success && data.response.songlist) {
+        setRecentlyPlayed(data.response.songlist.map((s: any) => ({
+          songId: s.songid,
+          name: s.title || s.artist || "Unknown",
+          artist: s.artist || "Unknown",
+          isLiked: s.isliked || false
+        })));
       }
     });
     
@@ -144,6 +146,7 @@ export function useAppLogic() {
     rpcCall("lib-getallplaylists", "lib", {});
     rpcCall("lib-getqueuesongs", "queue", {});
     rpcCall("player-get-volume", "player", {});
+    rpcCall("song-getallsongs", "song", {});
 
     return () => {
       unsubscribeSong();
