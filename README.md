@@ -1,13 +1,5 @@
 ### my spotify replacement
 
-
-### edgecases
-1. what if i run 2 songs backtoback
-2. when i delete the playlist but im still init in the tui
-3. open and close together  
-
-> Get the genius API to get album art, album details, artist details, search on genius and then get the url from ytdlp and run it with mpv
-
 ```
 nix develop
 ./build.sh
