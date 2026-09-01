@@ -8,7 +8,7 @@ interface ContextPanelProps {
 export function ContextPanel({ artistName, artistDescription }: ContextPanelProps) {
   const [artist] = useState({
     id: "rick_astley_01",
-    monthlyListeners: "6_243_182",
+    monthlyListeners: "",
     socials: {
       twitter: "https://twitter.com/rickastley",
       instagram: "https://instagram.com/rickastley",
@@ -32,7 +32,7 @@ export function ContextPanel({ artistName, artistDescription }: ContextPanelProp
       
       <box flexDirection="column">
         <text fg="#ffffff"><b>{artistName}</b></text>
-        <text fg="#b3b3b3">{artist.monthlyListeners} listeners</text>
+		{/**<text fg="#b3b3b3">{artist.monthlyListeners} listeners</text>**/}
       </box>
       
       <text fg="#b3b3b3">{artistDescription}</text>

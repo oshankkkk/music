@@ -9,7 +9,7 @@ export function useAppLogic() {
   const [song, setSong] = useState<Song>({
     id: "0",
     title: "Unknown song",
-    description: "Rick Astley's greatest hit",
+    description: "",
     artist: "Unknown artist",
     timestamp: 0,
     duration: 0,
