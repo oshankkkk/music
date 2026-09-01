@@ -1,6 +1,6 @@
 old/
 build/
-src/db/migrations/cache.db
-src/db/migrations/music.db
+src/db/db/cache.db
+src/db/db/music.db
 cache/
 

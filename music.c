@@ -97,6 +97,7 @@ int main(void){
 
 		execlp(
             "bun",
+//			"SHOW_CONSOLE=true"
             "bun",
             "run",
             "dev",
