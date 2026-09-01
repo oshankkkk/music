@@ -1,8 +1,8 @@
 #### Library
 
-* [ ] Search YouTube (via yt-dlp)
-* [ ] Stream music
-* [ ] Download/cache songs
+* [x] Search YouTube (via yt-dlp)
+* [x] Stream music
+* [x] Download/cache songs
 * [ ] Mark songs as favorites
 * [ ] View recently played
 * [ ] View most played
@@ -11,24 +11,24 @@
 
 #### Queue
 
-* [ ] Queue songs
-* [ ] Clear queue
+* [x] Queue songs
+* [x] Clear queue
 ~~* [ ] Shuffle~~
-* [ ] Repeat (off, one, ~~all~~)
+* [x] Repeat (off, one, ~~all~~)
 
 #### Playlists
 
-* [ ] Create playlist
-* [ ] Rename playlist
-* [ ] Delete playlist
-* [ ] Add songs to playlist
-* [ ] Remove songs from playlist
+* [x] Create playlist
+* [x] Rename playlist
+* [x] Delete playlist
+* [x] Add songs to playlist
+* [x] Remove songs from playlist
 ~~* [ ] Reorder songs~~
 ~~* [ ] Duplicate playlist~~
 
 #### User Interface
 
-* [ ] Keyboard-driven TUI
+* [x] Keyboard-driven TUI
 * [ ] View now playing
 * [ ] Remember playback position
 

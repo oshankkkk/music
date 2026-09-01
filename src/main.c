@@ -23,8 +23,10 @@
 #define MPVSOCK_PATH "./build/mpv.socket"
 #define MSG_MAX      4096
 #define QUEUE_CAP    64
+
 static pid_t mpvpid;
 App *g_app = NULL;
+
 int startup(App *app){
 	unlink(MPVSOCK_PATH);
 	int pid=mpvstart();
@@ -113,7 +115,10 @@ void exithandler(int sig){
 	exit(0);
 };
 
-int main(void) {
+int main(int argc,char *argv[]) {
+	int logfd=atoi(argv[1]);
+	FILE *logfp=fdopen(logfd,"w");
+	fprintf(logfp,"shawty like a melody in ma head");
 	signal(SIGTERM,exithandler);
 	pthread_t tui,mpvreader;
 	App app;

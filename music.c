@@ -42,7 +42,14 @@ void handle_signal(int sig){
 }
 
 int main(void){
+	FILE *logfp=fopen("log.txt", "w");
 
+	if(logfp==NULL){
+		perror("log file error");
+		return 1;
+	}
+	
+	int logfd=fileno(logfp);
     signal(SIGINT, handle_signal);
     signal(SIGTERM, handle_signal);
 
@@ -52,25 +59,32 @@ int main(void){
     if (backend_pid < 0) {
         perror("fork backend");
         return 1;
-    }
+	}
+	char command[512];
 
-    if (backend_pid == 0) {
+	snprintf(
+			command,
+			sizeof(command),
+
+			"gcc -g $(find src -name '*.c') "
+			"-o build/music "
+			"-Wall "
+			"-Werror "
+			"-lsqlite3 "
+			"-lcjson "
+			"&& ./build/music %d",
+
+			logfd
+		);
+	if (backend_pid == 0) {
 
         execlp(
 
             "sh",
             "sh",
             "-c",
-
-            "gcc -g $(find src -name '*.c') "
-            "-o build/music "
-            "-Wall "
-            "-Werror "
-            "-lsqlite3 "
-            "-lcjson "
-            "&& ./build/music",
-
-            NULL
+			command,
+			NULL
         );
 
         perror("failed to start backend");

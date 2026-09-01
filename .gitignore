@@ -3,4 +3,4 @@ build/
 src/db/db/cache.db
 src/db/db/music.db
 cache/
-
+log.txt
