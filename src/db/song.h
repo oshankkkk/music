@@ -15,6 +15,6 @@ int play_song(sqlite3 *db, const char *id);
 int like_song(sqlite3 *db, const char *id);
 int unlike_song(sqlite3 *db, const char *id);
 int GetSongList(sqlite3 *db, Song **out, int *count);
-int songhandler(App *app, char *method, cJSON *params, int id);
+//int songhandler(App *app, char *method, cJSON *params, int id);
 
 #endif // DB_SONG_H

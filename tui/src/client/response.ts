@@ -22,8 +22,9 @@ export function parseToSong(
           }));
         }
       } else if (data.response.method === "song-getallsongs") {
-        // Here songlist is an array of songs. 
+        //Here songlist is an array of songs. 
 		//need a different state function for that.
+		
         console.log("All songs received:", data.response.songlist);
       } else if (data.response.method === "song-likesong" || data.response.method === "song-unlikesong") {
         if (data.response.success) {

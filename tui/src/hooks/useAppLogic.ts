@@ -68,7 +68,7 @@ export function useAppLogic() {
         }
       } else if (data.response.method === "song-getallsongs" && data.response.success && data.response.songlist) {
         setRecentlyPlayed(data.response.songlist.map((s: any) => ({
-          songId: s.songid,
+          songId: s.id,
           name: s.title || s.artist || "Unknown",
           artist: s.artist || "Unknown",
           isLiked: s.isliked || false

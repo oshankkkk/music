@@ -179,12 +179,17 @@ int GetSongList(sqlite3 *db, Song **out, int *count) {
         Song *s = &arr[n++];
 
        memset(s, 0, sizeof(Song)); // zero all pointers so a failed strdup leaves NULL, not garbage
-		s->id     = strdup((const char *)sqlite3_column_text(stmt, 0));
-        s->title  = strdup((const char *)sqlite3_column_text(stmt, 1));
-        s->artist = strdup((const char *)sqlite3_column_text(stmt, 2));
+        const unsigned char *id     = sqlite3_column_text(stmt, 0);
+        const unsigned char *title  = sqlite3_column_text(stmt, 1);
+        const unsigned char *artist = sqlite3_column_text(stmt, 2);
+        const unsigned char *genre  = sqlite3_column_text(stmt, 5);
+
+        s->id     = id     ? strdup((const char *)id)     : NULL;
+        s->title  = title  ? strdup((const char *)title)  : NULL;
+        s->artist = artist ? strdup((const char *)artist) : NULL;
         s->duration = sqlite3_column_int(stmt, 3);
         s->isliked  = sqlite3_column_int(stmt, 4) != 0;
-        s->genre  = strdup((const char *)sqlite3_column_text(stmt, 5));
+        s->genre  = genre  ? strdup((const char *)genre)  : NULL;
 
     }
     sqlite3_finalize(stmt);
