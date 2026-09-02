@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import { useKeyboard } from "@opentui/react";
 import type { QueueItem } from "../client/types";
 import { rpcCall } from "../client/client";
+import { SongList } from "./SongList";
 
 export function QueuePopup({ isOpen, onClose, queue, setQueue }: { isOpen: boolean, onClose: () => void, queue: QueueItem[], setQueue: (q: QueueItem[]) => void }) {
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -50,20 +51,22 @@ export function QueuePopup({ isOpen, onClose, queue, setQueue }: { isOpen: boole
       <text fg="#ffffff"><b>Play Queue</b></text>
       <text fg="#888888">Press 'DD' to remove a song. 'Escape' to close.</text>
       
-      <box flexDirection="column" marginTop={1} gap={1} flexGrow={1}>
-        {queue.map((song, i) => {
-          const isSelected = selectedIndex === i;
-          return (
-            <box key={song.queueId} flexDirection="row" gap={2} alignItems="center" paddingX={1} backgroundColor={isSelected ? "#282828" : undefined}>
-              <text fg="#1DB954">██</text>
-              <box flexDirection="column">
-                <text fg={isSelected ? "#1DB954" : "#ffffff"}>{song.name}</text>
-                <text fg="#b3b3b3">Song ID: {song.songId}</text>
-              </box>
+      <SongList
+        items={queue}
+        selectedIndex={selectedIndex}
+        isFocused={isOpen}
+        gap={1}
+        marginTop={1}
+        renderItem={(song, i, isSelected) => (
+          <box flexDirection="row" gap={2} alignItems="center" paddingX={1} backgroundColor={isSelected ? "#282828" : undefined}>
+            <text fg="#1DB954">██</text>
+            <box flexDirection="column">
+              <text fg={isSelected ? "#1DB954" : "#ffffff"}>{song.name}</text>
+              <text fg="#b3b3b3">Song ID: {song.songId}</text>
             </box>
-          );
-        })}
-      </box>
+          </box>
+        )}
+      />
     </box>
   );
 }

@@ -3,6 +3,7 @@ import { useKeyboard } from "@opentui/react";
 import type { PlaylistInfo } from "../client/types";
 import { rpcCall, addRpcListener } from "../client/client";
 import { SongPlaylistAddSearch } from "./SongPlaylistAddSearch";
+import { SongList } from "./SongList";
 
 type SongInfo = { id: string; title: string; artist: string; duration: string; albumArtColor: string; };
 
@@ -90,22 +91,22 @@ export function PlaylistDetail({ playlist, isFocused, isPlaylistSearchOpen, onBa
       </box>
       
       {/* Song List */}
-      <box flexDirection="column" flexGrow={1} gap={0}>
-        {songs.map((song, i) => {
-          const isSelected = isFocused && selectedIndex === i;
-          return (
-            <box key={song.id} flexDirection="row" width="100%" alignItems="center" paddingX={1} backgroundColor={isSelected ? "#282828" : undefined}>
-              <text fg={isSelected ? "#1DB954" : "#b3b3b3"} width={4}>{String(i + 1)}</text>
-              <box flexDirection="row" gap={1} width={30} alignItems="center">
-                <text fg={song.albumArtColor}>██</text>
-                <text fg={isSelected ? "#1DB954" : "#ffffff"}>{song.title}</text>
-              </box>
-              <text fg="#b3b3b3" width={20}>{song.artist}</text>
-              <text fg="#b3b3b3" width={10}>{song.duration}</text>
+      <SongList
+        items={songs}
+        selectedIndex={selectedIndex}
+        isFocused={isFocused}
+        renderItem={(song, i, isSelected) => (
+          <box flexDirection="row" width="100%" alignItems="center" paddingX={1} backgroundColor={isSelected ? "#282828" : undefined}>
+            <text fg={isSelected ? "#1DB954" : "#b3b3b3"} width={4}>{String(i + 1)}</text>
+            <box flexDirection="row" gap={1} width={30} alignItems="center">
+              <text fg={song.albumArtColor}>██</text>
+              <text fg={isSelected ? "#1DB954" : "#ffffff"}>{song.title}</text>
             </box>
-          );
-        })}
-      </box>
+            <text fg="#b3b3b3" width={20}>{song.artist}</text>
+            <text fg="#b3b3b3" width={10}>{song.duration}</text>
+          </box>
+        )}
+      />
       <SongPlaylistAddSearch isOpen={isPlaylistSearchOpen} playlistId={parseInt(playlist.id)} />
     </box>
   );
