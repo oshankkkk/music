@@ -26,6 +26,7 @@ Response: {"jsonrpc":"2.0",type"mpv/mpv-event/song/playlist/queue/unknown,"respo
 | `dd` | Delete a selected playlist, or song |
 | `enter` | Confirm / select / submit |
 | `space` (alone) | Toggle play/pause |
+| `space l` | Toggle repeat (loop) |
 | `space p` | Focus sidebar |
 | `space n` | Focus quick-access grid |
 | `space m` | Focus mixes section |

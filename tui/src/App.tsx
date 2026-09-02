@@ -26,7 +26,8 @@ export function App() {
     isQueueOpen, setIsQueueOpen,
     isAddSongOpen, setIsAddSongOpen,
     isPlaying, togglePlay,
-    volume, setVolume
+    volume, setVolume,
+    isRepeat, toggleRepeat
   } = useAppLogic();
 
   return (
@@ -59,7 +60,7 @@ export function App() {
         )}
         <ContextPanel artistName={song.artist} artistDescription={song.description} />
       </box>
-      <Playbar isFocused={focusArea === "none" && !isSearchOpen && !isCreatePlaylistOpen && !isQueueOpen && !isAddSongOpen && !isPlaylistSearchOpen && !playlistToRename} isPlaying={isPlaying} onTogglePlay={togglePlay} song={song} setSong={setSong} volume={volume} setVolume={setVolume} />
+      <Playbar isFocused={focusArea === "none" && !isSearchOpen && !isCreatePlaylistOpen && !isQueueOpen && !isAddSongOpen && !isPlaylistSearchOpen && !playlistToRename} isPlaying={isPlaying} onTogglePlay={togglePlay} song={song} setSong={setSong} volume={volume} setVolume={setVolume} isRepeat={isRepeat} toggleRepeat={toggleRepeat} />
       <SongPlaySearch isOpen={isSearchOpen}/>
       <CreatePlaylistPopup 
         isOpen={isCreatePlaylistOpen} 

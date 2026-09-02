@@ -30,10 +30,9 @@ function formatTime(seconds: number) {
   return `${m}:${s.toString().padStart(2, '0')}`;
 }
 
-export function Playbar({ isFocused, isPlaying, onTogglePlay, song, setSong, volume, setVolume }: { isFocused?: boolean; isPlaying: boolean; onTogglePlay?: () => void; song: Song; setSong: React.Dispatch<React.SetStateAction<Song>>; volume: number; setVolume: React.Dispatch<React.SetStateAction<number>> }) {
+export function Playbar({ isFocused, isPlaying, onTogglePlay, song, setSong, volume, setVolume, isRepeat, toggleRepeat }: { isFocused?: boolean; isPlaying: boolean; onTogglePlay?: () => void; song: Song; setSong: React.Dispatch<React.SetStateAction<Song>>; volume: number; setVolume: React.Dispatch<React.SetStateAction<number>>, isRepeat: boolean, toggleRepeat: () => void }) {
   
   const [lyrics, setLyrics] = useState(false);
-  const [isRepeat, setIsRepeat] = useState(false);
 
   const [playFlash, setPlayFlash] = useState(0);
   const [prevFlash, setPrevFlash] = useState(0);
@@ -60,15 +59,6 @@ export function Playbar({ isFocused, isPlaying, onTogglePlay, song, setSong, vol
     triggerFlash(tPlay);
     setSong(s => ({ ...s, isPlayed: !s.isPlayed }));
     if (onTogglePlay) onTogglePlay();
-  };
-
-  const handleRepeat = async () => {
-    try {
-      await rpcCall("player-toggle-repeat","player");
-      setIsRepeat(r => !r);
-    } catch (e) {
-      console.error(e);
-    }
   };
 
   const handleNext = async () => {
@@ -177,7 +167,7 @@ export function Playbar({ isFocused, isPlaying, onTogglePlay, song, setSong, vol
           <text fg={interpolateGray(prevFlash)} onMouseDown={handlePrev}>{'|<'}</text>
           <text fg={interpolatePlay(playFlash)} onMouseDown={handlePlayToggle}>{song.isPlayed ? '[ || ]' : '[ > ]'}</text>
           <text fg={interpolateGray(nextFlash)} onMouseDown={handleNext}>{'>|'}</text>
-          <text fg={isRepeat ? "#1DB954" : "#b3b3b3"} onMouseDown={handleRepeat}>{'∞'}</text>
+          <text fg={isRepeat ? "#1DB954" : "#b3b3b3"} onMouseDown={toggleRepeat}>{'∞'}</text>
         </box>
         <box flexDirection="row" gap={1} alignItems="center">
           <text fg="#b3b3b3">{formatTime(song.timestamp)}</text>

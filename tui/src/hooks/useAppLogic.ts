@@ -37,11 +37,21 @@ export function useAppLogic() {
 
   const [isPlaylistSearchOpen, setIsPlaylistSearchOpen] = useState(false);
   const [playlistToRename, setPlaylistToRename] = useState<PlaylistInfo | null>(null);
+  const [isRepeat, setIsRepeat] = useState(false);
 
   const spaceTimestampRef = useRef<number | null>(null);
   const [playToggleTick, setPlayToggleTick] = useState(0);
   const isFirstTickRef = useRef(true);
   const isInitialQueueLoad = useRef(true);
+
+  const toggleRepeat = useCallback(async () => {
+    try {
+      await rpcCall("player-toggle-repeat", "player");
+      setIsRepeat((r) => !r);
+    } catch (e) {
+      console.error(e);
+    }
+  }, []);
 
   useEffect(() => {
     const unsubscribeSong = addRpcListener("song", (data) => {
@@ -238,6 +248,7 @@ export function useAppLogic() {
         case "i": setIsPlaylistSearchOpen(true); return;
         case "q": setIsQueueOpen(true); return;
         case "a": setIsAddSongOpen(true); return;
+        case "l": toggleRepeat(); return;
         default:
           togglePlay();
           break;
@@ -264,6 +275,7 @@ export function useAppLogic() {
     isQueueOpen, setIsQueueOpen,
     isAddSongOpen, setIsAddSongOpen,
     isPlaying, togglePlay,
-    volume, setVolume
+    volume, setVolume,
+    isRepeat, toggleRepeat
   };
 }
