@@ -15,18 +15,40 @@ Response: {"jsonrpc":"2.0",type"mpv/mpv-event/song/playlist/queue/unknown,"respo
 
 ### Keybinding Reference
 
-| Sequence | Action | Scope |
-|---|---|---|
-| `space` (alone) | Toggle play/pause | Global |
-| `space p` | Focus sidebar | Global |
-| `space n` | Focus quick-access grid | Global |
-| `space m` | Focus mixes section | Global |
-| `space b` | Focus bottom playbar | Global |
-| `escape` | Unfocus / exit app | Global |
-| `Ctrl+C` | Exit app | Global |
-| `j/k` | Navigate down/up | Sidebar, Quick-access |
-| `h/l` | Navigate left/right | Quick-access, Mixes |
-| `j/k` | Volume down/up | Playbar focused |
-| `h/l` | Prev/next track | Playbar focused |
+#### Global
+
+| Key | Action |
+|---|---|
+| `Ctrl+C` | Exit app |
+| `escape` | Close popup / unfocus area / go back |
+| `j` / `k` | Navigate down / up (volume down / up in playbar) |
+| `h` / `l` | Navigate left / right (seek in playbar) |
+| `dd` | Delete a selected playlist, or song |
+| `enter` | Confirm / select / submit |
+| `space` (alone) | Toggle play/pause |
+| `space p` | Focus sidebar |
+| `space n` | Focus quick-access grid |
+| `space m` | Focus mixes section |
+| `space r` | Focus recently played |
+| `space b` | Focus playbar (console) |
+| `space s` | Open song search (play) |
+| `space i` | Open playlist song search |
+| `space q` | Open queue popup |
+| `space a` | Open add-to-playlist popup |
+
+#### Sidebar
+
+| Key | Action |
+|---|---|
+| `n` | Create new playlist |
+| `r` | Rename selected playlist |
+
+#### Playbar / Console
+
+| Key | Action |
+|---|---|
+| `H` / `L` | Previous / next track |
+| `f` | Fast forward (60s) |
+| `b` | Rewind (60s) |
 
 
