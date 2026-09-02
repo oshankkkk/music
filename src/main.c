@@ -116,9 +116,13 @@ void exithandler(int sig){
 };
 
 int main(int argc,char *argv[]) {
+	if (argc>2){
 	int logfd=atoi(argv[1]);
+
 	FILE *logfp=fdopen(logfd,"w");
+
 	fprintf(logfp,"shawty like a melody in ma head");
+	}
 	signal(SIGTERM,exithandler);
 	pthread_t tui,mpvreader;
 	App app;

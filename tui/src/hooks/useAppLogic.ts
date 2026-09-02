@@ -248,7 +248,7 @@ export function useAppLogic() {
         case "i": setIsPlaylistSearchOpen(true); return;
         case "q": setIsQueueOpen(true); return;
         case "a": setIsAddSongOpen(true); return;
-        case "l": toggleRepeat(); return;
+        case "y": toggleRepeat(); return;
         default:
           togglePlay();
           break;

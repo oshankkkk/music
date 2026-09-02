@@ -1,6 +1,6 @@
 old/
 build/
-src/db/db/cache.db
-src/db/db/music.db
+src/db/
+src/db/
 cache/
 log.txt
