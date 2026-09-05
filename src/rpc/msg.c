@@ -4,6 +4,7 @@
 #include <time.h>
 #include <unistd.h>
 #include <string.h>
+#include <stdlib.h>
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <stddef.h>
@@ -12,16 +13,15 @@
 #define QUEUE_CAP    64
 
 void push(queue *queue,size_t itemlen,char *value){
-	if (itemlen>=MSG_MAX){
-		itemlen=MSG_MAX;
-	}	
 	pthread_mutex_lock(&queue->lock);
 	if(queue->count==QUEUE_CAP){
+		free(queue->items[queue->head].msg);
 		queue->head=(queue->head+1)%QUEUE_CAP;
 		queue->count--;
 	}
 	msg *item=&queue->items[queue->tail];
-	memcpy(item->msg, value,itemlen);	
+	item->msg = malloc(itemlen);
+	memcpy(item->msg, value, itemlen);	
 	item->len=itemlen;
 	queue->tail=(queue->tail+1)%QUEUE_CAP;
 	queue->count++;

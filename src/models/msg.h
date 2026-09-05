@@ -3,13 +3,10 @@
 
 #include <pthread.h>
 
-#define MSG_MAX      4096
 #define QUEUE_CAP    64
 
-
-
 typedef struct{
-	char msg[MSG_MAX];
+	char *msg;
 	size_t len;
 }msg;
 

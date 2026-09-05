@@ -150,11 +150,17 @@ void playerhandler(App *app,char *method,cJSON *params, int id, queue *mq){
 }
 
 void handler(App *app,const char *raw) {
+	const char *current_ptr = raw;
+	const char *return_parse_end = NULL;
 
-	cJSON *req = cJSON_Parse(raw);
-	if (!req) {
-		rpcerror(-32700, "Parse error", -1,app->msgqueue);
-	} else {
+	while (current_ptr != NULL && *current_ptr != '\0') {
+		cJSON *req = cJSON_ParseWithOpts(current_ptr, &return_parse_end, 0);
+		if (!req) {
+			// If it fails to parse but there's non-whitespace content, log/error.
+			// Otherwise just break.
+			break;
+		}
+
 		cJSON *type = cJSON_GetObjectItemCaseSensitive(req, "type");
 		cJSON *method = cJSON_GetObjectItemCaseSensitive(req, "method");
 		cJSON *params = cJSON_GetObjectItemCaseSensitive(req, "params");
@@ -166,6 +172,8 @@ void handler(App *app,const char *raw) {
 			dispatch(app, method->valuestring, type->valuestring, params, req_id);
 		}
 		cJSON_Delete(req);
+
+		current_ptr = return_parse_end;
 	}
 }
 

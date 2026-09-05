@@ -21,7 +21,6 @@
 
 #define TUISOCK_PATH "./build/us.socket"
 #define MPVSOCK_PATH "./build/mpv.socket"
-#define MSG_MAX      4096
 #define QUEUE_CAP    64
 
 static pid_t mpvpid;
@@ -72,7 +71,6 @@ int startup(App *app){
 }
 
 void *tuiwriter(void *arg){
-
 	App *app=(App *)arg;
 	msg msg;
 	uint32_t len;
@@ -81,18 +79,35 @@ void *tuiwriter(void *arg){
 		if(pop(app->msgqueue,&msg, 200)){
 			if (app->clientfd > 0) {
 				len = (uint32_t)msg.len;
-				if (write(app->clientfd, &len, sizeof(len))==-1){
-					perror("write length");
-					return NULL;
+				
+				// Write length
+				ssize_t written = 0;
+				while (written < sizeof(len)) {
+					ssize_t res = write(app->clientfd, ((char*)&len) + written, sizeof(len) - written);
+					if (res <= 0) {
+						app->clientfd = -1; // disconnected
+						break;
+					}
+					written += res;
 				}
 
-				if(write(app->clientfd, msg.msg, msg.len)==-1){
-					perror("write length");
-					return NULL;
+				if (app->clientfd > 0) {
+					// Write payload
+					written = 0;
+					while (written < msg.len) {
+						ssize_t res = write(app->clientfd, msg.msg + written, msg.len - written);
+						if (res <= 0) {
+							app->clientfd = -1; // disconnected
+							break;
+						}
+						written += res;
+					}
 				}
 			}
+			free(msg.msg);
 		}
 	}
+	return NULL;
 }
 
 
