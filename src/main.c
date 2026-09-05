@@ -25,7 +25,7 @@
 #define QUEUE_CAP    64
 
 static pid_t mpvpid;
-App *g_app = NULL;
+App app;
 
 int startup(App *app){
 	unlink(MPVSOCK_PATH);
@@ -106,8 +106,8 @@ queue msgqueue={
 
 void exithandler(int sig){
  	(void)sig;
-	if (g_app && g_app->db && g_app->songqueue && g_app->songqueue->queue) {
-		savequeue(g_app->db, g_app->songqueue->queue, g_app->songqueue->count);
+	if (app.db && app.songqueue && app.songqueue->queue) {
+		savequeue(app.db, app.songqueue->queue, app.songqueue->count);
 	}
   	if (mpvpid > 0) {
         kill(mpvpid, SIGTERM);
@@ -115,24 +115,17 @@ void exithandler(int sig){
 	exit(0);
 };
 
-int main(int argc,char *argv[]) {
-	if (argc>2){
-	int logfd=atoi(argv[1]);
 
-	FILE *logfp=fdopen(logfd,"w");
-
-	fprintf(logfp,"shawty like a melody in ma head");
-	}
+int main() {
+	memset(&app, 0, sizeof(app));
 	signal(SIGTERM,exithandler);
 	pthread_t tui,mpvreader;
-	App app;
-	g_app = &app;
+
 	SongQueue songqueue={
 	.queue=NULL,
 	.capacity=0,
 	.count=0,
 	};
-	memset(&app, 0, sizeof(app));
 	int err=0;
 	
 	err = startup(&app);

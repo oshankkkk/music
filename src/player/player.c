@@ -21,7 +21,7 @@ int getSong(App *app,char *songName){
 	//take rpc connection with songname from dispacher
 	Song *song = malloc(sizeof(Song));
 	if (ytSearch(songName,song) != 0) {
-		fprintf(stderr, "search failed, try again\n");
+		printf( "search failed, try again\n");
 		return 1;
 		//RPCerror
 	}
@@ -30,7 +30,7 @@ int getSong(App *app,char *songName){
 	}
 	app->currentsong = song;
 	if (app->currentsong->url == NULL || app->currentsong->url[0] == '\0') {
-		fprintf(stderr, "no url found for that result\n");
+		printf("no url found for that result\n");
 		return 1;
 		//RPCerror
 	}
@@ -128,7 +128,7 @@ int playSong(App *app,char *songName) {
 
 	char *path = getAudioPath(app);
 	if (path == NULL) {
-		fprintf(stderr, "audio: failed to get audio path\n");
+		printf( "audio: failed to get audio path\n");
         return 1;
     }
 

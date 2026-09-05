@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <signal.h>
 #include <sys/wait.h>
+#include <fcntl.h>
 
 static pid_t tui_pid = -1;
 static pid_t backend_pid = -1;
@@ -42,17 +43,8 @@ void handle_signal(int sig){
 }
 
 int main(void){
-	FILE *logfp=fopen("log.txt", "w");
-
-	if(logfp==NULL){
-		perror("log file error");
-		return 1;
-	}
-	
-	int logfd=fileno(logfp);
     signal(SIGINT, handle_signal);
     signal(SIGTERM, handle_signal);
-
 
     backend_pid = fork();
 
@@ -60,30 +52,32 @@ int main(void){
         perror("fork backend");
         return 1;
 	}
-	char command[512];
+	if (backend_pid == 0) {
 
-	snprintf(
-			command,
-			sizeof(command),
+        int nullfd = open("/dev/null", O_RDONLY);
+        int logfd  = open("build/backend.log", O_WRONLY | O_CREAT | O_TRUNC, 0644);
 
+        if (nullfd >= 0) {
+            dup2(nullfd, STDIN_FILENO);
+            close(nullfd);
+        }
+        if (logfd >= 0) {
+            dup2(logfd, STDOUT_FILENO);
+            dup2(logfd, STDERR_FILENO);
+            close(logfd);
+        }
+
+        execlp(
+            "sh",
+            "sh",
+            "-c",
 			"gcc -g $(find src -name '*.c') "
 			"-o build/music "
 			"-Wall "
 			"-Werror "
 			"-lsqlite3 "
 			"-lcjson "
-			"&& ./build/music %d",
-
-			logfd
-		);
-	if (backend_pid == 0) {
-
-        execlp(
-
-            "sh",
-            "sh",
-            "-c",
-			command,
+			"&& ./build/music",
 			NULL
         );
 
@@ -96,49 +90,35 @@ int main(void){
 
     if (tui_pid < 0) {
         perror("fork tui");
-
         cleanup();
-
         return 1;
     }
 
     if (tui_pid == 0) {
-
         if (chdir("tui") == -1) {
             perror("chdir tui");
             _exit(1);
         }
-
 		execlp(
             "bun",
-//			"SHOW_CONSOLE=true"
             "bun",
             "run",
             "dev",
             NULL
         );
-
 		perror("failed to start TUI");
         _exit(1);
     }
-
 
     printf("Music player started.\n");
     printf("Backend PID: %d\n", backend_pid);
     printf("TUI PID:     %d\n", tui_pid);
 
-
 	int status;
-
     waitpid(tui_pid, &status, 0);
-
     tui_pid = -1;
-
     printf("TUI exited.\n");
 
-
 	cleanup();
-
     return 0;
 }
-

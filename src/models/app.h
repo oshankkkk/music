@@ -2,6 +2,7 @@
 #define APP_H
 
 #include <sqlite3.h>
+#include <stdio.h>
 #include "./song.h"
 #include "./msg.h"
 #include "./queue.h"
