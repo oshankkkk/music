@@ -20,6 +20,10 @@ export function QueuePopup({ isOpen, onClose, queue, setQueue }: { isOpen: boole
       setSelectedIndex((prev) => Math.min(prev + 1, Math.max(0, queue.length - 1)));
     } else if (key.name === "k") {
       setSelectedIndex((prev) => Math.max(prev - 1, 0));
+    } else if (key.name === "return") {
+      if (queue.length > 0 && queue[selectedIndex]) {
+        rpcCall("song-playSong", "song", { songName: queue[selectedIndex].name });
+      }
     } else if (key.name === "d") {
       const now = Date.now();
       if (now - lastDPress.current < 500) {

@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import { useKeyboard } from "@opentui/react";
+import { rpcCall } from "../client/client";
 import type { RecentlyPlayedItem } from "../client/types";
 import { SongList } from "./SongList";
 
@@ -11,6 +12,11 @@ export function RecentlyPlayed({ isFocused, recentlyPlayed }: { isFocused: boole
     if (!isFocused) return;
     if (key.name === "j") setSelectedIndex((prev) => Math.min(prev + 1, Math.max(0, recentlyPlayed.length - 1)));
     if (key.name === "k") setSelectedIndex((prev) => Math.max(prev - 1, 0));
+    if (key.name === "return") {
+      if (recentlyPlayed.length > 0 && recentlyPlayed[selectedIndex]) {
+        rpcCall("song-playSong", "song", { songName: recentlyPlayed[selectedIndex].name });
+      }
+    }
   });
 
   return (

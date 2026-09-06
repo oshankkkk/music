@@ -46,6 +46,10 @@ export function PlaylistDetail({ playlist, isFocused, isPlaylistSearchOpen, onBa
       setSelectedIndex((prev) => Math.min(prev + 1, songs.length - 1));
     } else if (key.name === "k") {
       setSelectedIndex((prev) => Math.max(prev - 1, 0));
+    } else if (key.name === "return") {
+      if (songs.length > 0 && songs[selectedIndex]) {
+        rpcCall("song-playSong", "song", { songName: songs[selectedIndex].title });
+      }
     } else if (key.name === "d") {
       const now = Date.now();
       if (now - lastDPress.current < 500) {
