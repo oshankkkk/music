@@ -13,42 +13,50 @@
 //        fprintf(stderr, "slite error: %s\n", sqlite3_errmsg(db));
 //}
 
-void run_migrations(sqlite3 *db) {
-    const char *check_sql = "SELECT name FROM sqlite_master WHERE type='table' AND name='audioCache';";
-    sqlite3_stmt *stmt;
-    int rc = sqlite3_prepare_v2(db, check_sql, -1, &stmt, NULL);
-    if (rc != SQLITE_OK) return;
-    
-    rc = sqlite3_step(stmt);
+int runmigrations(sqlite3 *db) {
+	const char *check_sql = "SELECT name FROM sqlite_master WHERE type='table' AND name='audioCache';";
+	sqlite3_stmt *stmt;
+	int rc = sqlite3_prepare_v2(db, check_sql, -1, &stmt, NULL);
+	if (rc != SQLITE_OK)
+		return -1;
+
+	rc = sqlite3_step(stmt);
     sqlite3_finalize(stmt);
     
     if (rc == SQLITE_ROW) {
-        return;
+        return -1;
     }
     
     FILE *f = fopen("./src/db/migrations/cache.sql", "r");
+
     if (!f) {
-        fprintf(stderr, "Failed to open migration file\n");
-        return;
+        printf("Failed to open migration file\n");
+        return -1;
     }
     
     fseek(f, 0, SEEK_END);
     long fsize = ftell(f);
     fseek(f, 0, SEEK_SET);
-    
-    char *sql = malloc(fsize + 1);
-    if (sql) {
-        fread(sql, 1, fsize, f);
-        sql[fsize] = 0;
+
+	char *sql = malloc(fsize + 1);
+	if (sql) {
+		int n=fread(sql, 1, fsize, f);
+		if (n != fsize) {
+		perror("migration file err");		
+		return -1;
+		}
+		sql[fsize] = 0;
         char *err_msg = NULL;
         rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
         if (rc != SQLITE_OK) {
-            fprintf(stderr, "Migration error: %s\n", err_msg);
+            printf( "Migration error: %s\n", err_msg);
             sqlite3_free(err_msg);
+			return -1;
         }
         free(sql);
     }
     fclose(f);
+	return 0;
 }
 
 sqlite3 * InitCache(void){
@@ -57,7 +65,10 @@ sqlite3 * InitCache(void){
 	if( rc!=SQLITE_OK){
 		return NULL;
 	}
-	run_migrations(cache);
+	int err=runmigrations(cache);
+	if (err!=0){
+		return NULL;
+	}
 	return cache;
 }
 
@@ -79,7 +90,7 @@ int CacheSong(sqlite3 *db,Song *song,char *filepath, time_t expiresAt ){
 	}
 	char expiry[21];
 	snprintf(expiry, sizeof(expiry), "%lld", (long long)expiresAt);
-	//
+
 	char updated[21];
 	snprintf(updated, sizeof(updated), "%lld", (long long)song->playedTime);
 

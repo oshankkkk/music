@@ -8,23 +8,24 @@
 #include <cjson/cJSON.h>
 //#include "song.h"
 
-void run_migrations(sqlite3 *db) {
+int runmigrationssong(sqlite3 *db) {
     const char *check_sql = "SELECT name FROM sqlite_master WHERE type='table' AND name='song';";
     sqlite3_stmt *stmt;
     int rc = sqlite3_prepare_v2(db, check_sql, -1, &stmt, NULL);
-    if (rc != SQLITE_OK) return;
+    if (rc != SQLITE_OK) 
+		return -1;
     
     rc = sqlite3_step(stmt);
     sqlite3_finalize(stmt);
     
     if (rc == SQLITE_ROW) {
-        return;
+        return -1;
     }
     
     FILE *f = fopen("./src/db/migrations/song.sql", "r");
     if (!f) {
-        fprintf(stderr, "Failed to open migration file\n");
-        return;
+        printf( "Failed to open migration file\n");
+        return -1;
     }
     
     fseek(f, 0, SEEK_END);
@@ -33,17 +34,23 @@ void run_migrations(sqlite3 *db) {
     
     char *sql = malloc(fsize + 1);
     if (sql) {
-        fread(sql, 1, fsize, f);
+        int n=fread(sql, 1, fsize, f);
+		if (n != fsize) {
+		perror("migration file err");		
+		return -1;
+		}
         sql[fsize] = 0;
         char *err_msg = NULL;
         rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
         if (rc != SQLITE_OK) {
-            fprintf(stderr, "Migration error: %s\n", err_msg);
+            printf( "Migration error: %s\n", err_msg);
             sqlite3_free(err_msg);
+		return -1;
         }
         free(sql);
     }
     fclose(f);
+	return 0;
 }
 
 sqlite3 * InitDb(void){
@@ -52,7 +59,10 @@ sqlite3 * InitDb(void){
 	if( rc!=SQLITE_OK){
 		return NULL;
 	}
-	run_migrations(db);
+	int err=runmigrationssong(db);
+	if (err!=0){
+		return NULL;
+	}
 	return db;
 }
 
