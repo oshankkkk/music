@@ -13,12 +13,51 @@
 //        fprintf(stderr, "slite error: %s\n", sqlite3_errmsg(db));
 //}
 
+void run_migrations(sqlite3 *db) {
+    const char *check_sql = "SELECT name FROM sqlite_master WHERE type='table' AND name='audioCache';";
+    sqlite3_stmt *stmt;
+    int rc = sqlite3_prepare_v2(db, check_sql, -1, &stmt, NULL);
+    if (rc != SQLITE_OK) return;
+    
+    rc = sqlite3_step(stmt);
+    sqlite3_finalize(stmt);
+    
+    if (rc == SQLITE_ROW) {
+        return;
+    }
+    
+    FILE *f = fopen("./src/db/migrations/cache.sql", "r");
+    if (!f) {
+        fprintf(stderr, "Failed to open migration file\n");
+        return;
+    }
+    
+    fseek(f, 0, SEEK_END);
+    long fsize = ftell(f);
+    fseek(f, 0, SEEK_SET);
+    
+    char *sql = malloc(fsize + 1);
+    if (sql) {
+        fread(sql, 1, fsize, f);
+        sql[fsize] = 0;
+        char *err_msg = NULL;
+        rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
+        if (rc != SQLITE_OK) {
+            fprintf(stderr, "Migration error: %s\n", err_msg);
+            sqlite3_free(err_msg);
+        }
+        free(sql);
+    }
+    fclose(f);
+}
+
 sqlite3 * InitCache(void){
 	sqlite3 *cache;	
 	int rc=sqlite3_open("./src/db/db/cache.db",&cache);
 	if( rc!=SQLITE_OK){
 		return NULL;
 	}
+	run_migrations(cache);
 	return cache;
 }
 
