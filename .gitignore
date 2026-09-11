@@ -1,6 +1,5 @@
 old/
 build/
-src/db/
-src/db/
 cache/
 log.txt
+*.db

@@ -85,7 +85,8 @@ void *tuiwriter(void *arg){
 				while (written < sizeof(len)) {
 					ssize_t res = write(app->clientfd, ((char*)&len) + written, sizeof(len) - written);
 					if (res <= 0) {
-						app->clientfd = -1; // disconnected
+						app->clientfd = -1;
+
 						break;
 					}
 					written += res;
@@ -97,7 +98,8 @@ void *tuiwriter(void *arg){
 					while (written < msg.len) {
 						ssize_t res = write(app->clientfd, msg.msg + written, msg.len - written);
 						if (res <= 0) {
-							app->clientfd = -1; // disconnected
+							app->clientfd = -1; 
+
 							break;
 						}
 						written += res;
@@ -109,7 +111,6 @@ void *tuiwriter(void *arg){
 	}
 	return NULL;
 }
-
 
 queue msgqueue={
 	.head=0,
@@ -141,6 +142,7 @@ int main() {
 	.capacity=0,
 	.count=0,
 	};
+
 	int err=0;
 	
 	err = startup(&app);
@@ -167,6 +169,7 @@ int main() {
 	app.serverfd=serverFd;
 
 	printf("this is the fd in main %d",app.serverfd);
+
 	if (serverFd<0){
 		perror("unix socket");		
 		goto cleanup;
@@ -180,6 +183,7 @@ int main() {
 	strncpy(addr.sun_path, TUISOCK_PATH, sizeof(addr.sun_path) - 1);
 	unlink(TUISOCK_PATH);
 	err=bind(serverFd,(struct sockaddr *)&addr,sizeof(addr));
+
 	if (err < 0) {
 		perror("bind");
 		goto cleanup;
