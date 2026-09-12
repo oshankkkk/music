@@ -14,6 +14,7 @@ export function useAppLogic() {
     timestamp: 0,
     duration: 0,
     albumArtUrl: "https://example.com/art.jpg",
+    thumbnail: "",
     isLiked: true,
     playlists: [1, 2, 3],
     isPlayed: false
@@ -65,6 +66,7 @@ export function useAppLogic() {
             title: songData.title || prevSong.title,
             artist: songData.artist || prevSong.artist,
             duration: songData.duration !== undefined ? songData.duration : prevSong.duration,
+            thumbnail: songData.thumbnail || prevSong.thumbnail,
             isLiked: songData.isliked !== undefined ? songData.isliked : prevSong.isLiked,
             isPlayed: true,
           }));
@@ -81,7 +83,8 @@ export function useAppLogic() {
           songId: s.id,
           name: s.title || s.artist || "Unknown",
           artist: s.artist || "Unknown",
-          isLiked: s.isliked || false
+          isLiked: s.isliked || false,
+          thumbnail: s.thumbnail || undefined
         })));
       }
     });
@@ -130,7 +133,8 @@ export function useAppLogic() {
         setQueue(data.response.queuelist.map((sq: any, idx: number) => ({
           queueId: String(idx),
           songId: sq.songid,
-          name: sq.title || sq.artist || "Unknown"
+          name: sq.title || sq.artist || "Unknown",
+          thumbnail: sq.thumbnail || undefined
         })));
 
         if (isInitialQueueLoad.current) {
@@ -142,6 +146,7 @@ export function useAppLogic() {
               id: topItem.songid || prevSong.id,
               title: topItem.title || prevSong.title,
               artist: topItem.artist || prevSong.artist,
+              thumbnail: topItem.thumbnail || prevSong.thumbnail,
               isLiked: topItem.isliked !== undefined ? topItem.isliked : prevSong.isLiked,
             }));
           }

@@ -35,6 +35,7 @@ int songhandler(App *app, char *method, cJSON *params, int id) {
 			cJSON_AddNumberToObject(song, "duration", app->currentsong->duration);
 			cJSON_AddBoolToObject(song, "isliked", app->currentsong->isliked);
 			cJSON_AddNumberToObject(song, "personalplaycount", app->currentsong->personalplaycount);
+			cJSON_AddStringToObject(song, "thumbnail", app->currentsong->thumbnail ? app->currentsong->thumbnail : "");
 
             cJSON_AddItemToObject(resp, "songlist",song);
 			success=1;
@@ -52,11 +53,13 @@ int songhandler(App *app, char *method, cJSON *params, int id) {
                 cJSON_AddNumberToObject(song, "duration", songs[i].duration);
                 cJSON_AddBoolToObject(song, "isliked", songs[i].isliked);
                 cJSON_AddStringToObject(song, "genre", songs[i].genre ? songs[i].genre : "");
+                cJSON_AddStringToObject(song, "thumbnail", songs[i].thumbnail ? songs[i].thumbnail : "");
                 cJSON_AddItemToArray(songlist, song);
 
                 free(songs[i].id);
                 free(songs[i].title);
                 free(songs[i].artist);
+                free(songs[i].thumbnail);
                 free(songs[i].genre);
             }
             free(songs);

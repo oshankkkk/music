@@ -1,11 +1,13 @@
 import { useState } from "react";
+import { ImageRenderable } from "./Image";
 
 interface ContextPanelProps {
   artistName: string;
   artistDescription: string;
+  thumbnail?: string;
 }
 
-export function ContextPanel({ artistName, artistDescription }: ContextPanelProps) {
+export function ContextPanel({ artistName, artistDescription, thumbnail }: ContextPanelProps) {
   const [artist] = useState({
     id: "rick_astley_01",
     monthlyListeners: "",
@@ -19,16 +21,7 @@ export function ContextPanel({ artistName, artistDescription }: ContextPanelProp
 
   return (
     <box width={35} backgroundColor="#121212" flexDirection="column" paddingX={2} paddingTop={1} gap={1}>
-      <text fg="#1DB954">
-        ██████████████████████████████{"\n"}
-        ██████████████████████████████{"\n"}
-        ██████████████████████████████{"\n"}
-        ██████████████████████████████{"\n"}
-        ██████████████████████████████{"\n"}
-        ██████████████████████████████{"\n"}
-        ██████████████████████████████{"\n"}
-        ██████████████████████████████
-      </text>
+      <ImageRenderable src={thumbnail || ""} width={30} height={8} />
       
       <box flexDirection="column">
         <text fg="#ffffff"><b>{artistName}</b></text>

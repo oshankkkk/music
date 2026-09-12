@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useKeyboard, useTimeline } from "@opentui/react";
+import { ImageRenderable } from "./Image";
 import { rpcCall } from "../client/client";
 import type { Song } from "../client/types";
 
@@ -148,7 +149,7 @@ export function Playbar({ isFocused, isPlaying, onTogglePlay, song, setSong, vol
     <box flexDirection="column" width="100%" backgroundColor="#181818">
       <box flexDirection="row" width="100%" height={4} alignItems="center" paddingX={2}>
         <box flexDirection="row" width={30} alignItems="center" gap={1}>
-	  <text fg="#1DB954">██</text>
+          <ImageRenderable src={song.thumbnail || song.albumArtUrl || ""} width={2} height={1} />
 	  <box flexDirection="column">
 	  <text fg="#ffffff">{song.title}</text>
 	  <text fg="#b3b3b3">{song.artist}</text>

@@ -11,6 +11,7 @@ export type Song = {
   timestamp: number;
   duration: number;
   albumArtUrl: string;
+  thumbnail: string;
   isLiked: boolean;
   playlists: number[];
   isPlayed: boolean;
@@ -20,6 +21,7 @@ export type QueueItem = {
   queueId: string;
   songId: string;
   name: string;
+  thumbnail?: string;
 };
 
 export type RecentlyPlayedItem = {
@@ -27,4 +29,5 @@ export type RecentlyPlayedItem = {
   name: string;
   artist: string;
   isLiked: boolean;
+  thumbnail?: string;
 };

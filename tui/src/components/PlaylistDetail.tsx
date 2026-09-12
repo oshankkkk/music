@@ -1,11 +1,12 @@
 import { useState, useRef, useEffect } from "react";
 import { useKeyboard } from "@opentui/react";
+import { ImageRenderable } from "./Image";
 import type { PlaylistInfo } from "../client/types";
 import { rpcCall, addRpcListener } from "../client/client";
 import { SongPlaylistAddSearch } from "./SongPlaylistAddSearch";
 import { SongList } from "./SongList";
 
-type SongInfo = { id: string; title: string; artist: string; duration: string; albumArtColor: string; };
+type SongInfo = { id: string; title: string; artist: string; duration: string; albumArtColor: string; thumbnail?: string; };
 
 export function PlaylistDetail({ playlist, isFocused, isPlaylistSearchOpen, onBack }: { playlist: PlaylistInfo, isFocused: boolean, isPlaylistSearchOpen: boolean, onBack: () => void }) {
   const [songs, setSongs] = useState<SongInfo[]>([]);
@@ -22,7 +23,8 @@ export function PlaylistDetail({ playlist, isFocused, isPlaylistSearchOpen, onBa
           title: s.title || "Unknown",
           artist: s.artist || "Unknown",
           duration: s.duration ? `${Math.floor(s.duration / 60)}:${String(s.duration % 60).padStart(2, '0')}` : "0:00",
-          albumArtColor: "#1DB954"
+          albumArtColor: "#1DB954",
+          thumbnail: s.thumbnail || ""
         })));
       } else if (data.response.method === "lib-deletesongfromplaylist" && data.response.success) {
         rpcCall("lib-getplaylistsongs", "lib", { playlistid: parseInt(playlist.id) });
@@ -103,7 +105,7 @@ export function PlaylistDetail({ playlist, isFocused, isPlaylistSearchOpen, onBa
           <box flexDirection="row" width="100%" alignItems="center" paddingX={1} backgroundColor={isSelected ? "#282828" : undefined}>
             <text fg={isSelected ? "#1DB954" : "#b3b3b3"} width={4}>{String(i + 1)}</text>
             <box flexDirection="row" gap={1} width={30} alignItems="center">
-              <text fg={song.albumArtColor}>██</text>
+              <ImageRenderable src={song.thumbnail || ""} width={2} height={1} />
               <text fg={isSelected ? "#1DB954" : "#ffffff"}>{song.title}</text>
             </box>
             <text fg="#b3b3b3" width={20}>{song.artist}</text>

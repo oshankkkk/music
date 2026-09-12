@@ -173,7 +173,9 @@ The application completely mimics the ~90% visual static layout of the Spotify d
   - Render rows of dummy songs inside, showing small Unicode boxes for album art, title, and artist.
 - **Song Deletion (`DD` shortcut):**
   - Implement a key sequence tracker for `D` `D` (two rapid 'D' keystrokes) in both the Queue window and the future Playlist detail view.
-  - When pressed while hovering/focused on a song row, remove that item from the corresponding state array (queue or playlist).
+
+---
+
 ## playlist open implementation
   1. Interactive Sidebar: You can now open a playlist from the sidebar by either clicking on it or navigating to it and pressing Enter.
   2. Playlist Detail UI: When a playlist is selected, it replaces the main content area with a design reminiscent of Spotify.
@@ -187,4 +189,18 @@ The application completely mimics the ~90% visual static layout of the Spotify d
 
   The dummy values are all wired up and ready. Give it a spin! Let me know if you want to tweak the aesthetics or add anything else.
 
+---
+
+## Phase 11: High-Fidelity Image Rendering (Thumbnails)
+**Goal:** Replace the current text-based Unicode color square placeholders with actual image thumbnails using native terminal rendering capabilities.
+- **Data Flow & State Management:**
+  - The backend (`src/yt/yt.c`) already parses the `thumbnail` field from the `yt-dlp` JSON output. We need to ensure this is serialized and sent to the frontend via JSON-RPC.
+  - Update the `Song` type definition in `tui/src/client/types.ts` to capture the `thumbnail` (or reuse `albumArtUrl`).
+  - Modify `tui/src/hooks/useAppLogic.ts` and `tui/src/client/response.ts` to parse the `thumbnail` property from the incoming JSON payloads (e.g., `songData.thumbnail`) and map it to the active React state objects.
+- **Terminal Image Rendering:**
+  - Integrate `ImageRenderable` and `createCliRenderer` utilities (from OpenTUI / the designated library) into the project.
+  - Update UI components that display cover art (such as `Playbar.tsx`, `ContextPanel.tsx`, the Playlist detail header, and `MainContent.tsx` cards).
+  - Remove the legacy Unicode block characters (e.g., `█`) and hardcoded background colors.
+  - Instantiate `ImageRenderable` in place of the text blocks, passing the fetched `thumbnail` URL as the image source.
+  - Ensure the images are properly sized using Yoga layout constraints to fit the existing terminal UI slots.
 

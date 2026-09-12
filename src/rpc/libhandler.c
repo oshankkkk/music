@@ -153,11 +153,13 @@ int queuehandler(App *app, char *method, cJSON *params, int id) {
         cJSON_AddStringToObject(songobj, "title", song.title ? song.title : "Unknown Title");
         cJSON_AddStringToObject(songobj, "artist", song.artist ? song.artist : "Unknown Artist");
         cJSON_AddBoolToObject(songobj, "isliked", song.isliked);
+        cJSON_AddStringToObject(songobj, "thumbnail", song.thumbnail ? song.thumbnail : "");
         cJSON_AddItemToArray(songlist, songobj);
 
         if (song.id) free(song.id);
         if (song.title) free(song.title);
         if (song.artist) free(song.artist);
+        if (song.thumbnail) free(song.thumbnail);
         if (song.genre) free(song.genre);
     }
 
@@ -191,11 +193,13 @@ int queuehandler(App *app, char *method, cJSON *params, int id) {
                     cJSON_AddStringToObject(songobj, "title", song.title);
                     cJSON_AddStringToObject(songobj, "artist", song.artist);
                     cJSON_AddBoolToObject(songobj, "isliked", song.isliked);
+                    cJSON_AddStringToObject(songobj, "thumbnail", song.thumbnail ? song.thumbnail : "");
                     cJSON_AddItemToArray(songlist, songobj);
                     
                     if (song.id) free(song.id);
                     if (song.title) free(song.title);
                     if (song.artist) free(song.artist);
+                    if (song.thumbnail) free(song.thumbnail);
                     if (song.genre) free(song.genre);
                 }
                 free(out[i]);
