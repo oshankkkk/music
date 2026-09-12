@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { useKeyboard } from "@opentui/react";
-import { ImageRenderable } from "./Image";
+
 import type { QueueItem } from "../client/types";
 import { rpcCall } from "../client/client";
 import { SongList } from "./SongList";
@@ -64,7 +64,6 @@ export function QueuePopup({ isOpen, onClose, queue, setQueue }: { isOpen: boole
         marginTop={1}
         renderItem={(song, i, isSelected) => (
           <box flexDirection="row" gap={2} alignItems="center" paddingX={1} backgroundColor={isSelected ? "#282828" : undefined}>
-            <ImageRenderable src={song.thumbnail || ""} width={2} height={1} />
             <box flexDirection="column">
               <text fg={isSelected ? "#1DB954" : "#ffffff"}>{song.name}</text>
               <text fg="#b3b3b3">Song ID: {song.songId}</text>

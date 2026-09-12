@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useKeyboard } from "@opentui/react";
-import { ImageRenderable } from "./Image";
+
 import type { PlaylistInfo } from "../client/types";
 import { rpcCall, addRpcListener } from "../client/client";
 import { SongPlaylistAddSearch } from "./SongPlaylistAddSearch";
@@ -105,7 +105,6 @@ export function PlaylistDetail({ playlist, isFocused, isPlaylistSearchOpen, onBa
           <box flexDirection="row" width="100%" alignItems="center" paddingX={1} backgroundColor={isSelected ? "#282828" : undefined}>
             <text fg={isSelected ? "#1DB954" : "#b3b3b3"} width={4}>{String(i + 1)}</text>
             <box flexDirection="row" gap={1} width={30} alignItems="center">
-              <ImageRenderable src={song.thumbnail || ""} width={2} height={1} />
               <text fg={isSelected ? "#1DB954" : "#ffffff"}>{song.title}</text>
             </box>
             <text fg="#b3b3b3" width={20}>{song.artist}</text>
