@@ -14,9 +14,8 @@
     "typescript": "^5"
   },
   "dependencies": {
-    "@opentui/core": "^0.4.3",
-    "@opentui/react": "^0.4.3",
-    "react": "^19.2.6",
-    "terminal-image": "^5.0.1"
+    "@opentui/core": "^0.5.11",
+    "@opentui/react": "^0.5.11",
+    "react": "^19.2.6"
   }
 }
