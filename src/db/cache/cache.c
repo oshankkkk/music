@@ -24,7 +24,7 @@ int runmigrations(sqlite3 *db) {
     sqlite3_finalize(stmt);
     
     if (rc == SQLITE_ROW) {
-        return -1;
+        return 0;
     }
     
     FILE *f = fopen("./src/db/migrations/cache.sql", "r");

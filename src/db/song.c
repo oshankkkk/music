@@ -12,14 +12,16 @@ int runmigrationssong(sqlite3 *db) {
     const char *check_sql = "SELECT name FROM sqlite_master WHERE type='table' AND name='song';";
     sqlite3_stmt *stmt;
     int rc = sqlite3_prepare_v2(db, check_sql, -1, &stmt, NULL);
-    if (rc != SQLITE_OK) 
+    if (rc != SQLITE_OK) {
+
+		printf( "Migration error sqlok:\n");
 		return -1;
-    
+    }
     rc = sqlite3_step(stmt);
     sqlite3_finalize(stmt);
     
     if (rc == SQLITE_ROW) {
-        return -1;
+        return 0;
     }
     
     FILE *f = fopen("./src/db/migrations/song.sql", "r");
@@ -37,6 +39,7 @@ int runmigrationssong(sqlite3 *db) {
         int n=fread(sql, 1, fsize, f);
 		if (n != fsize) {
 		perror("migration file err");		
+		printf( "Migration perror kalla sqlok:\n");
 		return -1;
 		}
         sql[fsize] = 0;
@@ -45,7 +48,7 @@ int runmigrationssong(sqlite3 *db) {
         if (rc != SQLITE_OK) {
             printf( "Migration error: %s\n", err_msg);
             sqlite3_free(err_msg);
-		return -1;
+			return -1;
         }
         free(sql);
     }
@@ -61,6 +64,8 @@ sqlite3 * InitDb(void){
 	}
 	int err=runmigrationssong(db);
 	if (err!=0){
+
+		return NULL;
 		return NULL;
 	}
 	return db;
